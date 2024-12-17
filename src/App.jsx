@@ -1,13 +1,40 @@
 import './App.css'
-import { DatePicker } from 'antd';
+import LoadingPage from './pages/Loading';
+import NotFoundPage from './pages/NotFound';
+import routes from './routes';
+import { lazy, Suspense } from 'react';
+import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+
+
+const MainLayout = lazy(() => import('./layouts/MainLayout'));
 
 function App() {
 
   return (
-    <h1 className="text-3xl font-bold underline text-center">
-      Hello world!
-      <DatePicker />
-    </h1>
+    <Suspense fallback={<LoadingPage />}>
+      <BrowserRouter>
+        <ToastContainer
+          position='top-left'
+          autoClose={1000}
+          hideProgressBar={false}
+          closeOnClick={true}
+          pauseOnHover={true}
+          draggable={true}
+          theme='light'
+        />
+        <Routes>
+          {routes.map(({ id, path, element }) => (
+            <Route
+              key={id}
+              path={path}
+              element={<MainLayout>{element}</MainLayout>}
+            />
+          ))}
+          <Route path='*' element={<NotFoundPage />} />
+        </Routes>
+      </BrowserRouter>
+    </Suspense>
   )
 }
 

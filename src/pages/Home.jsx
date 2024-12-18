@@ -1,4 +1,7 @@
 import { Carousel } from "antd";
+import NFTCard from "../components/NFTCard";
+import Timer from "../components/Timer";
+import ImageUpload from "../components/ImageUpload";
 
 function Home() {
   const carousel = [
@@ -9,7 +12,7 @@ function Home() {
 
   return (
     <div>
-      <div className="w-2/3">
+      {/* <div className="w-2/3">
         <Carousel autoplay arrows infinite={false}>
           {carousel.map((item, index) => (
             <img
@@ -20,7 +23,12 @@ function Home() {
             />
           ))}
         </Carousel>
-      </div>
+      </div> */}
+      <main className="container mx-auto p-6">
+        <NFTCard />
+        <Timer />
+        <ImageUpload/>
+      </main>
     </div>
   );
 }

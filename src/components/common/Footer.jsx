@@ -31,7 +31,7 @@ const mainLinks = [
 
 const Footer = () => {
   return (
-    <footer className="bg-gray-50 shadow-lg border-t border-hover-primary">
+    <footer className="bg-gray-200 shadow-lg">
       <div className="max-w-7xl mx-auto px-4 p-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {/* Logo Section */}

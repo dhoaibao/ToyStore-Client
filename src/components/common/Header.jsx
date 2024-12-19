@@ -9,19 +9,19 @@ import {
   MoveLeft,
 } from "lucide-react";
 import { useState } from "react";
-import { Dropdown, Space, Avatar } from "antd";
-import { Link } from "react-router-dom";
+import { Dropdown, Space } from "antd";
+import { Link, useLocation } from "react-router-dom";
+import ProfileDropdown from "../profile/ProfileDropdown";
 
 const Header = () => {
-  const [isLogin, setIsLogin] = useState(false);
+  const location = useLocation();
+  const [isLogin, setIsLogin] = useState(true);
 
   const navItems = [
-    // { value: "", label: "Trang chủ" },
     { value: "products", label: "Sản phẩm" },
     { value: "saleoff", label: "Khuyến mãi" },
     { value: "news", label: "Tin tức" },
-    // { value: "about", label: "Giới thiệu" },
-    { value: "contact", label: "Liên hệ" },
+    { value: "about", label: "Giới thiệu" },
   ];
 
   const items = [
@@ -72,13 +72,19 @@ const Header = () => {
   ];
 
   return (
-    <div className="text-black border-b shadow-lg border-hover-primary">
+    <div className="text-black shadow-xl">
       {/* Phần trên: Logo, Thanh tìm kiếm, và icon */}
       <div className="flex items-center justify-between px-4 py-2">
         {/* Logo */}
-        <div className="text-2xl font-bold">
-          <img src="/src/assets/Logo(150x50).png" alt="Logo" className="h-12" />
-        </div>
+        <Link to="/">
+          <div className="text-2xl font-bold">
+            <img
+              src="/src/assets/Logo(150x50).png"
+              alt="Logo"
+              className="h-12"
+            />
+          </div>
+        </Link>
 
         {/* Phần menu điều hướng */}
         <div className="flex justify-center space-x-4 p-2">
@@ -90,18 +96,28 @@ const Header = () => {
                   items,
                 }}
               >
-                <a onClick={(e) => e.preventDefault()}>
-                  <Space className="hover:text-hover-primary hover:bg-blue-100 p-2 rounded-xl font-bold cursor-pointer">
+                <Link to="/products">
+                  <Space
+                    className={`${
+                      location.pathname === `/${item.value}`
+                        ? "text-hover-primary bg-blue-100"
+                        : "hover:text-hover-primary hover:bg-blue-100"
+                    } p-2 rounded-xl font-bold cursor-pointer`}
+                  >
                     <TableOfContents strokeWidth={1} />
                     {item.label}
                   </Space>
-                </a>
+                </Link>
               </Dropdown>
             ) : (
               <Link
                 key={index}
                 to={`/${item.value}`}
-                className="hover:text-hover-primary hover:bg-blue-100 p-2 rounded-xl font-bold cursor-pointer"
+                className={`${
+                  location.pathname === `/${item.value}`
+                    ? "text-hover-primary bg-blue-100"
+                    : "hover:text-hover-primary hover:bg-blue-100"
+                } p-2 rounded-xl font-bold cursor-pointer`}
               >
                 {item.label}
               </Link>
@@ -143,18 +159,11 @@ const Header = () => {
           </button>
           <button>
             {isLogin ? (
-              <Avatar
-                src={
-                  <img
-                    src={
-                      "https://www.vlance.vn/uploads/portfolio/view/c4a875224357fa0f1dce59defcb7a42b3d6d2cab1.jpg"
-                    }
-                    alt="avatar"
-                  />
-                }
-              />
+              <ProfileDropdown />
             ) : (
-              <LogIn strokeWidth={1} />
+              <Link to="/login">
+                <LogIn strokeWidth={1} />
+              </Link>
             )}
           </button>
           {/* <div className="border rounded px-2 py-1">

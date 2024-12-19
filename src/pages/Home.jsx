@@ -2,9 +2,9 @@ import { Carousel } from "antd";
 
 function Home() {
   const carousel = [
-    "/public/banner1.png",
-    "/public/banner2.png",
-    "/public/banner3.png",
+    "/banner1.png",
+    "/banner2.png",
+    "/banner3.png",
   ];
 
   return (

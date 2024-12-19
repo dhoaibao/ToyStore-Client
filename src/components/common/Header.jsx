@@ -3,23 +3,76 @@ import {
   ImageUp,
   Mic,
   ShoppingCart,
-  CircleUserRound,
+  LogIn,
   Star,
+  TableOfContents,
+  MoveLeft,
 } from "lucide-react";
-import { Link } from 'react-router-dom';
+import { useState } from "react";
+import { Dropdown, Space, Avatar } from "antd";
+import { Link } from "react-router-dom";
 
 const Header = () => {
+  const [isLogin, setIsLogin] = useState(false);
+
   const navItems = [
-    { value: "", label: "Trang chủ" },
+    // { value: "", label: "Trang chủ" },
     { value: "products", label: "Sản phẩm" },
     { value: "saleoff", label: "Khuyến mãi" },
     { value: "news", label: "Tin tức" },
-    { value: "about", label: "Giới thiệu" },
+    // { value: "about", label: "Giới thiệu" },
     { value: "contact", label: "Liên hệ" },
   ];
 
+  const items = [
+    {
+      key: "1",
+      type: "group",
+      label: "Group title",
+      children: [
+        {
+          key: "1-1",
+          label: "1st menu item",
+        },
+        {
+          key: "1-2",
+          label: "2nd menu item",
+        },
+      ],
+    },
+    {
+      key: "2",
+      label: "sub menu",
+      children: [
+        {
+          key: "2-1",
+          label: "3rd menu item",
+        },
+        {
+          key: "2-2",
+          label: "4th menu item",
+        },
+      ],
+    },
+    {
+      key: "3",
+      label: "disabled sub menu",
+      disabled: true,
+      children: [
+        {
+          key: "3-1",
+          label: "5d menu item",
+        },
+        {
+          key: "3-2",
+          label: "6th menu item",
+        },
+      ],
+    },
+  ];
+
   return (
-    <div className="text-black">
+    <div className="text-black border-b shadow-lg border-hover-primary">
       {/* Phần trên: Logo, Thanh tìm kiếm, và icon */}
       <div className="flex items-center justify-between px-4 py-2">
         {/* Logo */}
@@ -27,28 +80,61 @@ const Header = () => {
           <img src="/src/assets/Logo(150x50).png" alt="Logo" className="h-12" />
         </div>
 
+        {/* Phần menu điều hướng */}
+        <div className="flex justify-center space-x-4 p-2">
+          {navItems.map((item, index) =>
+            item.value === "products" ? (
+              <Dropdown
+                key={index}
+                menu={{
+                  items,
+                }}
+              >
+                <a onClick={(e) => e.preventDefault()}>
+                  <Space className="hover:text-hover-primary hover:bg-blue-100 p-2 rounded-xl font-bold cursor-pointer">
+                    <TableOfContents strokeWidth={1} />
+                    {item.label}
+                  </Space>
+                </a>
+              </Dropdown>
+            ) : (
+              <Link
+                key={index}
+                to={`/${item.value}`}
+                className="hover:text-hover-primary hover:bg-blue-100 p-2 rounded-xl font-bold cursor-pointer"
+              >
+                {item.label}
+              </Link>
+            )
+          )}
+        </div>
+
         {/* Thanh tìm kiếm */}
-        <div className="w-full sm:w-1/2 mx-4 sm:mx-8 relative">
+        <div className="w-full sm:w-1/4 mx-4 sm:mx-8 relative">
           <input
             type="text"
-            placeholder="Nhập từ khóa để tìm kiếm (ví dụ: lắp ráp, mô hình, ba lô,...)"
-            className="w-full px-4 py-2 rounded-full text-sm text-black placeholder-gray-500 pr-20 sm:pr-16 border border-gray-300 shadow-sm focus:border-primary focus:shadow-md"
+            placeholder="Nhập từ khóa để tìm kiếm..."
+            className="w-full px-4 py-2 rounded-full text-sm bg-gray-200 placeholder-gray-600 pr-20 sm:pr-28 shadow-sm "
           />
-          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex space-x-2 sm:space-x-4">
+          <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex p-2 space-x-2 sm:space-x-2">
             <button>
-              <Mic color="#000000" strokeWidth={1} />
+              <ImageUp strokeWidth={1} size={20} />
             </button>
             <button>
-              <ImageUp color="#000000" strokeWidth={1} />
+              <Mic strokeWidth={1} size={20} />
             </button>
-            <button className="bg-white p-1 rounded-full">
-              <Search strokeWidth={1} color="#000000" />
+            <button>
+              <Search strokeWidth={1} size={20} />
             </button>
           </div>
         </div>
 
         {/* Các icon */}
         <div className="flex space-x-4 items-center">
+          <button className="bg-green-300 py-1 px-2 font-semibold flex items-center justify-center rounded-full">
+            <MoveLeft strokeWidth={1} />
+            Trò chơi
+          </button>
           <button>
             <Star strokeWidth={1} />
           </button>
@@ -56,56 +142,28 @@ const Header = () => {
             <ShoppingCart strokeWidth={1} />
           </button>
           <button>
-            <CircleUserRound strokeWidth={1} />
+            {isLogin ? (
+              <Avatar
+                src={
+                  <img
+                    src={
+                      "https://www.vlance.vn/uploads/portfolio/view/c4a875224357fa0f1dce59defcb7a42b3d6d2cab1.jpg"
+                    }
+                    alt="avatar"
+                  />
+                }
+              />
+            ) : (
+              <LogIn strokeWidth={1} />
+            )}
           </button>
-          <div className="border rounded px-2 py-1">
+          {/* <div className="border rounded px-2 py-1">
             <span>🇻🇳</span>
-          </div>
+          </div> */}
         </div>
       </div>
-    
-    {/* Phần menu điều hướng */}
-    <div className="flex justify-center space-x-16 p-2 bg-white shadow-md border-b border-b-primary">
-      {navItems.map((item, index) => (
-        <Link key={index} to={`/${item.value}`} className="hover:text-hover-primary hover:bg-blue-100 p-2 rounded-xl font-bold cursor-pointer">
-          {item.label}
-        </Link>
-      ))}
-    </div>
     </div>
   );
 };
 
 export default Header;
-
-// import { Search, Upload } from "lucide-react";
-
-// const Header = () => (
-//   <header className="flex justify-between items-center p-4 bg-white shadow">
-//     <h1 className="text-2xl font-bold">
-//       <span className="text-black">ONIEX</span>
-//       <span className="text-blue-600">MINT</span>
-//     </h1>
-//     <nav className="space-x-6">
-//       <a href="#" className="text-gray-600">Discover</a>
-//       <a href="#" className="text-gray-600">Resources</a>
-//       <a href="#" className="text-gray-600">How it works</a>
-//     </nav>
-//     <div className="flex gap-4">
-//       <div className="relative">
-//         <Search className="absolute left-2 top-2 w-5 h-5 text-gray-400" />
-//         <input
-//           type="text"
-//           placeholder="Search"
-//           className="pl-10 pr-4 py-2 border rounded-full"
-//         />
-//       </div>
-//       <button className="bg-indigo-700 text-white px-4 py-2 rounded-full flex items-center gap-1">
-//         <Upload size={16} />
-//         Upload
-//       </button>
-//     </div>
-//   </header>
-// );
-
-// export default Header;

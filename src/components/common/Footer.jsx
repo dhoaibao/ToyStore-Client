@@ -44,7 +44,7 @@ const Footer = () => {
               />
             </div>
             <p className="leading-relaxed">
-              Chào mừng bạn đến với <strong>Toystore</strong> – nơi bán các mẫu
+              Chào mừng bạn đến với <strong>ToyStore</strong> – nơi bán các mẫu
               mô hình độc đáo, chất lượng cao. Chúng tôi cam kết mang đến cho
               bạn trải nghiệm mua sắm hoàn hảo cùng dịch vụ tận tâm nhất.
             </p>
@@ -109,7 +109,7 @@ const Footer = () => {
 
         {/* Bottom Footer */}
         <div className="border-t mt-8 pt-6 text-sm text-center">
-          <span>© 2024 Toystore. All rights reserved.</span>
+          <span>© 2024 ToyStore. All rights reserved.</span>
         </div>
       </div>
     </footer>

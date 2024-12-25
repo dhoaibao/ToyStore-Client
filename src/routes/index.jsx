@@ -3,6 +3,7 @@ import Home from '../pages/Home';
 import Login from '../pages/Login';
 import Product from '../pages/Product';
 import About from '../pages/About';
+import PuzzleGame from '../pages/PuzzleGame';
 
 const routes = [
   {
@@ -24,6 +25,11 @@ const routes = [
     id: "about",
     path: "/about",
     element: <About />,
+  },
+  {
+    id: "game",
+    path: "/game",
+    element: <PuzzleGame />,
   },
 ];
 

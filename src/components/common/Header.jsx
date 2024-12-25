@@ -4,7 +4,7 @@ import {
   Mic,
   ShoppingCart,
   LogIn,
-  Star,
+  MessageSquare,
   TableOfContents,
   MoveLeft,
 } from "lucide-react";
@@ -147,12 +147,14 @@ const Header = () => {
 
         {/* Các icon */}
         <div className="flex space-x-4 items-center">
-          <button className="bg-green-300 py-1 px-2 font-semibold flex items-center justify-center rounded-full">
-            <MoveLeft strokeWidth={1} />
-            Trò chơi
-          </button>
+          <Link to="/game">
+            <button className="bg-green-300 py-1 px-2 font-semibold flex items-center justify-center rounded-full">
+              <MoveLeft strokeWidth={1} />
+              Trò chơi
+            </button>
+          </Link>
           <button>
-            <Star strokeWidth={1} />
+            <MessageSquare strokeWidth={1} />
           </button>
           <button>
             <ShoppingCart strokeWidth={1} />

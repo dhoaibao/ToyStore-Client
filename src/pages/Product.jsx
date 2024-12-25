@@ -1,6 +1,5 @@
-import { Button, Card, Breadcrumb } from "antd";
+import { Breadcrumb } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
-import { ShoppingCart, Star } from "lucide-react";
 import Filter from "../components/product/Filter";
 import ProductItem from "../components/product/ProductItem";
 
@@ -8,19 +7,31 @@ const Product = () => {
   const products = [
     {
       id: 1,
-      name: "Product 1",
-      price: "$100",
-      image: "https://via.placeholder.com/150",
-      rating: 4.5,
+      image:
+        "https://cdn.shopify.com/s/files/1/0731/6514/4343/files/lich-giang-sinh-nguoi-nhen-2024-lego-superheroes-76293_5.jpg?v=1733712457&width=500",
+      category: "LEGO SUPERHEROES",
+      sku: "76293",
+      name: "Đồ Chơi Lắp Ráp Lịch Giáng Sinh Người Nhện 2024 Lego Superheroes 76293",
+      price: 1179000,
     },
     {
       id: 2,
-      name: "Product 2",
-      price: "$200",
-      image: "https://via.placeholder.com/150",
-      rating: 4.0,
+      image:
+        "https://cdn.shopify.com/s/files/1/0731/6514/4343/files/lich-giang-sinh-nguoi-nhen-2024-lego-superheroes-76293_5.jpg?v=1733712457&width=500",
+      category: "LEGO SUPERHEROES",
+      sku: "76293",
+      name: "Đồ Chơi Lắp Ráp Lịch Giáng Sinh Người Nhện 2024 Lego Superheroes 76293",
+      price: 1179000,
     },
-    // Add more products as needed
+    {
+      id: 3,
+      image:
+        "https://cdn.shopify.com/s/files/1/0731/6514/4343/files/lich-giang-sinh-nguoi-nhen-2024-lego-superheroes-76293_5.jpg?v=1733712457&width=500",
+      category: "LEGO SUPERHEROES",
+      sku: "76293",
+      name: "Đồ Chơi Lắp Ráp Lịch Giáng Sinh Người Nhện 2024 Lego Superheroes 76293",
+      price: 1179000,
+    },
   ];
 
   return (
@@ -38,38 +49,21 @@ const Product = () => {
           ]}
         />
       </div>
-      <div className="p-2 bg-gray-100 min-h-screen">
+      <div className="p-4 bg-gray-100 min-h-screen">
         <div className="flex space-x-4">
           <div className="w-1/4 bg-white p-4 rounded-lg shadow-md">
             <Filter />
           </div>
-          <div className="w-3/4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-           < ProductItem/>
+          <div className="w-3/4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {products.map((product) => (
-              <Card
+              <ProductItem
                 key={product.id}
-                cover={
-                  <img
-                    alt={product.name}
-                    src={product.image}
-                    className="h-64 object-cover"
-                  />
-                }
-                className="rounded-lg shadow-md overflow-hidden"
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl font-semibold">{product.name}</h2>
-                  <span className="flex items-center text-yellow-500">
-                    <Star className="w-5 h-5 mr-1" /> {product.rating}
-                  </span>
-                </div>
-                <p className="text-lg font-medium text-gray-800 mb-4">
-                  {product.price}
-                </p>
-                <Button type="primary" icon={<ShoppingCart />}>
-                  Add to Cart
-                </Button>
-              </Card>
+                image={product.image}
+                category={product.category}
+                sku={product.sku}
+                name={product.name}
+                price={product.price}
+              />
             ))}
           </div>
         </div>

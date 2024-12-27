@@ -15,7 +15,7 @@ const DropZone = ({ position, onDrop, placedPiece }) => {
   return (
     <div
       ref={dropRef}
-      className={`w-16 h-16 border border-gray-300 flex items-center justify-center ${
+      className={`w-16 h-16 rounded-sm border border-gray-300 flex items-center justify-center ${
         isOver ? 'bg-blue-100' : placedPiece?.isCorrect ? 'bg-green-100' : 'bg-white'
       }`}
     >

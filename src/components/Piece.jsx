@@ -18,7 +18,7 @@ const Piece = ({ id, image, position, onDragEnd }) => {
   return (
     <div
       ref={dragRef}
-      className={`w-16 h-16 border border-gray-300 ${
+      className={`w-16 h-16 border border-gray-300 rounded-sm ${
         isDragging ? 'opacity-50' : 'opacity-100'
       }`}
       style={{

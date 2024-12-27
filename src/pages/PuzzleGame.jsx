@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
+import { Button, Modal } from "antd";
 import Piece from "../components/Piece";
 import DropZone from "../components/DropZone";
 
@@ -9,6 +10,7 @@ const App = () => {
   const [pieces, setPieces] = useState([]); // Lưu các mảnh đã cắt
   const canvasRef = useRef(null);
   const [placedPieces, setPlacedPieces] = useState([]); // Lưu các mảnh đã đặt
+  const [isModalVisible, setIsModalVisible] = useState(false); // Modal thắng game
 
   // useEffect(() => {
   //   if (
@@ -71,7 +73,7 @@ const App = () => {
     };    
   };
 
-    const handleDrop = (item, targetPosition) => {
+  const handleDrop = (item, targetPosition) => {
     if (!item.position) return;
   
     // Check if the piece is placed in the correct position
@@ -86,16 +88,22 @@ const App = () => {
     ]);
   };
 
-  console.log(pieces)
+  // Kiểm tra xem tất cả mảnh đã được đặt đúng hay chưa
+  useEffect(() => {
+    if (
+      placedPieces.length === pieces.length &&
+      placedPieces.every((p) => p.isCorrect)
+    ) {
+      setIsModalVisible(true); // Hiển thị modal khi hoàn thành
+    }
+  }, [placedPieces, pieces]);
 
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
-        <h1 className="text-3xl font-bold mb-6">Game Xếp Hình Kéo Thả</h1>
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700">
-            Upload ảnh:
-          </label>
+        <h1 className="text-3xl font-bold mb-6 text-blue-600">Game Xếp Hình Kéo Thả</h1>
+        <div className="mb-4 w-full max-w-md">
+          <label className="block text-sm font-medium text-gray-700">Upload ảnh:</label>
           <input
             type="file"
             accept="image/*"
@@ -105,15 +113,15 @@ const App = () => {
         </div>
         {image && (
           <div className="mb-4">
-            <button
+            <Button
               onClick={handleCutImage}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600"
+              className="w-full py-2 text-white bg-blue-500 rounded-md shadow-md hover:bg-blue-600"
             >
               Cắt ảnh thành mảnh
-            </button>
+            </Button>
           </div>
         )}
-        <div className="flex gap-4">
+        <div className="flex gap-6 mb-6 w-full max-w-6xl">
           {/* Khu vực bên trái: Hiển thị mảnh ghép */}
           <div className="w-1/2 p-4 bg-white shadow-md rounded-md">
             <h2 className="text-xl font-semibold mb-4">Mảnh ghép</h2>
@@ -122,7 +130,7 @@ const App = () => {
                 <Piece
                   key={piece.id}
                   id={piece.id}
-                  image={image}
+                  image={piece.image}
                   position={piece.position}
                 />
               ))}
@@ -159,12 +167,18 @@ const App = () => {
         {/* Canvas ẩn dùng để cắt ảnh */}
         <canvas ref={canvasRef} className="hidden" />
       </div>
-      {placedPieces.length === pieces.length &&
-        placedPieces.every((p) => p.isCorrect) && (
-          <div className="mt-4 p-4 bg-green-100 text-green-800 font-bold rounded">
-            🎉 Chúc mừng! Bạn đã hoàn thành trò chơi! 🎉
-          </div>
-        )}
+
+      {/* Modal thông báo hoàn thành */}
+      <Modal
+        title="Chúc mừng!"
+        visible={isModalVisible}
+        onOk={() => setIsModalVisible(false)}
+        onCancel={() => setIsModalVisible(false)}
+        okText="Tiếp tục"
+        cancelButtonProps={{ style: { display: "none" } }}
+      >
+        <p>🎉 Bạn đã hoàn thành trò chơi! 🎉</p>
+      </Modal>
     </DndProvider>
   );
 };

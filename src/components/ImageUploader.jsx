@@ -1,4 +1,3 @@
-// src/components/ImageUploader.js
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useDropzone } from 'react-dropzone';
@@ -23,12 +22,15 @@ const ImageUploader = ({ onUpload }) => {
   const { getRootProps, getInputProps } = useDropzone({ onDrop });
 
   return (
-    <div {...getRootProps()} style={{ border: '2px dashed #ccc', padding: '20px', textAlign: 'center' }}>
+    <div
+      {...getRootProps()}
+      className="border-2 border-dashed border-gray-300 mb-4 p-6 text-center cursor-pointer"
+    >
       <input {...getInputProps()} />
       {image ? (
-        <img src={image.src} alt="Uploaded" style={{ maxWidth: '100%' }} />
+        <img src={image.src} alt="Uploaded" className="max-w-full mx-auto" />
       ) : (
-        <p>Drag & drop an image here, or click to select one</p>
+        <p>Kéo & thả hình ảnh vào đây, hoặc nhấp để chọn</p>
       )}
     </div>
   );

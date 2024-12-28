@@ -4,6 +4,7 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { Button, Modal } from "antd";
 import Piece from "../components/Piece";
 import DropZone from "../components/DropZone";
+// import ImageUploader from "../components/ImageUploader";
 
 const App = () => {
   const [image, setImage] = useState(null);
@@ -22,12 +23,17 @@ const App = () => {
   // }, [placedPieces, pieces]);
 
   const handleUpload = (e) => {
+    console.log()
     const file = e.target.files[0];
     if (file) {
       const imageUrl = URL.createObjectURL(file);
       setImage(imageUrl);
     }
   };
+
+  // const handleUpload = (img) => {
+  //   setImage(img.src);
+  // };
 
   const handleCutImage = () => {
     if (!image) return;
@@ -42,10 +48,10 @@ const App = () => {
       const cols = 4;
       const pieceWidth = img.width / cols;
       const pieceHeight = img.height / rows;
-    
+
       canvas.width = pieceWidth;
       canvas.height = pieceHeight;
-    
+
       const newPieces = [];
       for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
@@ -70,17 +76,17 @@ const App = () => {
         }
       }
       setPieces(newPieces);
-    };    
+    };
   };
 
   const handleDrop = (item, targetPosition) => {
     if (!item.position) return;
-  
+
     // Check if the piece is placed in the correct position
     const isCorrect =
       item.position.row === targetPosition.row &&
       item.position.col === targetPosition.col;
-  
+
     // Update the state of placed pieces
     setPlacedPieces((prev) => [
       ...prev.filter((p) => p.id !== item.id), // Remove the piece if it was placed elsewhere
@@ -101,9 +107,13 @@ const App = () => {
   return (
     <DndProvider backend={HTML5Backend}>
       <div className="min-h-screen flex flex-col items-center justify-center bg-gray-100 p-4">
-        <h1 className="text-3xl font-bold mb-6 text-blue-600">Game Xếp Hình Kéo Thả</h1>
+        <h1 className="text-3xl font-bold mb-6 text-blue-600">
+          Game Xếp Hình Kéo Thả
+        </h1>
         <div className="mb-4 w-full max-w-md">
-          <label className="block text-sm font-medium text-gray-700">Upload ảnh:</label>
+          <label className="block text-sm font-medium text-gray-700">
+            Upload ảnh:
+          </label>
           <input
             type="file"
             accept="image/*"
@@ -111,6 +121,7 @@ const App = () => {
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
           />
         </div>
+        {/* <ImageUploader onUpload={handleUpload} /> */}
         {image && (
           <div className="mb-4">
             <Button

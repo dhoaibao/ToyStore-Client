@@ -1,12 +1,14 @@
-import { useState } from 'react';
-import PropTypes from 'prop-types';
-import { useDropzone } from 'react-dropzone';
+import { useState } from "react";
+import PropTypes from "prop-types";
+import { useDropzone } from "react-dropzone";
 
 const ImageUploader = ({ onUpload }) => {
   const [image, setImage] = useState(null);
+  const [fileName, setFileName] = useState('');
 
   const onDrop = (acceptedFiles) => {
     const file = acceptedFiles[0];
+    setFileName(file.name);
     const reader = new FileReader();
     reader.onload = () => {
       const img = new Image();
@@ -26,9 +28,10 @@ const ImageUploader = ({ onUpload }) => {
       {...getRootProps()}
       className="border-2 border-dashed border-gray-300 mb-4 p-6 text-center cursor-pointer"
     >
-      <input {...getInputProps()} />
+      <input {...getInputProps({ accept: "image/*" })} />
       {image ? (
-        <img src={image.src} alt="Uploaded" className="max-w-full mx-auto" />
+        <p>{fileName}</p>
+        // <img src={image.src} alt="Uploaded" className="max-w-1/2 mx-auto" />
       ) : (
         <p>Kéo & thả hình ảnh vào đây, hoặc nhấp để chọn</p>
       )}

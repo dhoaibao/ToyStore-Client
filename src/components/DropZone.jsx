@@ -3,20 +3,25 @@ import { useDrop } from "react-dnd";
 
 const DropZone = ({ position, onDrop, placedPiece }) => {
   const [{ isOver }, dropRef] = useDrop({
-    accept: 'piece',
+    accept: "piece",
     drop: (item) => onDrop(item, position),
     collect: (monitor) => ({
       isOver: !!monitor.isOver(),
     }),
   });
 
-  console.log('abc:', placedPiece)
+  const gridSize = 4; // Số hàng/cột (đảm bảo khớp với số cắt ảnh)
+  const backgroundSize = `${gridSize * 100}% ${gridSize * 100}%`;
 
   return (
     <div
       ref={dropRef}
-      className={`w-16 h-16 rounded-sm border border-gray-300 flex items-center justify-center ${
-        isOver ? 'bg-blue-100' : placedPiece?.isCorrect ? 'bg-green-100' : 'bg-white'
+      className={`w-16 h-16 rounded-sm border border-gray-300 flex items-center justify-center transition ${
+        isOver
+          ? "bg-blue-100"
+          : placedPiece?.isCorrect
+          ? "bg-green-100"
+          : "bg-white"
       }`}
     >
       {placedPiece && (
@@ -24,10 +29,10 @@ const DropZone = ({ position, onDrop, placedPiece }) => {
           className="w-full h-full"
           style={{
             backgroundImage: `url(${placedPiece.image})`,
-            backgroundPosition: `-${placedPiece.position.col * 100}% -${
-              placedPiece.position.row * 100
+            backgroundPosition: `-${placedPiece.position.col * (100 / gridSize)}% -${
+              placedPiece.position.row * (100 / gridSize)
             }%`,
-            backgroundSize: '400% 400%',
+            backgroundSize: backgroundSize,
           }}
         />
       )}
@@ -35,12 +40,21 @@ const DropZone = ({ position, onDrop, placedPiece }) => {
   );
 };
 
-
-
 DropZone.propTypes = {
-  position: PropTypes.object.isRequired,
+  position: PropTypes.shape({
+    row: PropTypes.number.isRequired,
+    col: PropTypes.number.isRequired,
+  }).isRequired,
   onDrop: PropTypes.func.isRequired,
-  placedPiece: PropTypes.object,
+  placedPiece: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    image: PropTypes.string.isRequired,
+    position: PropTypes.shape({
+      row: PropTypes.number.isRequired,
+      col: PropTypes.number.isRequired,
+    }).isRequired,
+    isCorrect: PropTypes.bool.isRequired,
+  }),
 };
 
 export default DropZone;

@@ -4,14 +4,14 @@ import { HTML5Backend } from "react-dnd-html5-backend";
 import { Button, Modal } from "antd";
 import Piece from "../components/Piece";
 import DropZone from "../components/DropZone";
-// import ImageUploader from "../components/ImageUploader";
+import ImageUploader from "../components/ImageUploader";
 
 const App = () => {
   const [image, setImage] = useState(null);
-  const [pieces, setPieces] = useState([]); // Lưu các mảnh đã cắt
+  const [pieces, setPieces] = useState([]); 
   const canvasRef = useRef(null);
-  const [placedPieces, setPlacedPieces] = useState([]); // Lưu các mảnh đã đặt
-  const [isModalVisible, setIsModalVisible] = useState(false); // Modal thắng game
+  const [placedPieces, setPlacedPieces] = useState([]); 
+  const [isModalVisible, setIsModalVisible] = useState(false); 
 
   // useEffect(() => {
   //   if (
@@ -22,39 +22,38 @@ const App = () => {
   //   }
   // }, [placedPieces, pieces]);
 
-  const handleUpload = (e) => {
-    console.log()
-    const file = e.target.files[0];
-    if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      setImage(imageUrl);
-    }
-  };
-
-  // const handleUpload = (img) => {
-  //   setImage(img.src);
+  // const handleUpload = (e) => {
+  //   console.log()
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const imageUrl = URL.createObjectURL(file);
+  //     setImage(imageUrl);
+  //   }
   // };
+
+  const handleUpload = (img) => {
+    setImage(img.src);
+  };
 
   const handleCutImage = () => {
     if (!image) return;
-
+  
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-
+  
     const img = new Image();
     img.src = image;
     img.onload = () => {
-      const rows = 4;
-      const cols = 4;
+      const rows = 4; 
+      const cols = 4; 
       const pieceWidth = img.width / cols;
       const pieceHeight = img.height / rows;
-
-      canvas.width = pieceWidth;
-      canvas.height = pieceHeight;
-
+  
       const newPieces = [];
       for (let row = 0; row < rows; row++) {
         for (let col = 0; col < cols; col++) {
+          canvas.width = pieceWidth; 
+          canvas.height = pieceHeight;
           ctx.clearRect(0, 0, pieceWidth, pieceHeight);
           ctx.drawImage(
             img,
@@ -75,32 +74,36 @@ const App = () => {
           });
         }
       }
-      setPieces(newPieces);
+      setPieces(newPieces.sort(() => Math.random() - 0.5));
     };
   };
+  
 
   const handleDrop = (item, targetPosition) => {
     if (!item.position) return;
 
-    // Check if the piece is placed in the correct position
     const isCorrect =
       item.position.row === targetPosition.row &&
       item.position.col === targetPosition.col;
 
-    // Update the state of placed pieces
     setPlacedPieces((prev) => [
-      ...prev.filter((p) => p.id !== item.id), // Remove the piece if it was placed elsewhere
-      { ...item, targetPosition, isCorrect }, // Add the piece with the new target position and correctness status
+      ...prev.filter((p) => p.id !== item.id),
+      { ...item, targetPosition, isCorrect }, 
     ]);
   };
 
-  // Kiểm tra xem tất cả mảnh đã được đặt đúng hay chưa
+  const onDragEndHandler = (item, monitor) => {
+    if (monitor.didDrop()) {
+      setPieces((prevPieces) => prevPieces.filter((piece) => piece.id !== item.id));
+    }
+  };
+  
   useEffect(() => {
     if (
       placedPieces.length === pieces.length &&
       placedPieces.every((p) => p.isCorrect)
     ) {
-      setIsModalVisible(true); // Hiển thị modal khi hoàn thành
+      setIsModalVisible(true);
     }
   }, [placedPieces, pieces]);
 
@@ -110,7 +113,7 @@ const App = () => {
         <h1 className="text-3xl font-bold mb-6 text-blue-600">
           Game Xếp Hình Kéo Thả
         </h1>
-        <div className="mb-4 w-full max-w-md">
+        {/* <div className="mb-4 w-full max-w-md">
           <label className="block text-sm font-medium text-gray-700">
             Upload ảnh:
           </label>
@@ -120,8 +123,8 @@ const App = () => {
             onChange={handleUpload}
             className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
           />
-        </div>
-        {/* <ImageUploader onUpload={handleUpload} /> */}
+        </div> */}
+        <ImageUploader onUpload={handleUpload} />
         {image && (
           <div className="mb-4">
             <Button
@@ -130,6 +133,7 @@ const App = () => {
             >
               Cắt ảnh thành mảnh
             </Button>
+            
           </div>
         )}
         <div className="flex gap-6 mb-6 w-full max-w-6xl">
@@ -143,6 +147,7 @@ const App = () => {
                   id={piece.id}
                   image={piece.image}
                   position={piece.position}
+                  onDragEnd={onDragEndHandler}
                 />
               ))}
             </div>

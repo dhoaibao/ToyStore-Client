@@ -1,7 +1,10 @@
-import { Breadcrumb } from "antd";
+import { Breadcrumb, Pagination } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
 import Filter from "../components/product/Filter";
 import ProductItem from "../components/product/ProductItem";
+import SortBar from "../components/product/SortBar";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useEffect, useState } from "react";
 
 const Product = () => {
   const products = [
@@ -17,7 +20,7 @@ const Product = () => {
     {
       id: 2,
       image:
-        "https://cdn.shopify.com/s/files/1/0731/6514/4343/files/lich-giang-sinh-nguoi-nhen-2024-lego-superheroes-76293_5.jpg?v=1733712457&width=500",
+        "https://cdn.shopify.com/s/files/1/0731/6514/4343/files/76290.jpg?v=1727170924&width=500",
       category: "LEGO SUPERHEROES",
       sku: "76293",
       name: "Đồ Chơi Lắp Ráp Lịch Giáng Sinh Người Nhện 2024 Lego Superheroes 76293",
@@ -32,7 +35,48 @@ const Product = () => {
       name: "Đồ Chơi Lắp Ráp Lịch Giáng Sinh Người Nhện 2024 Lego Superheroes 76293",
       price: 1179000,
     },
+    {
+      id: 4,
+      image:
+        "https://cdn.shopify.com/s/files/1/0731/6514/4343/files/lich-giang-sinh-nguoi-nhen-2024-lego-superheroes-76293_5.jpg?v=1733712457&width=500",
+      category: "LEGO SUPERHEROES",
+      sku: "76293",
+      name: "Đồ Chơi Lắp Ráp Lịch Giáng Sinh Người Nhện 2024 Lego Superheroes 76293",
+      price: 1179000,
+    },
+    {
+      id: 5,
+      image:
+        "https://cdn.shopify.com/s/files/1/0731/6514/4343/files/lich-giang-sinh-nguoi-nhen-2024-lego-superheroes-76293_5.jpg?v=1733712457&width=500",
+      category: "LEGO SUPERHEROES",
+      sku: "76293",
+      name: "Đồ Chơi Lắp Ráp Lịch Giáng Sinh Người Nhện 2024 Lego Superheroes 76293",
+      price: 1179000,
+    },
   ];
+
+  const navigate = useNavigate();
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+
+  const page = searchParams.get("page") || 1;
+  const [currentPage, setCurrentPage] = useState(page);
+  const [totalPage, setTotalPage] = useState(50);
+
+  useEffect(() => {
+    setCurrentPage(page);
+  }, [page]);
+
+  const updateQuery = (key, value) => {
+    searchParams.set(key, value);
+    navigate({ search: searchParams.toString() });
+  };
+
+  const handlePageChange = (page) => {
+    updateQuery("page", page);
+  };
+
+  console.log(page);
 
   return (
     <div>
@@ -49,24 +93,28 @@ const Product = () => {
           ]}
         />
       </div>
-      <div className="p-4 bg-gray-100 min-h-screen">
+      <div className="p-4 bg-gray-100">
         <div className="flex space-x-4">
-          <div className="w-1/4 bg-white p-4 rounded-lg shadow-md">
+          <div className="w-1/5 bg-white p-4 rounded-lg shadow-sm">
             <Filter />
           </div>
-          <div className="w-3/4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {products.map((product) => (
-              <ProductItem
-                key={product.id}
-                image={product.image}
-                category={product.category}
-                sku={product.sku}
-                name={product.name}
-                price={product.price}
-              />
-            ))}
+          <div className="w-4/5">
+            <SortBar />
+            <div className="grid grid-cols-4 gap-3">
+              {products.map((product) => (
+                <ProductItem key={product.id} {...product} />
+              ))}
+            </div>
           </div>
         </div>
+        <Pagination
+          align="center"
+          defaultCurrent={1}
+          current={currentPage}
+          total={totalPage}
+          onChange={handlePageChange}
+          className="mt-4"
+        />
       </div>
     </div>
   );

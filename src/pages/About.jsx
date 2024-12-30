@@ -1,5 +1,7 @@
 import { Layout, Typography, Row, Col, Card } from "antd";
 import { Truck, ShoppingCart, Star } from "lucide-react";
+import { Breadcrumb } from "antd";
+import { HomeOutlined } from "@ant-design/icons";
 
 const { Title, Paragraph } = Typography;
 const { Content, Footer } = Layout;
@@ -7,6 +9,19 @@ const { Content, Footer } = Layout;
 const About = () => {
   return (
     <Layout className="min-h-screen">
+      <div className="px-4 py-2 bg-gray-200">
+        <Breadcrumb
+          items={[
+            {
+              href: "/",
+              title: <HomeOutlined />,
+            },
+            {
+              title: "Giới thiệu",
+            },
+          ]}
+        />
+      </div>
       {/* Nội dung chính */}
       <Content className="px-8 py-16">
         <div className="text-center mb-12">

@@ -43,7 +43,7 @@ const SortBar = () => {
   };
 
   return (
-    <div className="flex items-center space-x-2 shadow-sm bg-white p-2 mb-3 rounded-lg">
+    <div className="flex items-center space-x-2 shadow-md bg-white p-2 mb-3 rounded-lg">
       {options1.map((option) => (
         <button
           key={option.value}

@@ -72,7 +72,7 @@ const Header = () => {
   ];
 
   return (
-    <div className="text-black shadow-xl">
+    <div className="text-black rounded-md">
       {/* Phần trên: Logo, Thanh tìm kiếm, và icon */}
       <div className="flex items-center justify-between px-4 py-2">
         {/* Logo */}
@@ -116,7 +116,7 @@ const Header = () => {
                 className={`${
                   location.pathname === `/${item.value}`
                     ? "text-hover-primary bg-blue-100"
-                    : "hover:text-hover-primary hover:bg-blue-100"
+                        : "hover:text-hover-primary hover:bg-blue-100"
                 } p-2 rounded-xl font-bold cursor-pointer`}
               >
                 {item.label}

@@ -7,5 +7,5 @@ body {
 }
 
 .custom-dropdown-menu .ant-dropdown-menu-item:hover {
-  @apply bg-blue-200 text-hover-primary;
+  @apply text-primary;
 }

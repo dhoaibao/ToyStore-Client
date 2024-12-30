@@ -15,7 +15,7 @@ const ProductItem = ({
   const discountedPrice = price - (price * discount) / 100;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4 relative h-96 w-60">
+    <div className="bg-white rounded-lg shadow-md p-4 relative h-96 w-60">
       {discount > 0 && (
         <div className="absolute z-10 top-0 left-0 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-tr-lg rounded-br-lg">
           Giảm {discount}%
@@ -47,7 +47,7 @@ const ProductItem = ({
           </h3>
         </Link>
         <div className="flex mt-2 items-center">
-          <p className="font-extrabold text-primary">
+          <p className="font-extrabold text-hover-primary">
             {discountedPrice.toLocaleString("vi-VN")}đ
           </p>
           <p className="ml-2 line-through font-semibold text-gray-500">

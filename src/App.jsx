@@ -14,6 +14,8 @@ function App() {
       theme={{
         token: {
           fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif',
+          colorPrimary: '#122da6',
+          
         },
       }}
     >

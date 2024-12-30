@@ -53,7 +53,7 @@ const Filter = () => {
   return (
     <div className="relative">
       <button
-        className="absolute z-10 top-0 right-0 text-xs text-red-600"
+        className="absolute z-10 top-0 right-0 text-sm text-red-600"
         onClick={handleClearFilters}
       >
         Xóa bộ lọc

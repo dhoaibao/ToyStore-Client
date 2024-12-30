@@ -1,4 +1,4 @@
-import { Breadcrumb, Pagination } from "antd";
+import { Breadcrumb, Empty, Pagination } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
 import Filter from "../components/product/Filter";
 import ProductItem from "../components/product/ProductItem";
@@ -80,7 +80,7 @@ const Product = () => {
 
   return (
     <div>
-      <div className="px-4 py-2 bg-gray-200">
+      <div className="px-4 py-2 rounded-md bg-gray-300">
         <Breadcrumb
           items={[
             {
@@ -93,28 +93,38 @@ const Product = () => {
           ]}
         />
       </div>
-      <div className="p-4 bg-gray-100">
-        <div className="flex space-x-4">
-          <div className="w-1/5 bg-white p-4 rounded-lg shadow-sm">
-            <Filter />
-          </div>
-          <div className="w-4/5">
-            <SortBar />
-            <div className="grid grid-cols-4 gap-3">
-              {products.map((product) => (
-                <ProductItem key={product.id} {...product} />
-              ))}
+      <div className="p-4 ">
+        <div>
+          <div className="flex space-x-4">
+            <div className="w-1/5 bg-white p-4 rounded-lg shadow-md">
+              <Filter />
+            </div>
+            <div className="w-4/5">
+              <SortBar />
+              {products?.length > 0 ? (
+                <div className="mt-4 grid grid-cols-4 gap-3">
+                  {products.map((product) => (
+                    <ProductItem key={product.id} {...product} />
+                  ))}
+                </div>
+              ) : (
+                <div className="flex items-center justify-center h-full">
+                  <Empty description={"Không có sản phẩm"} />
+                </div>
+              )}
             </div>
           </div>
+          {products?.length > 0 && (
+            <Pagination
+              align="center"
+              defaultCurrent={1}
+              current={currentPage}
+              total={totalPage}
+              onChange={handlePageChange}
+              className="mt-4"
+            />
+          )}
         </div>
-        <Pagination
-          align="center"
-          defaultCurrent={1}
-          current={currentPage}
-          total={totalPage}
-          onChange={handlePageChange}
-          className="mt-4"
-        />
       </div>
     </div>
   );

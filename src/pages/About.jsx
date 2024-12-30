@@ -1,6 +1,5 @@
-import { Layout, Typography, Row, Col, Card } from "antd";
+import { Layout, Typography, Row, Col, Card, Breadcrumb } from "antd";
 import { Truck, ShoppingCart, Star } from "lucide-react";
-import { Breadcrumb } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
 
 const { Title, Paragraph } = Typography;
@@ -9,25 +8,31 @@ const { Content, Footer } = Layout;
 const About = () => {
   return (
     <Layout className="min-h-screen">
-      <div className="px-4 py-2 bg-gray-200">
+      <div className="px-4 py-2 bg-gray-300">
         <Breadcrumb
+          className="text-white"
           items={[
             {
               href: "/",
               title: <HomeOutlined />,
             },
             {
-              title: "Giới thiệu",
+              title:
+                "Giới thiệu",
             },
           ]}
         />
       </div>
+
       {/* Nội dung chính */}
       <Content className="px-8 py-16">
         <div className="text-center mb-12">
           <Title level={2}>Giới thiệu về ToyStore</Title>
           <Paragraph className="text-lg">
-            ToyStore là cửa hàng chuyên cung cấp các loại đồ chơi chất lượng cao cho trẻ em, với mục tiêu mang đến sự vui vẻ và sáng tạo cho trẻ em ở mọi độ tuổi. Chúng tôi luôn đảm bảo mỗi sản phẩm là sự lựa chọn tuyệt vời cho các bậc phụ huynh.
+            ToyStore là cửa hàng chuyên cung cấp các loại đồ chơi chất lượng cao
+            cho trẻ em, với mục tiêu mang đến sự vui vẻ và sáng tạo cho trẻ em ở
+            mọi độ tuổi. Chúng tôi luôn đảm bảo mỗi sản phẩm là sự lựa chọn
+            tuyệt vời cho các bậc phụ huynh.
           </Paragraph>
         </div>
 
@@ -37,7 +42,9 @@ const About = () => {
             <Card
               className="shadow-lg"
               hoverable
-              cover={<img alt="selection" src="https://via.placeholder.com/200" />}
+              cover={
+                <img alt="selection" src="https://via.placeholder.com/200" />
+              }
             >
               <Card.Meta
                 title="Lựa chọn đa dạng"
@@ -55,7 +62,9 @@ const About = () => {
             <Card
               className="shadow-lg"
               hoverable
-              cover={<img alt="delivery" src="https://via.placeholder.com/200" />}
+              cover={
+                <img alt="delivery" src="https://via.placeholder.com/200" />
+              }
             >
               <Card.Meta
                 title="Giao hàng nhanh chóng"
@@ -73,7 +82,9 @@ const About = () => {
             <Card
               className="shadow-lg"
               hoverable
-              cover={<img alt="customer" src="https://via.placeholder.com/200" />}
+              cover={
+                <img alt="customer" src="https://via.placeholder.com/200" />
+              }
             >
               <Card.Meta
                 title="Hài lòng khách hàng"

@@ -7,13 +7,31 @@ import {
 } from "@ant-design/icons";
 import { Dropdown, Space, Avatar } from "antd";
 import Profile from "./Profile";
+import Order from "./OrderManagement"
+import AddressBook from "./AddressBook";
+import VoucherManagement from "./VoucherManagement";
 import { useState } from "react";
 
 const ProfileDropdown = () => {
   const [profileOpen, setProfileOpen] = useState(false);
+  const [orderOpen, setOrderOpen] = useState(false);
+  const [addressOpen, setAddressOpen] = useState(false);
+  const [voucherOpen, setVoucherOpen] = useState(false);
 
   const handleProfileClick = () => {
     setProfileOpen(true);
+  };
+
+  const handleOrderClick = () => {
+    setOrderOpen(true);
+  };
+
+  const handleAddressClick = () => {
+    setAddressOpen(true);
+  };
+
+  const handleVoucherClick = () => {
+    setVoucherOpen(true);
   };
 
   const items = [
@@ -28,7 +46,7 @@ const ProfileDropdown = () => {
           />
           <div>
             <p className="font-semibold">Duong Hoai Bao</p>
-            <p className="text-gray-600">abc@gmail.com</p>
+            <p className="text-gray-600">baob2103488@student.ctu.edu.vn</p>
           </div>
         </div>
       ),
@@ -46,16 +64,19 @@ const ProfileDropdown = () => {
       key: "3",
       label: "Quản lý đơn hàng",
       icon: <ContainerOutlined />,
+      onClick: handleOrderClick,
     },
     {
       key: "4",
       label: "Sổ địa chỉ",
       icon: <BookOutlined />,
+      onClick: handleAddressClick,
     },
     {
       key: "5",
       label: "Kho mã giảm giá",
       icon: <GiftOutlined />,
+      onClick: handleVoucherClick,
     },
     {
       type: "divider",
@@ -94,6 +115,9 @@ const ProfileDropdown = () => {
         </a>
       </Dropdown>
       <Profile open={profileOpen} setOpen={setProfileOpen} />
+      <Order open={orderOpen} setOpen={setOrderOpen} />
+      <AddressBook open={addressOpen} setOpen={setAddressOpen} />
+      <VoucherManagement open={voucherOpen} setOpen={setVoucherOpen} />
     </>
   );
 };

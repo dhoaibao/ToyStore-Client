@@ -83,7 +83,7 @@ const Cart = ({ open, setOpen }) => {
   return (
     <Drawer
       closable={false}
-      size={"large"}
+      width={600}
       title={<Title level={3}>Giỏ hàng của bạn</Title>}
       onClose={onClose}
       open={open}

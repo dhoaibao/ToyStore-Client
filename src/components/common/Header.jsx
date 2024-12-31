@@ -13,12 +13,16 @@ import { Dropdown, Space } from "antd";
 import { Link, useLocation } from "react-router-dom";
 import ProfileDropdown from "../profile/ProfileDropdown";
 import Cart from "../cart/Cart";
+import ChatBox from "./ChatBox";
+import Auth from "./Auth";
 
 const Header = () => {
   const location = useLocation();
-  const [isLogin, setIsLogin] = useState(true);
+  const [isLogin, setIsLogin] = useState(false);
   const [scrollDirection, setScrollDirection] = useState("up");
   const [cartOpen, setCartOpen] = useState(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -180,20 +184,14 @@ const Header = () => {
               Trò chơi
             </button>
           </Link>
-          <button>
+          <button onClick={() => setIsChatOpen(true)}>
             <MessageSquare strokeWidth={1} />
           </button>
           <button onClick={() => setCartOpen(true)}>
             <ShoppingCart strokeWidth={1} />
           </button>
-          <button>
-            {isLogin ? (
-              <ProfileDropdown />
-            ) : (
-              <Link to="/login">
-                <LogIn strokeWidth={1} />
-              </Link>
-            )}
+          <button onClick={() => !isLogin && setIsAuthOpen(true)}>
+            {isLogin ? <ProfileDropdown /> : <LogIn strokeWidth={1} />}
           </button>
           {/* <div className="border rounded px-2 py-1">
             <span>🇻🇳</span>
@@ -201,6 +199,13 @@ const Header = () => {
         </div>
       </div>
       <Cart open={cartOpen} setOpen={setCartOpen} />
+      <ChatBox
+        open={isChatOpen}
+        setOpen={setIsChatOpen}
+        sender="A" // Người dùng hiện tại
+        receiver="B" // Tên người nhận
+      />
+      <Auth open={isAuthOpen} setOpen={setIsAuthOpen} />
     </div>
   );
 };

@@ -8,14 +8,37 @@ import {
   TableOfContents,
   MoveLeft,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Dropdown, Space } from "antd";
 import { Link, useLocation } from "react-router-dom";
 import ProfileDropdown from "../profile/ProfileDropdown";
+import Cart from "../cart/Cart";
 
 const Header = () => {
   const location = useLocation();
   const [isLogin, setIsLogin] = useState(true);
+  const [scrollDirection, setScrollDirection] = useState("up");
+  const [cartOpen, setCartOpen] = useState(false);
+
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+
+    const updateScrollDirection = () => {
+      const scrollY = window.scrollY;
+      if (scrollY > lastScrollY) {
+        setScrollDirection("down");
+      } else {
+        setScrollDirection("up");
+      }
+      lastScrollY = scrollY;
+    };
+
+    window.addEventListener("scroll", updateScrollDirection);
+
+    return () => {
+      window.removeEventListener("scroll", updateScrollDirection);
+    };
+  }, []);
 
   const navItems = [
     { value: "products", label: "Sản phẩm" },
@@ -72,7 +95,11 @@ const Header = () => {
   ];
 
   return (
-    <div className="text-black rounded-md">
+    <div
+      className={`text-black rounded-md shadow-md sticky top-0 z-50 bg-white transition-transform duration-300 ${
+        scrollDirection === "down" ? "-translate-y-full" : "translate-y-0"
+      }`}
+    >
       {/* Phần trên: Logo, Thanh tìm kiếm, và icon */}
       <div className="flex items-center justify-between px-4 py-2">
         {/* Logo */}
@@ -116,7 +143,7 @@ const Header = () => {
                 className={`${
                   location.pathname === `/${item.value}`
                     ? "text-hover-primary bg-blue-100"
-                        : "hover:text-hover-primary hover:bg-blue-100"
+                    : "hover:text-hover-primary hover:bg-blue-100"
                 } p-2 rounded-xl font-bold cursor-pointer`}
               >
                 {item.label}
@@ -156,7 +183,7 @@ const Header = () => {
           <button>
             <MessageSquare strokeWidth={1} />
           </button>
-          <button>
+          <button onClick={() => setCartOpen(true)}>
             <ShoppingCart strokeWidth={1} />
           </button>
           <button>
@@ -173,6 +200,7 @@ const Header = () => {
           </div> */}
         </div>
       </div>
+      <Cart open={cartOpen} setOpen={setCartOpen} />
     </div>
   );
 };

@@ -1,6 +1,6 @@
 import { Carousel } from "antd";
 import ProductItem from "../components/product/ProductItem";
-import VoucherSection from "../components/VoucherCard";
+import VoucherSection from "../components/VoucherSection";
 
 function Home() {
   const carousel = ["/banner1.png", "/banner2.png", "/banner3.png"];
@@ -128,7 +128,7 @@ function Home() {
                 className="w-full h-32 object-cover mb-2 rounded-xl"
               />
               <h3 className="font-semibold text-xl">{category.name}</h3>
-              <button className="mt-4 px-6 py-2 border-2 border-red-600 text-red-600 font-medium rounded-xl hover:bg-red-500 hover:text-white transition-all">
+              <button className="mt-4 px-6 py-2 border-2 border-primary text-primary font-medium rounded-xl hover:bg-red-500 hover:text-white transition-all">
                 Xem Thêm
               </button>
             </div>

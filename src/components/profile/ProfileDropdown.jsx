@@ -1,66 +1,100 @@
 import {
-  SettingOutlined,
   UserOutlined,
   LogoutOutlined,
+  BookOutlined,
+  ContainerOutlined,
+  GiftOutlined,
 } from "@ant-design/icons";
 import { Dropdown, Space, Avatar } from "antd";
-import { Link } from "react-router-dom";
-const items = [
-  {
-    key: "1",
-    label: (
-        <p className="font-semibold">Duong Hoai Bao</p>
-    ),
-  },
-  {
-    type: "divider",
-  },
-  {
-    key: "2",
-    label: <Link to="/profile">Hồ sơ người dùng</Link>,
-    icon: <UserOutlined />,
-  },
-  {
-    key: "3",
-    label: (
-        <Link to="/setting">Thiết lập tài khoản</Link>
-    ),
-    icon: <SettingOutlined />,
-  },
-  {
-    type: "divider",
-  },
-  {
-    key: "4",
-    label: "Đăng xuất",
-    icon: <LogoutOutlined />,
-    danger: true,
-    onClick: () => {
-      alert("Logout");
+import Profile from "./Profile";
+import { useState } from "react";
+
+const ProfileDropdown = () => {
+  const [profileOpen, setProfileOpen] = useState(false);
+
+  const handleProfileClick = () => {
+    setProfileOpen(true);
+  };
+
+  const items = [
+    {
+      key: "1",
+      label: (
+        <div style={{ display: "flex", alignItems: "center" }}>
+          <Avatar
+            src="https://www.vlance.vn/uploads/portfolio/view/c4a875224357fa0f1dce59defcb7a42b3d6d2cab1.jpg"
+            size="large"
+            style={{ marginRight: "10px" }}
+          />
+          <div>
+            <p className="font-semibold">Duong Hoai Bao</p>
+            <p className="text-gray-600">abc@gmail.com</p>
+          </div>
+        </div>
+      ),
     },
-  },
-];
-const ProfileDropdown = () => (
-  <Dropdown
-    menu={{
-      items,
-    }}
-    overlayClassName="custom-dropdown-menu"
-  >
-    <a onClick={(e) => e.preventDefault()}>
-      <Space>
-        <Avatar
-          src={
-            <img
+    {
+      type: "divider",
+    },
+    {
+      key: "2",
+      label: "Thông tin cá nhân",
+      icon: <UserOutlined />,
+      onClick: handleProfileClick,
+    },
+    {
+      key: "3",
+      label: "Quản lý đơn hàng",
+      icon: <ContainerOutlined />,
+    },
+    {
+      key: "4",
+      label: "Sổ địa chỉ",
+      icon: <BookOutlined />,
+    },
+    {
+      key: "5",
+      label: "Kho mã giảm giá",
+      icon: <GiftOutlined />,
+    },
+    {
+      type: "divider",
+    },
+    {
+      key: "6",
+      label: "Đăng xuất",
+      icon: <LogoutOutlined />,
+      danger: true,
+      onClick: () => {
+        alert("Logout");
+      },
+    },
+  ];
+  return (
+    <>
+      <Dropdown
+        menu={{
+          items,
+        }}
+        overlayClassName="custom-dropdown-menu"
+      >
+        <a onClick={(e) => e.preventDefault()}>
+          <Space>
+            <Avatar
               src={
-                "https://www.vlance.vn/uploads/portfolio/view/c4a875224357fa0f1dce59defcb7a42b3d6d2cab1.jpg"
+                <img
+                  src={
+                    "https://www.vlance.vn/uploads/portfolio/view/c4a875224357fa0f1dce59defcb7a42b3d6d2cab1.jpg"
+                  }
+                  alt="avatar"
+                />
               }
-              alt="avatar"
             />
-          }
-        />
-      </Space>
-    </a>
-  </Dropdown>
-);
+          </Space>
+        </a>
+      </Dropdown>
+      <Profile open={profileOpen} setOpen={setProfileOpen} />
+    </>
+  );
+};
 export default ProfileDropdown;

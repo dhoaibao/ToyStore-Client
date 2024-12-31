@@ -229,19 +229,19 @@ const ProductDetail = () => {
             <div className="container mx-auto mt-4">
               <h2 className="text-xl font-semibold mb-4">Thông tin sản phẩm</h2>
               <div className="flex flex-col items-center">
-                <table className="table-auto border-collapse border border-gray-300 w-full text-left rounded-lg">
-                  <tbody>
+                <table className="table-auto border-collapse w-full text-left rounded-lg shadow-lg overflow-hidden">
+                  <tbody className="divide-y divide-gray-200">
                     {productDetails.map((detail, index) => (
                       <tr
                         key={index}
                         className={`${
                           !isExpanded && index > 2 ? "hidden" : ""
-                        }`}
+                        } ${index % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
                       >
-                        <td className="border border-gray-300 px-4 py-2 font-medium">
+                        <td className="px-4 py-3 font-medium text-gray-700">
                           {detail.label}
                         </td>
-                        <td className="border border-gray-300 px-4 py-2">
+                        <td className="px-4 py-3 text-gray-600">
                           {detail.value || "-"}
                         </td>
                       </tr>
@@ -250,7 +250,7 @@ const ProductDetail = () => {
                 </table>
                 <button
                   onClick={toggleExpand}
-                  className="text-red-500 text-center font-medium mt-2 hover:underline"
+                  className="text-red-600 text-center font-medium mt-2 hover:underline"
                 >
                   {isExpanded ? "Thu gọn" : "Xem thêm"}
                 </button>

@@ -1,22 +1,14 @@
 import { Drawer, List, Avatar, Typography, Input, Button } from "antd";
 import { useState } from "react";
 import PropTypes from "prop-types";
+import { useSelector } from 'react-redux'
 
 const { Text, Title } = Typography;
 
 const Profile = ({ open, setOpen }) => {
-  const [profileDetails, setProfileDetails] = useState({
-    firstName: "Duong",
-    lastName: "Hoai Bao",
-    email: "duonghoaibao@example.com",
-    phone: "0123456789",
-    birthday: "1990-01-01",
-    gender: "Male",
-    avatar:
-      "https://www.vlance.vn/uploads/portfolio/view/c4a875224357fa0f1dce59defcb7a42b3d6d2cab1.jpg",
-  });
+  const [isEditing, setIsEditing] = useState(false);
 
-  const [isEditing, setIsEditing] = useState(false); // Trạng thái chỉnh sửa
+  const profileDetails = useSelector((state) => state.auth.user);
 
   const onClose = () => {
     setOpen(false);
@@ -63,7 +55,7 @@ const Profile = ({ open, setOpen }) => {
           className="mb-4 shadow-lg"
         />
         <Title level={4}>
-          {profileDetails.firstName} {profileDetails.lastName}
+          {profileDetails.fullName}
         </Title>
       </div>
       <List itemLayout="vertical" className="mt-6">

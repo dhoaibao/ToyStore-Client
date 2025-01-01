@@ -7,16 +7,19 @@ import {
 } from "@ant-design/icons";
 import { Dropdown, Space, Avatar } from "antd";
 import Profile from "./Profile";
-import Order from "./OrderManagement"
+import Order from "./OrderManagement";
 import AddressBook from "./AddressBook";
 import VoucherManagement from "./VoucherManagement";
 import { useState } from "react";
+import { useSelector } from 'react-redux'
 
 const ProfileDropdown = () => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [orderOpen, setOrderOpen] = useState(false);
   const [addressOpen, setAddressOpen] = useState(false);
   const [voucherOpen, setVoucherOpen] = useState(false);
+
+  const user = useSelector((state) => state.auth.user);
 
   const handleProfileClick = () => {
     setProfileOpen(true);
@@ -34,20 +37,18 @@ const ProfileDropdown = () => {
     setVoucherOpen(true);
   };
 
+  const handleLogout = () => {
+    localStorage.clear();
+    window.location.reload();
+  };
+
   const items = [
     {
       key: "1",
       label: (
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <Avatar
-            src="https://www.vlance.vn/uploads/portfolio/view/c4a875224357fa0f1dce59defcb7a42b3d6d2cab1.jpg"
-            size="large"
-            style={{ marginRight: "10px" }}
-          />
-          <div>
-            <p className="font-semibold">Duong Hoai Bao</p>
-            <p className="text-gray-600">baob2103488@student.ctu.edu.vn</p>
-          </div>
+        <div>
+          <p className="font-semibold">{user.fullName}</p>
+          <p className="text-gray-600">{user.email}</p>
         </div>
       ),
     },
@@ -86,9 +87,7 @@ const ProfileDropdown = () => {
       label: "Đăng xuất",
       icon: <LogoutOutlined />,
       danger: true,
-      onClick: () => {
-        alert("Logout");
-      },
+      onClick: handleLogout,
     },
   ];
   return (

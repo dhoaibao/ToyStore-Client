@@ -11,6 +11,7 @@ import {
 import { useState, useEffect } from "react";
 import { Dropdown, Space } from "antd";
 import { Link, useLocation } from "react-router-dom";
+import { useSelector } from 'react-redux'
 import ProfileDropdown from "../profile/ProfileDropdown";
 import Cart from "../cart/Cart";
 import ChatBox from "./ChatBox";
@@ -23,6 +24,12 @@ const Header = () => {
   const [cartOpen, setCartOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+
+  const authStatus = useSelector((state) => state.auth.isAuthenticated);
+
+  useEffect(() => {
+    setIsLogin(authStatus);
+  }, [authStatus]);
 
   useEffect(() => {
     let lastScrollY = window.scrollY;

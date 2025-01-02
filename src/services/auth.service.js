@@ -14,12 +14,16 @@ class authService {
             await this.api.post('/sign-up', data)).data;
     }
 
-    async getLoggedInUser() {
-        return (await this.api.get('/me', {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-            },
-        })).data;
+    async signOut() {
+        return (await this.api.post('/sign-out')).data;
+    }
+
+    async verifyEmail(data) {
+        return (await this.api.post('/verify-email', data)).data;
+    }
+
+    async resendOtp(data) {
+        return (await this.api.post('/resend-otp', data)).data;
     }
 }
 

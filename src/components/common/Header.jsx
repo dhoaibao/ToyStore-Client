@@ -11,11 +11,13 @@ import {
 import { useState, useEffect } from "react";
 import { Dropdown, Space } from "antd";
 import { Link, useLocation } from "react-router-dom";
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from "react-redux";
 import ProfileDropdown from "../profile/ProfileDropdown";
 import Cart from "../cart/Cart";
 import ChatBox from "./ChatBox";
 import Auth from "./Auth";
+import { authService } from "../../services";
+import { setAuth } from "../../redux/slices/authSlice";
 
 const Header = () => {
   const location = useLocation();
@@ -25,11 +27,26 @@ const Header = () => {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
 
+  const dispatch = useDispatch();
+
   const authStatus = useSelector((state) => state.auth.isAuthenticated);
 
   useEffect(() => {
     setIsLogin(authStatus);
   }, [authStatus]);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const user = await authService.getLoggedInUser();
+        dispatch(setAuth(user.data));
+      } catch (error) {
+        console.error("Check auth error:", error);
+      }
+    };
+
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     let lastScrollY = window.scrollY;

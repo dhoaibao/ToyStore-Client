@@ -70,7 +70,7 @@ const Header = () => {
 
   const navItems = [
     { value: "products", label: "Sản phẩm" },
-    { value: "saleoff", label: "Khuyến mãi" },
+    { value: "promotions", label: "Khuyến mãi" },
     { value: "news", label: "Tin tức" },
     { value: "about", label: "Giới thiệu" },
   ];

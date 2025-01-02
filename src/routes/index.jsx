@@ -5,6 +5,8 @@ import Product from '../pages/Product';
 import About from '../pages/About';
 import PuzzleGame from '../pages/PuzzleGame';
 import ProductDetail from '../pages/ProductDetail'
+import News from '../pages/News';
+import Promotions from '../pages/Promotions';
 
 const routes = [
   {
@@ -36,6 +38,16 @@ const routes = [
     id: "product-detail",
     path: "/products/:slug",
     element: <ProductDetail />,
+  },
+  {
+    id: "news",
+    path: "/news",
+    element: <News />,
+  },
+  {
+    id: "promotions",
+    path: "/promotions",
+    element: <Promotions />,
   },
 ];
 

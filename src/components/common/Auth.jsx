@@ -13,6 +13,9 @@ import { useDispatch } from "react-redux";
 import PropTypes from "prop-types";
 import { authService, userService } from "../../services";
 import { setAuth } from "../../redux/slices/authSlice";
+import { LoginSocialGoogle } from "reactjs-social-login";
+
+const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
 const { Title } = Typography;
 
@@ -326,6 +329,37 @@ const AuthDrawer = ({ open, setOpen }) => {
                 >
                   {isForgotPassword ? "Quay lại đăng nhập" : "Quên mật khẩu?"}
                 </Button>
+                {!isForgotPassword && (
+                  <LoginSocialGoogle
+                    client_id={CLIENT_ID}
+                    onResolve={(response) => {
+                      console.log(response.data);
+                    }}
+                    onReject={(error) => {
+                      console.log(error);
+                    }}
+                    className="w-full mt-4"
+                  >
+                    <Button
+                      type="default"
+                      icon={
+                        <img
+                          src="https://img.icons8.com/?size=100&id=17949&format=png&color=000000"
+                          alt="Google logo"
+                          style={{ width: 20, marginRight: 8 }}
+                        />
+                      }
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: "100%",
+                      }}
+                    >
+                      Đăng nhập với Google
+                    </Button>
+                  </LoginSocialGoogle>
+                )}
               </Form>
             ),
           },

@@ -58,10 +58,10 @@ const AuthDrawer = ({ open, setOpen }) => {
     otpForm.resetFields();
   };
 
-  const handleLogin = async (values) => {
+  const processLogin = async (apiCall, successMessage) => {
     setLoading(true);
     try {
-      const response = await authService.signIn(values);
+      const response = await apiCall();
 
       const { accessToken, refreshToken } = response.data;
 
@@ -70,8 +70,8 @@ const AuthDrawer = ({ open, setOpen }) => {
 
       const user = await userService.getLoggedInUser();
       dispatch(setAuth(user.data));
-      message.success("Đăng nhập thành công!");
 
+      message.success(successMessage);
       handleClose();
     } catch (error) {
       message.error("Đăng nhập thất bại!");
@@ -79,6 +79,25 @@ const AuthDrawer = ({ open, setOpen }) => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleLogin = async (values) => {
+    await processLogin(
+      () => authService.signIn(values),
+      "Đăng nhập thành công!"
+    );
+  };
+
+  const handleLoginWithGoogle = async (data) => {
+    console.log("hehe", data);
+    await processLogin(
+      () =>
+        authService.signInWithGoogle({
+          email: data.email,
+          fullName: data.name,
+        }),
+      "Đăng nhập với Google thành công!"
+    );
   };
 
   const handleRegister = async (values) => {
@@ -330,35 +349,40 @@ const AuthDrawer = ({ open, setOpen }) => {
                   {isForgotPassword ? "Quay lại đăng nhập" : "Quên mật khẩu?"}
                 </Button>
                 {!isForgotPassword && (
-                  <LoginSocialGoogle
-                    client_id={CLIENT_ID}
-                    onResolve={(response) => {
-                      console.log(response.data);
-                    }}
-                    onReject={(error) => {
-                      console.log(error);
-                    }}
-                    className="w-full mt-4"
-                  >
-                    <Button
-                      type="default"
-                      icon={
-                        <img
-                          src="https://img.icons8.com/?size=100&id=17949&format=png&color=000000"
-                          alt="Google logo"
-                          style={{ width: 20, marginRight: 8 }}
-                        />
-                      }
-                      style={{
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        width: "100%",
+                  <>
+                    <LoginSocialGoogle
+                      client_id={CLIENT_ID}
+                      onResolve={(response) => {
+                        handleLoginWithGoogle(response.data);
+                        console.log("Login success:", response.data);
                       }}
+                      onReject={(error) => {
+                        message.error("Đăng nhập thất bại!");
+                        console.error("Login error:", error);
+                      }}
+                      className="w-full mt-4"
                     >
-                      Đăng nhập với Google
-                    </Button>
-                  </LoginSocialGoogle>
+                      <Button
+                        type="default"
+                        icon={
+                          <img
+                            src="https://img.icons8.com/?size=100&id=17949&format=png&color=000000"
+                            alt="Google logo"
+                            style={{ width: 20, marginRight: 8 }}
+                          />
+                        }
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          width: "100%",
+                        }}
+                      >
+                        Đăng nhập với Google
+                      </Button>
+                    </LoginSocialGoogle>
+                    
+                  </>
                 )}
               </Form>
             ),

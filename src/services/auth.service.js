@@ -29,6 +29,10 @@ class authService {
     async verifyResetPassword(data) {
         return (await this.api.post('/verify-reset-password', data)).data;
     }
+
+    async signInWithGoogle(data) {
+        return (await this.api.post('/sign-in-with-google', data)).data;
+    }
 }
 
 export default new authService();

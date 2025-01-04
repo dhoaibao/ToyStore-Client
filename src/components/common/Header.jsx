@@ -16,7 +16,7 @@ import ProfileDropdown from "../profile/ProfileDropdown";
 import Cart from "../cart/Cart";
 import ChatBox from "./ChatBox";
 import Auth from "./Auth";
-import { authService } from "../../services";
+import { userService } from "../../services";
 import { setAuth } from "../../redux/slices/authSlice";
 
 const Header = () => {
@@ -33,20 +33,18 @@ const Header = () => {
 
   useEffect(() => {
     setIsLogin(authStatus);
-  }, [authStatus]);
 
-  useEffect(() => {
     const checkAuth = async () => {
       try {
-        const user = await authService.getLoggedInUser();
+        const user = await userService.getLoggedInUser();
         dispatch(setAuth(user.data));
       } catch (error) {
-        console.error("Check auth error:", error);
+        console.error("Get user error:", error.response);
       }
     };
 
-    checkAuth();
-  }, []);
+    if (authStatus) checkAuth();
+  }, [dispatch, authStatus]);
 
   useEffect(() => {
     let lastScrollY = window.scrollY;

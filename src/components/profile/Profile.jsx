@@ -1,29 +1,70 @@
-import { Drawer, List, Avatar, Typography, Input, Button } from "antd";
+import {
+  Drawer,
+  List,
+  Avatar,
+  Typography,
+  Input,
+  Button,
+  Select,
+  DatePicker,
+  Form,
+  message,
+} from "antd";
 import { useState } from "react";
 import PropTypes from "prop-types";
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from "react-redux";
+import moment from "moment";
+import { userService } from "../../services";
+import { setAuth } from "../../redux/slices/authSlice";
+import generateAvatar from "../../utils/generateAvatar";
 
 const { Text, Title } = Typography;
 
 const Profile = ({ open, setOpen }) => {
   const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const user = useSelector((state) => state.auth.user);
+  const dispatch = useDispatch();
+  const [form] = Form.useForm();
 
-  const profileDetails = useSelector((state) => state.auth.user);
+  const { color, initial } = generateAvatar(user?.email, user?.fullName);
 
   const onClose = () => {
     setOpen(false);
+    setIsEditing(false);
+    form.resetFields();
   };
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProfileDetails((prevDetails) => ({
-      ...prevDetails,
-      [name]: value,
-    }));
+  const handleUpdate = async (values) => {
+    setLoading(true);
+    try {
+      const updatedValues = {
+        ...values,
+        gender: values.gender === "true",
+      };
+      const response = await userService.updateProfile(
+        user.userId,
+        updatedValues
+      );
+      dispatch(setAuth(response.data));
+      message.success("Cập nhật thông tin thành công!");
+      setIsEditing(false);
+    } catch (error) {
+      console.error("Update profile error:", error.response?.data);
+      message.error(
+        error.response?.data?.message || "Cập nhật thông tin thất bại!"
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   const toggleEdit = () => {
-    setIsEditing(!isEditing);
+    if (isEditing) {
+      form.submit();
+    } else {
+      setIsEditing(true);
+    }
   };
 
   return (
@@ -42,6 +83,7 @@ const Profile = ({ open, setOpen }) => {
             size="large"
             className={"ml-4"}
             onClick={toggleEdit}
+            loading={loading}
           >
             {isEditing ? "Lưu" : "Chỉnh sửa"}
           </Button>
@@ -50,66 +92,101 @@ const Profile = ({ open, setOpen }) => {
     >
       <div className="flex flex-col items-center">
         <Avatar
-          src={profileDetails.avatar}
+          src={user.avatar}
           size={100}
           className="mb-4 shadow-lg"
-        />
-        <Title level={4}>
-          {profileDetails.fullName}
-        </Title>
+          style={{
+            backgroundColor: user?.avatar ? "transparent" : color,
+            fontSize: 36,
+          }}
+        >
+          {!user.avatar && initial}
+        </Avatar>
+        <Title level={4}>{user?.fullName}</Title>
       </div>
-      <List itemLayout="vertical" className="mt-6">
-        <List.Item className="mb-6">
-          <div className="mb-4">
-            <Text strong>Email:</Text>
-            <Input
-              name="email"
-              value={profileDetails.email}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className={`mt-2 ${
-                isEditing ? "border-primary" : "border-gray-300"
-              }`}
-            />
-          </div>
-          <div className="mb-4">
-            <Text strong>Số điện thoại:</Text>
-            <Input
-              name="phone"
-              value={profileDetails.phone}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className={`mt-2 ${
-                isEditing ? "border-primary" : "border-gray-300"
-              }`}
-            />
-          </div>
-          <div className="mb-4">
-            <Text strong>Ngày sinh:</Text>
-            <Input
-              name="birthday"
-              value={profileDetails.birthday}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className={`mt-2 ${
-                isEditing ? "border-primary" : "border-gray-300"
-              }`}
-            />
-          </div>
-          <div className="mb-4">
-            <Text strong>Giới tính:</Text>
-            <Input
-              name="gender"
-              value={profileDetails.gender}
-              onChange={handleChange}
-              disabled={!isEditing}
-              className={`mt-2 ${
-                isEditing ? "border-primary" : "border-gray-300"
-              }`}
-            />
-          </div>
-        </List.Item>
-      </List>
+      <Form
+        form={form}
+        layout="vertical"
+        initialValues={{
+          email: user?.email,
+          phone: user?.phone,
+          birthday: user?.birthday ? moment(user?.birthday) : null,
+          gender: user?.gender?.toString(),
+        }}
+        onFinish={handleUpdate}
+      >
+        <List itemLayout="vertical" className="mt-6">
+          <List.Item className="mb-6">
+            <div className="mb-4">
+              <Text strong>Email:</Text>
+              <Form.Item
+                name="email"
+                rules={[{ required: true, message: "Vui lòng nhập email!" }]}
+              >
+                <Input
+                  disabled={!isEditing}
+                  className={`mt-2 ${
+                    isEditing ? "border-primary" : "border-gray-300"
+                  }`}
+                />
+              </Form.Item>
+            </div>
+            <div className="mb-4">
+              <Text strong>Số điện thoại:</Text>
+              <Form.Item
+                name="phone"
+                rules={[
+                  { required: true, message: "Vui lòng nhập số điện thoại!" },
+                ]}
+              >
+                <Input
+                  disabled={!isEditing}
+                  className={`mt-2 ${
+                    isEditing ? "border-primary" : "border-gray-300"
+                  }`}
+                />
+              </Form.Item>
+            </div>
+            <div className="mb-4">
+              <Text strong>Ngày sinh:</Text>
+              <Form.Item
+                name="birthday"
+                rules={[
+                  { required: true, message: "Vui lòng chọn ngày sinh!" },
+                ]}
+              >
+                <DatePicker
+                  disabled={!isEditing}
+                  className={`mt-2 ${
+                    isEditing ? "border-primary" : "border-gray-300"
+                  }`}
+                  style={{ width: "100%" }}
+                />
+              </Form.Item>
+            </div>
+            <div className="mb-4">
+              <Text strong>Giới tính:</Text>
+              <Form.Item
+                name="gender"
+                rules={[
+                  { required: true, message: "Vui lòng chọn giới tính!" },
+                ]}
+              >
+                <Select
+                  disabled={!isEditing}
+                  className={`mt-2 ${
+                    isEditing ? "border-primary" : "border-gray-300"
+                  }`}
+                  style={{ width: "100%" }}
+                >
+                  <Select.Option value="true">Nam</Select.Option>
+                  <Select.Option value="false">Nữ</Select.Option>
+                </Select>
+              </Form.Item>
+            </div>
+          </List.Item>
+        </List>
+      </Form>
     </Drawer>
   );
 };

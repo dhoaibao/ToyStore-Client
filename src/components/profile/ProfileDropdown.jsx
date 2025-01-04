@@ -4,25 +4,35 @@ import {
   BookOutlined,
   ContainerOutlined,
   GiftOutlined,
+  LockOutlined,
 } from "@ant-design/icons";
 import { Dropdown, Space, Avatar } from "antd";
 import Profile from "./Profile";
 import Order from "./OrderManagement";
 import AddressBook from "./AddressBook";
 import VoucherManagement from "./VoucherManagement";
+import ChangePassword from "./ChangePassword";
 import { useState } from "react";
-import { useSelector } from 'react-redux'
+import { useSelector } from "react-redux";
+import generateAvatar from "../../utils/generateAvatar";
 
 const ProfileDropdown = () => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [orderOpen, setOrderOpen] = useState(false);
   const [addressOpen, setAddressOpen] = useState(false);
   const [voucherOpen, setVoucherOpen] = useState(false);
+  const [changePassOpen, setChangePassOpen] = useState(false);
 
   const user = useSelector((state) => state.auth.user);
 
+  const { color, initial } = generateAvatar(user?.email, user?.fullName);
+
   const handleProfileClick = () => {
     setProfileOpen(true);
+  };
+
+  const handleChangePassClick = () => {
+    setChangePassOpen(true);
   };
 
   const handleOrderClick = () => {
@@ -63,18 +73,24 @@ const ProfileDropdown = () => {
     },
     {
       key: "3",
+      label: "Đổi mật khẩu",
+      icon: <LockOutlined />,
+      onClick: handleChangePassClick,
+    },
+    {
+      key: "4",
       label: "Quản lý đơn hàng",
       icon: <ContainerOutlined />,
       onClick: handleOrderClick,
     },
     {
-      key: "4",
+      key: "5",
       label: "Sổ địa chỉ",
       icon: <BookOutlined />,
       onClick: handleAddressClick,
     },
     {
-      key: "5",
+      key: "6",
       label: "Kho mã giảm giá",
       icon: <GiftOutlined />,
       onClick: handleVoucherClick,
@@ -83,7 +99,7 @@ const ProfileDropdown = () => {
       type: "divider",
     },
     {
-      key: "6",
+      key: "7",
       label: "Đăng xuất",
       icon: <LogoutOutlined />,
       danger: true,
@@ -101,15 +117,14 @@ const ProfileDropdown = () => {
         <a onClick={(e) => e.preventDefault()}>
           <Space>
             <Avatar
-              src={
-                <img
-                  src={
-                    "https://www.vlance.vn/uploads/portfolio/view/c4a875224357fa0f1dce59defcb7a42b3d6d2cab1.jpg"
-                  }
-                  alt="avatar"
-                />
-              }
-            />
+              src={user?.avatar}
+              style={{
+                backgroundColor: user?.avatar ? "transparent" : color,
+                fontSize: 16,
+              }}
+            >
+              {!user.avatar && initial}
+            </Avatar>
           </Space>
         </a>
       </Dropdown>
@@ -117,6 +132,7 @@ const ProfileDropdown = () => {
       <Order open={orderOpen} setOpen={setOrderOpen} />
       <AddressBook open={addressOpen} setOpen={setAddressOpen} />
       <VoucherManagement open={voucherOpen} setOpen={setVoucherOpen} />
+      <ChangePassword open={changePassOpen} setOpen={setChangePassOpen} />
     </>
   );
 };

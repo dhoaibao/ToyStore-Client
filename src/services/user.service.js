@@ -6,11 +6,15 @@ class authService {
     }
 
     async getLoggedInUser() {
-        return (await this.api.get('/me', {
-            headers: {
-                Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
-            },
-        })).data;
+        return (await this.api.get('/me')).data;
+    }
+
+    async updateProfile(id, data) {
+        return (await this.api.put(`/${id}`, data)).data;
+    }
+
+    async changePassword(data) {
+        return (await this.api.put('/change-password', data)).data;
     }
 }
 

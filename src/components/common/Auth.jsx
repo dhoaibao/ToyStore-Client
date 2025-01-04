@@ -22,9 +22,12 @@ const AuthDrawer = ({ open, setOpen }) => {
   const [registeredEmail, setRegisteredEmail] = useState("");
   const [otpSent, setOtpSent] = useState(false); // State to manage OTP step
   const [otpForm] = Form.useForm();
+  const [loginForm] = Form.useForm();
+  const [registerForm] = Form.useForm();
   const [countdown, setCountdown] = useState(60); // Countdown timer state
   const [resendDisabled, setResendDisabled] = useState(true); // Resend button state
   const [loading, setLoading] = useState(false); // Loading state for buttons
+  const [isForgotPassword, setIsForgotPassword] = useState(false);
 
   useEffect(() => {
     let timer;
@@ -42,9 +45,14 @@ const AuthDrawer = ({ open, setOpen }) => {
     setOpen(false);
     setActiveTab("login");
     setOtpSent(false);
+    setRegisteredEmail("");
+    setIsForgotPassword(false);
     setCountdown(60);
     setResendDisabled(true);
     setLoading(false);
+    loginForm.resetFields();
+    registerForm.resetFields();
+    otpForm.resetFields();
   };
 
   const handleLogin = async (values) => {
@@ -64,7 +72,7 @@ const AuthDrawer = ({ open, setOpen }) => {
       handleClose();
     } catch (error) {
       message.error("Đăng nhập thất bại!");
-      console.error("Login error:", error);
+      console.error("Login error:", error.response);
     } finally {
       setLoading(false);
     }
@@ -80,6 +88,40 @@ const AuthDrawer = ({ open, setOpen }) => {
     } catch (error) {
       message.error("Đăng ký thất bại!");
       console.error("Register error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPassword = async (values) => {
+    setLoading(true);
+    try {
+      await authService.resetPassword(values);
+      message.success("Vui lòng xác thực OTP để đặt lại mật khẩu.");
+      setRegisteredEmail(values.email);
+      setOtpSent(true);
+    } catch (error) {
+      message.error("Đặt lại mật khẩu thất bại!");
+      console.error("Reset password error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleResetPasswordVerification = async (values) => {
+    setLoading(true);
+    try {
+      await authService.verifyResetPassword({
+        email: registeredEmail,
+        otp: values.otp,
+      });
+      message.success("Đặt lại mật khẩu thành công! Vui lòng đăng nhập.");
+      setOtpSent(false);
+      setIsForgotPassword(false);
+      setActiveTab("login");
+    } catch (error) {
+      message.error("Xác thực OTP không đúng hoặc hết hạn!");
+      console.error("Reset password verification error:", error);
     } finally {
       setLoading(false);
     }
@@ -146,27 +188,32 @@ const AuthDrawer = ({ open, setOpen }) => {
         items={[
           {
             key: "login",
-            label: "Đăng nhập",
-            children: (
-              <Form layout="vertical" onFinish={handleLogin}>
+            label: !isForgotPassword ? "Đăng nhập" : "Quên mật khẩu",
+            children: otpSent ? (
+              <Form
+                layout="vertical"
+                onFinish={handleResetPasswordVerification}
+                form={otpForm}
+              >
                 <Form.Item
-                  label="Email"
-                  name="email"
+                  label="Mã OTP"
+                  name="otp"
                   rules={[
-                    { required: true, message: "Vui lòng nhập email!" },
-                    { type: "email", message: "Email không hợp lệ!" },
+                    { required: true, message: "Vui lòng nhập mã OTP!" },
+                    { len: 6, message: "Mã OTP phải có 6 chữ số!" },
                   ]}
+                  style={{ textAlign: "center" }}
                 >
-                  <Input placeholder="Nhập email" />
-                </Form.Item>
-                <Form.Item
-                  label="Mật khẩu"
-                  name="password"
-                  rules={[
-                    { required: true, message: "Vui lòng nhập mật khẩu!" },
-                  ]}
-                >
-                  <Input.Password placeholder="Nhập mật khẩu" />
+                  <Input.OTP
+                    placeholder="Nhập mã OTP"
+                    maxLength={6}
+                    inputMode="numeric"
+                    onChange={(e) => {
+                      if (e && e.target) {
+                        e.target.value = e.target.value.replace(/[^0-9]/g, "");
+                      }
+                    }}
+                  />
                 </Form.Item>
                 <Button
                   type="primary"
@@ -174,7 +221,110 @@ const AuthDrawer = ({ open, setOpen }) => {
                   loading={loading}
                   block
                 >
-                  Đăng nhập
+                  Xác thực OTP
+                </Button>
+                <div style={{ textAlign: "center", marginTop: "10px" }}>
+                  {resendDisabled ? (
+                    <span>Gửi lại mã sau {countdown} giây</span>
+                  ) : (
+                    <Button type="link" onClick={handleResendOtp}>
+                      Gửi lại mã OTP
+                    </Button>
+                  )}
+                </div>
+              </Form>
+            ) : (
+              <Form
+                layout="vertical"
+                onFinish={isForgotPassword ? handleResetPassword : handleLogin}
+                form={loginForm}
+              >
+                {!isForgotPassword ? (
+                  <>
+                    <Form.Item
+                      label="Email"
+                      name="email"
+                      rules={[
+                        { required: true, message: "Vui lòng nhập email!" },
+                        { type: "email", message: "Email không hợp lệ!" },
+                      ]}
+                    >
+                      <Input placeholder="Nhập email" />
+                    </Form.Item>
+                    <Form.Item
+                      label="Mật khẩu"
+                      name="password"
+                      rules={[
+                        { required: true, message: "Vui lòng nhập mật khẩu!" },
+                      ]}
+                    >
+                      <Input.Password placeholder="Nhập mật khẩu" />
+                    </Form.Item>
+                  </>
+                ) : (
+                  <>
+                    <Form.Item
+                      label="Email"
+                      name="email"
+                      rules={[
+                        { required: true, message: "Vui lòng nhập email!" },
+                        { type: "email", message: "Email không hợp lệ!" },
+                      ]}
+                    >
+                      <Input placeholder="Nhập email" />
+                    </Form.Item>
+                    <Form.Item
+                      label="Mật khẩu mới"
+                      name="newPassword"
+                      rules={[
+                        { required: true, message: "Vui lòng nhập mật khẩu!" },
+                      ]}
+                    >
+                      <Input.Password placeholder="Nhập mật khẩu mới" />
+                    </Form.Item>
+                    <Form.Item
+                      label="Xác nhận mật khẩu mới"
+                      name="confirmNewPassword"
+                      dependencies={["password"]}
+                      rules={[
+                        {
+                          required: true,
+                          message: "Vui lòng nhập lại mật khẩu mới!",
+                        },
+                        ({ getFieldValue }) => ({
+                          validator(_, value) {
+                            if (
+                              !value ||
+                              getFieldValue("newPassword") === value
+                            ) {
+                              return Promise.resolve();
+                            }
+                            return Promise.reject(
+                              new Error("Mật khẩu không khớp!")
+                            );
+                          },
+                        }),
+                      ]}
+                    >
+                      <Input.Password placeholder="Xác nhận mật khẩu mới" />
+                    </Form.Item>
+                  </>
+                )}
+                <Button
+                  type="primary"
+                  htmlType="submit"
+                  loading={loading}
+                  block
+                >
+                  {isForgotPassword ? "Đặt lại mật khẩu" : "Đăng nhập"}
+                </Button>
+                <Button
+                  className="mt-2"
+                  type="link"
+                  block
+                  onClick={() => setIsForgotPassword(!isForgotPassword)}
+                >
+                  {isForgotPassword ? "Quay lại đăng nhập" : "Quên mật khẩu?"}
                 </Button>
               </Form>
             ),
@@ -202,7 +352,9 @@ const AuthDrawer = ({ open, setOpen }) => {
                     maxLength={6}
                     inputMode="numeric"
                     onChange={(e) => {
-                      e.target.value = e.target.value.replace(/[^0-9]/g, "");
+                      if (e && e.target) {
+                        e.target.value = e.target.value.replace(/[^0-9]/g, "");
+                      }
                     }}
                   />
                 </Form.Item>
@@ -229,7 +381,11 @@ const AuthDrawer = ({ open, setOpen }) => {
                 </div>
               </Form>
             ) : (
-              <Form layout="vertical" onFinish={handleRegister}>
+              <Form
+                layout="vertical"
+                onFinish={handleRegister}
+                form={registerForm}
+              >
                 <Form.Item
                   label="Họ tên"
                   name="fullName"

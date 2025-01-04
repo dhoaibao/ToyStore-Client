@@ -76,7 +76,7 @@ const Product = () => {
     updateQuery("page", page);
   };
 
-  console.log(page);
+  console.log(searchParams.toString());
 
   return (
     <div>

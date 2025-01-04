@@ -14,16 +14,20 @@ class authService {
             await this.api.post('/sign-up', data)).data;
     }
 
-    async signOut() {
-        return (await this.api.post('/sign-out')).data;
-    }
-
     async verifyEmail(data) {
         return (await this.api.post('/verify-email', data)).data;
     }
 
     async resendOtp(data) {
         return (await this.api.post('/resend-otp', data)).data;
+    }
+
+    async resetPassword(data) {
+        return (await this.api.post('/reset-password', data)).data;
+    }
+
+    async verifyResetPassword(data) {
+        return (await this.api.post('/verify-reset-password', data)).data;
     }
 }
 

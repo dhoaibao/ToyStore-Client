@@ -1,62 +1,57 @@
 import axios from 'axios';
 
-const commonConfig = {
-  headers: {
-    'Content-Type': 'application/json',
-    Accept: 'application/json',
-  },
-};
+const baseURL = 'http://localhost:3000/api/v1';
 
-async function checkLocalhost() {
-  try {
-    await axios.get('http://localhost:3000/');
-    return true;
-    // eslint-disable-next-line no-unused-vars
-  } catch (error) {
-    return false;
-  }
-}
-
-const isLocalhostRunning = await checkLocalhost();
-
-const rootURL = isLocalhostRunning
-  ? 'http://localhost:3000/api/v1'
-  : 'https://ct250-backend-nydf.onrender.com/api/v1';
-
-console.log(rootURL);
-
-const createApiClient = path => {
-  const baseURL = `${rootURL}${path}`;
+const createApiClient = (path) => {
   const api = axios.create({
-    baseURL: baseURL,
-    ...commonConfig,
+    baseURL: `${baseURL}${path}`,
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json',
+    },
   });
 
+  // Request interceptor to add the Authorization header
+  api.interceptors.request.use(
+    (config) => {
+      const accessToken = localStorage.getItem('accessToken');
+      if (accessToken) {
+        config.headers['Authorization'] = `Bearer ${accessToken}`;
+      }
+      return config;
+    },
+    (error) => {
+      return Promise.reject(error);
+    }
+  );
+
+  // Response interceptor to handle token refresh
   api.interceptors.response.use(
-    response => {
+    (response) => {
       return response;
     },
-    async error => {
+    async (error) => {
+      console.log('Error:', error.response);
       const originalRequest = error.config;
-
       const refreshToken = localStorage.getItem('refreshToken');
 
       if (
-        error.response.data.error === 'Token expired!' &&
+        error.response &&
+        error.response.data.message === 'Token has expired' &&
         !originalRequest._retry &&
         refreshToken
       ) {
         originalRequest._retry = true;
 
         try {
-          const response = await axios.post(`${rootURL}/auth/refresh`, {
+          const response = await axios.post(`${baseURL}/auth/refresh-token`, {
             refreshToken: refreshToken,
           });
 
-          // console.log("Làm mới token thành công:", response.data);
+          // console.log('Làm mới token thành công:', response.data.token);
 
-          const newAccessToken = response.data.accessToken;
-          const newRefreshToken = response.data.refreshToken;
+          const newAccessToken = response.data.token.accessToken;
+          const newRefreshToken = response.data.token.refreshToken;
 
           localStorage.setItem('accessToken', newAccessToken);
           localStorage.setItem('refreshToken', newRefreshToken);
@@ -67,16 +62,16 @@ const createApiClient = path => {
         } catch (refreshError) {
           if (
             refreshError.response &&
-            refreshError.response.data.error === 'Token expired!'
+            refreshError.response.data.message === 'Token has expired'
           ) {
-            // localStorage.removeItem("accessToken");
+            localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
             window.location.href = '/login';
             return Promise.reject(refreshError);
           }
         }
       }
-      return Promise.reject(error.response);
+      return Promise.reject(error);
     }
   );
 

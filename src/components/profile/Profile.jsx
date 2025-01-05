@@ -9,14 +9,17 @@ import {
   DatePicker,
   Form,
   message,
+  Upload,
 } from "antd";
+import { UploadOutlined } from "@ant-design/icons";
 import { useState } from "react";
 import PropTypes from "prop-types";
 import { useSelector, useDispatch } from "react-redux";
 import moment from "moment";
-import { userService } from "../../services";
+import { userService, imageService } from "../../services";
 import { setAuth } from "../../redux/slices/authSlice";
 import generateAvatar from "../../utils/generateAvatar";
+import dayjs from "dayjs";
 
 const { Text, Title } = Typography;
 
@@ -26,12 +29,16 @@ const Profile = ({ open, setOpen }) => {
   const user = useSelector((state) => state.auth.user);
   const dispatch = useDispatch();
   const [form] = Form.useForm();
+  const [avatar, setAvatar] = useState(user.avatar.url);
+  const [file, setFile] = useState(null);
 
   const { color, initial } = generateAvatar(user?.email, user?.fullName);
 
   const onClose = () => {
     setOpen(false);
     setIsEditing(false);
+    setAvatar(user.avatar.url);
+    setFile(null);
     form.resetFields();
   };
 
@@ -42,6 +49,19 @@ const Profile = ({ open, setOpen }) => {
         ...values,
         gender: values.gender === "true",
       };
+
+      if (file) {
+        try {
+          const formData = new FormData();
+          formData.append("file", file);
+          const image = await imageService.uploadSingleImage(formData);
+          updatedValues.avatarId = image.data.uploadImageId;
+        } catch (uploadError) {
+          console.error("Avatar upload failed:", uploadError);
+          message.error("Tải lên ảnh đại diện thất bại!");
+        }
+      }
+
       const response = await userService.updateProfile(
         user.userId,
         updatedValues
@@ -55,6 +75,18 @@ const Profile = ({ open, setOpen }) => {
         error.response?.data?.message || "Cập nhật thông tin thất bại!"
       );
     } finally {
+      setLoading(false);
+      onClose();
+    }
+  };
+
+  const handleAvatarChange = async (info) => {
+    if (info.file.status === "uploading") {
+      setLoading(true);
+    }
+    if (info.file.status === "done") {
+      setFile(info.file.originFileObj);
+      setAvatar(URL.createObjectURL(info.file.originFileObj));
       setLoading(false);
     }
   };
@@ -92,16 +124,33 @@ const Profile = ({ open, setOpen }) => {
     >
       <div className="flex flex-col items-center">
         <Avatar
-          src={user.avatar}
+          src={avatar}
           size={100}
           className="mb-4 shadow-lg"
           style={{
-            backgroundColor: user?.avatar ? "transparent" : color,
+            backgroundColor: avatar ? "transparent" : color,
             fontSize: 36,
           }}
         >
-          {!user.avatar && initial}
+          {!user.avatar.url && initial}
         </Avatar>
+        {isEditing && (
+          <Upload
+            name="avatar"
+            showUploadList={false}
+            customRequest={({ onSuccess }) => {
+              setTimeout(() => {
+                onSuccess("ok");
+              }, 0);
+            }}
+            onChange={handleAvatarChange}
+            className="mb-2"
+          >
+            <Button loading={loading} icon={<UploadOutlined />}>
+              Thay đổi ảnh đại diện
+            </Button>
+          </Upload>
+        )}
         <Title level={4}>{user?.fullName}</Title>
       </div>
       <Form
@@ -121,7 +170,7 @@ const Profile = ({ open, setOpen }) => {
               <Text strong>Email:</Text>
               <Form.Item
                 name="email"
-                rules={[{ required: true, message: "Vui lòng nhập email!" }]}
+                rules={[{ required: false, message: "Vui lòng nhập email!" }]}
               >
                 <Input
                   disabled={!isEditing}
@@ -136,7 +185,7 @@ const Profile = ({ open, setOpen }) => {
               <Form.Item
                 name="phone"
                 rules={[
-                  { required: true, message: "Vui lòng nhập số điện thoại!" },
+                  { required: false, message: "Vui lòng nhập số điện thoại!" },
                 ]}
               >
                 <Input
@@ -152,8 +201,12 @@ const Profile = ({ open, setOpen }) => {
               <Form.Item
                 name="birthday"
                 rules={[
-                  { required: true, message: "Vui lòng chọn ngày sinh!" },
+                  { required: false, message: "Vui lòng chọn ngày sinh!" },
                 ]}
+                getValueProps={(value) => ({
+                  value: value && dayjs(value),
+                })}
+                normalize={(value) => value && value.tz().format("YYYY-MM-DD")}
               >
                 <DatePicker
                   disabled={!isEditing}
@@ -169,7 +222,7 @@ const Profile = ({ open, setOpen }) => {
               <Form.Item
                 name="gender"
                 rules={[
-                  { required: true, message: "Vui lòng chọn giới tính!" },
+                  { required: false, message: "Vui lòng chọn giới tính!" },
                 ]}
               >
                 <Select

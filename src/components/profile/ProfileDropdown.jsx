@@ -117,13 +117,13 @@ const ProfileDropdown = () => {
         <a onClick={(e) => e.preventDefault()}>
           <Space>
             <Avatar
-              src={user?.avatar}
+              src={user?.avatar?.url}
               style={{
-                backgroundColor: user?.avatar ? "transparent" : color,
+                backgroundColor: user?.avatar?.url ? "transparent" : color,
                 fontSize: 16,
               }}
             >
-              {!user.avatar && initial}
+              {!user?.avatar?.url && initial}
             </Avatar>
           </Space>
         </a>

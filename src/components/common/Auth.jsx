@@ -89,7 +89,6 @@ const AuthDrawer = ({ open, setOpen }) => {
   };
 
   const handleLoginWithGoogle = async (data) => {
-    console.log("hehe", data);
     await processLogin(
       () =>
         authService.signInWithGoogle({

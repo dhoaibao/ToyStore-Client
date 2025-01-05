@@ -16,6 +16,7 @@
     "axios": "^1.7.9",
     "crypto-js": "^4.2.0",
     "ct553-client": "file:",
+    "dayjs": "^1.11.13",
     "lucide-react": "^0.468.0",
     "moment": "^2.30.1",
     "react": "^18.3.1",

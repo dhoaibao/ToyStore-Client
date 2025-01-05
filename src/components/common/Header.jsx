@@ -43,7 +43,7 @@ const Header = () => {
       }
     };
 
-    if (authStatus) checkAuth();
+    checkAuth();
   }, [dispatch, authStatus]);
 
   useEffect(() => {

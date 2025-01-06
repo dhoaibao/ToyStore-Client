@@ -37,7 +37,6 @@ const Profile = ({ open, setOpen }) => {
   const onClose = () => {
     setOpen(false);
     setIsEditing(false);
-    setAvatar(user.avatar.url);
     setFile(null);
     form.resetFields();
   };
@@ -56,6 +55,7 @@ const Profile = ({ open, setOpen }) => {
           formData.append("file", file);
           const image = await imageService.uploadSingleImage(formData);
           updatedValues.avatarId = image.data.uploadImageId;
+          setAvatar(image.data.url);
         } catch (uploadError) {
           console.error("Avatar upload failed:", uploadError);
           message.error("Tải lên ảnh đại diện thất bại!");

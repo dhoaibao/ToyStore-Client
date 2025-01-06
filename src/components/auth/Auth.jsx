@@ -11,8 +11,8 @@ import {
 import { useState, useEffect } from "react";
 import { useDispatch } from "react-redux";
 import PropTypes from "prop-types";
-import { authService, userService } from "../../services";
-import { setAuth } from "../../redux/slices/authSlice";
+import { authService } from "../../services";
+import { getLoggedInUser } from "../../redux/thunks/userThunk";
 import { LoginSocialGoogle } from "reactjs-social-login";
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -68,8 +68,7 @@ const AuthDrawer = ({ open, setOpen }) => {
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
 
-      const user = await userService.getLoggedInUser();
-      dispatch(setAuth(user.data));
+      dispatch(getLoggedInUser());
 
       message.success(successMessage);
       handleClose();
@@ -380,7 +379,6 @@ const AuthDrawer = ({ open, setOpen }) => {
                         Đăng nhập với Google
                       </Button>
                     </LoginSocialGoogle>
-                    
                   </>
                 )}
               </Form>

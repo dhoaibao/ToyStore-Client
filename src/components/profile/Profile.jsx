@@ -16,17 +16,17 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import { useSelector, useDispatch } from "react-redux";
 import moment from "moment";
-import { userService, imageService } from "../../services";
-import { setAuth } from "../../redux/slices/authSlice";
+import { imageService } from "../../services";
 import generateAvatar from "../../utils/generateAvatar";
 import dayjs from "dayjs";
+import { updateProfile } from "../../redux/thunks/userThunk";
 
 const { Text, Title } = Typography;
 
 const Profile = ({ open, setOpen }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const user = useSelector((state) => state.auth.user);
+  const user = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
   const [form] = Form.useForm();
   const [avatar, setAvatar] = useState(user.avatar.url);
@@ -61,12 +61,7 @@ const Profile = ({ open, setOpen }) => {
           message.error("Tải lên ảnh đại diện thất bại!");
         }
       }
-
-      const response = await userService.updateProfile(
-        user.userId,
-        updatedValues
-      );
-      dispatch(setAuth(response.data));
+      dispatch(updateProfile(user.userId, updatedValues));
       message.success("Cập nhật thông tin thành công!");
       setIsEditing(false);
     } catch (error) {

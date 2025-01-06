@@ -9,7 +9,7 @@ import {
 import { Dropdown, Space, Avatar } from "antd";
 import Profile from "./Profile";
 import Order from "./OrderManagement";
-import AddressBook from "./AddressBook";
+import AddressBook from "../address/AddressBook";
 import VoucherManagement from "./VoucherManagement";
 import ChangePassword from "./ChangePassword";
 import { useState } from "react";
@@ -23,34 +23,9 @@ const ProfileDropdown = () => {
   const [voucherOpen, setVoucherOpen] = useState(false);
   const [changePassOpen, setChangePassOpen] = useState(false);
 
-  const user = useSelector((state) => state.auth.user);
+  const user = useSelector((state) => state.user.user);
 
   const { color, initial } = generateAvatar(user?.email, user?.fullName);
-
-  const handleProfileClick = () => {
-    setProfileOpen(true);
-  };
-
-  const handleChangePassClick = () => {
-    setChangePassOpen(true);
-  };
-
-  const handleOrderClick = () => {
-    setOrderOpen(true);
-  };
-
-  const handleAddressClick = () => {
-    setAddressOpen(true);
-  };
-
-  const handleVoucherClick = () => {
-    setVoucherOpen(true);
-  };
-
-  const handleLogout = () => {
-    localStorage.clear();
-    window.location.reload();
-  };
 
   const items = [
     {
@@ -69,31 +44,31 @@ const ProfileDropdown = () => {
       key: "2",
       label: "Thông tin cá nhân",
       icon: <UserOutlined />,
-      onClick: handleProfileClick,
+      onClick: () => setProfileOpen(true),
     },
     {
       key: "3",
       label: "Đổi mật khẩu",
       icon: <LockOutlined />,
-      onClick: handleChangePassClick,
+      onClick: () => setChangePassOpen(true),
     },
     {
       key: "4",
       label: "Quản lý đơn hàng",
       icon: <ContainerOutlined />,
-      onClick: handleOrderClick,
+      onClick: () => setOrderOpen(true),
     },
     {
       key: "5",
       label: "Sổ địa chỉ",
       icon: <BookOutlined />,
-      onClick: handleAddressClick,
+      onClick: () => setAddressOpen(true),
     },
     {
       key: "6",
       label: "Kho mã giảm giá",
       icon: <GiftOutlined />,
-      onClick: handleVoucherClick,
+      onClick: () => setVoucherOpen(true),
     },
     {
       type: "divider",
@@ -103,7 +78,10 @@ const ProfileDropdown = () => {
       label: "Đăng xuất",
       icon: <LogoutOutlined />,
       danger: true,
-      onClick: handleLogout,
+      onClick: () => {
+        localStorage.clear();
+        window.location.reload();
+      },
     },
   ];
   return (

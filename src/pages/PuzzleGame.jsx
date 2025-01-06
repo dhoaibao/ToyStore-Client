@@ -2,9 +2,9 @@ import { useState, useRef, useEffect } from "react";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { Button, Modal } from "antd";
-import Piece from "../components/Piece";
-import DropZone from "../components/DropZone";
-import ImageUploader from "../components/ImageUploader";
+import Piece from "../components/game/Piece";
+import DropZone from "../components/game/DropZone";
+import ImageUploader from "../components/game/ImageUploader";
 
 const App = () => {
   const [image, setImage] = useState(null);

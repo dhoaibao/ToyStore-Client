@@ -1,6 +1,6 @@
 import { Carousel } from "antd";
 import ProductItem from "../components/product/ProductItem";
-import VoucherSection from "../components/VoucherSection";
+import VoucherSection from "../components/voucher/VoucherSection";
 
 function Home() {
   const carousel = ["/banner1.png", "/banner2.png", "/banner3.png"];

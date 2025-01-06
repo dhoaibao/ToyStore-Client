@@ -14,14 +14,12 @@ import { Link, useLocation } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import ProfileDropdown from "../profile/ProfileDropdown";
 import Cart from "../cart/Cart";
-import ChatBox from "./ChatBox";
-import Auth from "./Auth";
-import { userService } from "../../services";
-import { setAuth } from "../../redux/slices/authSlice";
+import ChatBox from "../chat/ChatBox";
+import Auth from "../auth/Auth";
+import { getLoggedInUser } from "../../redux/thunks/userThunk";
 
 const Header = () => {
   const location = useLocation();
-  const [isLogin, setIsLogin] = useState(false);
   const [scrollDirection, setScrollDirection] = useState("up");
   const [cartOpen, setCartOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -29,22 +27,11 @@ const Header = () => {
 
   const dispatch = useDispatch();
 
-  const authStatus = useSelector((state) => state.auth.isAuthenticated);
+  const isLogin = useSelector((state) => state.user.isLogin);
 
   useEffect(() => {
-    setIsLogin(authStatus);
-
-    const checkAuth = async () => {
-      try {
-        const user = await userService.getLoggedInUser();
-        dispatch(setAuth(user.data));
-      } catch (error) {
-        console.error("Get user error:", error.response);
-      }
-    };
-
-    checkAuth();
-  }, [dispatch, authStatus]);
+    dispatch(getLoggedInUser());
+  }, [dispatch]);
 
   useEffect(() => {
     let lastScrollY = window.scrollY;

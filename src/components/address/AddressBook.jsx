@@ -9,6 +9,7 @@ import {
   message,
   Select,
 } from "antd";
+import { MapPin } from "lucide-react";
 import PropTypes from "prop-types";
 import { addressService, openApi } from "../../services";
 import { useSelector } from "react-redux";
@@ -125,6 +126,8 @@ const AddressBook = ({ open, setOpen }) => {
 
       const { address } = response.data;
 
+      console.log("address", address);
+
       const province = provinces.find((province) =>
         province.name.includes(address.city || address.state)
       );
@@ -145,9 +148,9 @@ const AddressBook = ({ open, setOpen }) => {
       );
 
       form.setFieldsValue({
-        provinceName: province.name,
-        districtName: district.name,
-        wardName: ward.name,
+        provinceName: JSON.stringify(province),
+        districtName: JSON.stringify(district),
+        wardName: JSON.stringify(ward),
         detail: address.road || "",
       });
 
@@ -332,9 +335,12 @@ const AddressBook = ({ open, setOpen }) => {
           </div>
         }
       >
-        <Button className="mb-2" onClick={getLocation} loading={loading}>
-          Lấy vị trí hiện tại
-        </Button>
+        <div className="text-right">
+          <Button onClick={getLocation} loading={loading}>
+            <MapPin size={20} color="red" strokeWidth={1} />
+            Sử dụng vị trí hiện tại
+          </Button>
+        </div>
         <Form form={form} layout="vertical">
           <Form.Item
             label="Tên địa chỉ"

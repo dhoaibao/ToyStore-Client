@@ -12,6 +12,7 @@ import {
 import PropTypes from "prop-types";
 import { addressService, openApi } from "../../services";
 import { useSelector } from "react-redux";
+import axios from "axios";
 const { Title, Text } = Typography;
 
 const AddressBook = ({ open, setOpen }) => {
@@ -21,17 +22,13 @@ const AddressBook = ({ open, setOpen }) => {
   const [wards, setWards] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState(null);
   const [selectedDistrict, setSelectedDistrict] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingAddress, setEditingAddress] = useState(null);
   const [form] = Form.useForm();
 
   const user = useSelector((state) => state.user.user);
-
-  const addressString = useMemo(
-    () => (address) => `${address.detail}, ${address.wardName}, ${address.districtName}, ${address.provinceName}`,
-    []
-  );
 
   useEffect(() => {
     const fetchAddresses = async () => {
@@ -46,29 +43,128 @@ const AddressBook = ({ open, setOpen }) => {
     fetchAddresses();
   }, []);
 
+  // Tải danh sách tỉnh/thành phố khi component được mount
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchProvinces = async () => {
       try {
         const provincesData = await openApi.getProvinces();
         setProvinces(provincesData);
-
-        if (selectedProvince) {
-          const districtsData = await openApi.getDistricts(selectedProvince);
-          setDistricts(districtsData);
-        }
-
-        if (selectedDistrict) {
-          const wardsData = await openApi.getWards(selectedDistrict);
-          setWards(wardsData);
-        }
       } catch (error) {
-        console.error("Failed to fetch location data: ", error);
-        message.error("Failed to fetch location data");
+        console.error("Failed to fetch provinces:", error);
+        message.error("Không thể tải danh sách tỉnh/thành phố.");
       }
     };
 
-    fetchData();
-  }, [selectedProvince, selectedDistrict]);
+    fetchProvinces();
+  }, []);
+
+  // Tải danh sách quận/huyện khi selectedProvince thay đổi
+  useEffect(() => {
+    const fetchDistricts = async () => {
+      if (!selectedProvince) return;
+      try {
+        const districtsData = await openApi.getDistricts(selectedProvince);
+        setDistricts(districtsData);
+      } catch (error) {
+        console.error("Failed to fetch districts:", error);
+        message.error("Không thể tải danh sách quận/huyện.");
+      }
+    };
+
+    fetchDistricts();
+  }, [selectedProvince]);
+
+  // Tải danh sách xã/phường khi selectedDistrict thay đổi
+  useEffect(() => {
+    const fetchWards = async () => {
+      if (!selectedDistrict) return;
+      try {
+        const wardsData = await openApi.getWards(selectedDistrict);
+        setWards(wardsData);
+      } catch (error) {
+        console.error("Failed to fetch wards:", error);
+        message.error("Không thể tải danh sách xã/phường.");
+      }
+    };
+
+    fetchWards();
+  }, [selectedDistrict]);
+
+  const getLocation = async () => {
+    try {
+      setLoading(true);
+
+      if (!navigator.geolocation) {
+        message.error("Trình duyệt không hỗ trợ Geolocation.");
+        setLoading(false);
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          await getAddressFromCoordinates(latitude, longitude); // Chuyển tọa độ thành địa chỉ
+        },
+        (err) => {
+          console.error("Lỗi khi lấy vị trí:", err.message);
+          message.error("Không thể lấy vị trí hiện tại.");
+          setLoading(false);
+        }
+      );
+    } catch (err) {
+      console.error("Error getting location:", err);
+      setLoading(false);
+    }
+  };
+
+  const getAddressFromCoordinates = async (latitude, longitude) => {
+    try {
+      const response = await axios.get(
+        `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
+      );
+
+      const { address } = response.data;
+
+      const province = provinces.find((province) =>
+        province.name.includes(address.city || address.state)
+      );
+
+      setSelectedProvince(province.code);
+      const districtsData = await openApi.getDistricts(province.code);
+
+      const districtName = address.suburb.replace(" District", "");
+      const district = districtsData.find((district) =>
+        district.name.includes(districtName)
+      );
+
+      setSelectedDistrict(district.code);
+      const wardsData = await openApi.getWards(district.code);
+
+      const ward = wardsData.find((ward) =>
+        ward.name.includes(address.quarter || address.village)
+      );
+
+      form.setFieldsValue({
+        provinceName: province.name,
+        districtName: district.name,
+        wardName: ward.name,
+        detail: address.road || "",
+      });
+
+      message.success("Lấy địa chỉ thành công!");
+    } catch (err) {
+      console.error("Error fetching address:", err);
+      message.error("Không thể chuyển tọa độ thành địa chỉ.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const addressString = useMemo(
+    () => (address) =>
+      `${address.detail}, ${address.wardName}, ${address.districtName}, ${address.provinceName}`,
+    []
+  );
 
   const handleProvinceChange = (value) => {
     const province = JSON.parse(value);
@@ -102,9 +198,11 @@ const AddressBook = ({ open, setOpen }) => {
     form
       .validateFields()
       .then(async (values) => {
+        console.log("values", values);
         const province = JSON.parse(values.provinceName);
         const district = JSON.parse(values.districtName);
         const ward = JSON.parse(values.wardName);
+
         const newValues = {
           ...values,
           provinceName: province.name,
@@ -153,7 +251,9 @@ const AddressBook = ({ open, setOpen }) => {
   const handleDelete = async (addressId) => {
     try {
       await addressService.deleteAddress(addressId);
-      setAddresses((prev) => prev.filter((item) => item.addressId !== addressId));
+      setAddresses((prev) =>
+        prev.filter((item) => item.addressId !== addressId)
+      );
       message.success("Xóa địa chỉ thành công!");
     } catch (error) {
       console.error("Failed to delete address: ", error);
@@ -232,6 +332,9 @@ const AddressBook = ({ open, setOpen }) => {
           </div>
         }
       >
+        <Button className="mb-2" onClick={getLocation} loading={loading}>
+          Lấy vị trí hiện tại
+        </Button>
         <Form form={form} layout="vertical">
           <Form.Item
             label="Tên địa chỉ"

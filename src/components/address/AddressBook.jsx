@@ -8,6 +8,7 @@ import {
   Typography,
   message,
   Select,
+  Checkbox,
 } from "antd";
 import { MapPin } from "lucide-react";
 import PropTypes from "prop-types";
@@ -36,6 +37,7 @@ const AddressBook = ({ open, setOpen }) => {
       try {
         const response = await addressService.getAddressByUser();
         setAddresses(response.data);
+        console.log("addresses", response.data);
       } catch (error) {
         console.error("Failed to fetch addresses: ", error);
         message.error("Failed to fetch addresses");
@@ -44,7 +46,6 @@ const AddressBook = ({ open, setOpen }) => {
     fetchAddresses();
   }, []);
 
-  // Tải danh sách tỉnh/thành phố khi component được mount
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
@@ -59,7 +60,6 @@ const AddressBook = ({ open, setOpen }) => {
     fetchProvinces();
   }, []);
 
-  // Tải danh sách quận/huyện khi selectedProvince thay đổi
   useEffect(() => {
     const fetchDistricts = async () => {
       if (!selectedProvince) return;
@@ -75,7 +75,6 @@ const AddressBook = ({ open, setOpen }) => {
     fetchDistricts();
   }, [selectedProvince]);
 
-  // Tải danh sách xã/phường khi selectedDistrict thay đổi
   useEffect(() => {
     const fetchWards = async () => {
       if (!selectedDistrict) return;
@@ -90,6 +89,18 @@ const AddressBook = ({ open, setOpen }) => {
 
     fetchWards();
   }, [selectedDistrict]);
+
+  const getProvinceCode = (provinceName) => {
+    return provinces.find((p) => p.name === provinceName).code;
+  };
+
+  const getDistrictCode = (districtName) => {
+    return districts.find((d) => d.name === districtName).code;
+  };
+
+  const getWardCode = (wardName) => {
+    return wards.find((w) => w.name === wardName).code;
+  };
 
   const getLocation = async () => {
     try {
@@ -120,6 +131,8 @@ const AddressBook = ({ open, setOpen }) => {
 
   const getAddressFromCoordinates = async (latitude, longitude) => {
     try {
+
+      console.log("latitude", latitude);
       const response = await axios.get(
         `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
       );
@@ -148,9 +161,9 @@ const AddressBook = ({ open, setOpen }) => {
       );
 
       form.setFieldsValue({
-        provinceName: JSON.stringify(province),
-        districtName: JSON.stringify(district),
-        wardName: JSON.stringify(ward),
+        provinceName: province.name,
+        districtName: district.name,
+        wardName: ward.name,
         detail: address.road || "",
       });
 
@@ -170,8 +183,8 @@ const AddressBook = ({ open, setOpen }) => {
   );
 
   const handleProvinceChange = (value) => {
-    const province = JSON.parse(value);
-    setSelectedProvince(province.code);
+    const provinceCode = getProvinceCode(value);
+    setSelectedProvince(provinceCode);
     setDistricts([]);
     setSelectedDistrict(null);
     setWards([]);
@@ -179,14 +192,17 @@ const AddressBook = ({ open, setOpen }) => {
   };
 
   const handleDistrictChange = (value) => {
-    const district = JSON.parse(value);
-    setSelectedDistrict(district.code);
+    const districtCode = getDistrictCode(value);
+    setSelectedDistrict(districtCode);
     setWards([]);
     form.setFieldsValue({ wardName: null });
   };
 
   const openAddressDrawer = (address = null) => {
+    console.log("address", address);
     setEditingAddress(address);
+    setSelectedProvince(address?.provinceCode);
+    setSelectedDistrict(address?.districtCode);
     setIsDrawerOpen(true);
     form.setFieldsValue(address || { addressName: "", address: "", phone: "" });
   };
@@ -197,23 +213,25 @@ const AddressBook = ({ open, setOpen }) => {
     form.resetFields();
   };
 
+  const handleChangeDefault = async (addressId) => {
+    setAddresses((prev) =>
+      prev.map((item) =>
+        item.addressId === addressId
+          ? { ...item, isDefault: true }
+          : { ...item, isDefault: false }
+      )
+    );
+  };
+
   const handleSave = () => {
     form
       .validateFields()
       .then(async (values) => {
-        console.log("values", values);
-        const province = JSON.parse(values.provinceName);
-        const district = JSON.parse(values.districtName);
-        const ward = JSON.parse(values.wardName);
-
         const newValues = {
           ...values,
-          provinceName: province.name,
-          districtName: district.name,
-          wardName: ward.name,
-          provinceCode: province.code,
-          districtCode: district.code,
-          wardCode: ward.code,
+          provinceCode: getProvinceCode(values.provinceName),
+          districtCode: getDistrictCode(values.districtName),
+          wardCode: getWardCode(values.wardName),
           userId: user.userId,
         };
 
@@ -226,11 +244,12 @@ const AddressBook = ({ open, setOpen }) => {
                   : item
               )
             );
+            if (newValues.isDefault)
+              handleChangeDefault(editingAddress.addressId);
             await addressService.updateAddress(
               editingAddress.addressId,
               newValues
             );
-            message.success("Cập nhật địa chỉ thành công!");
           } else {
             const response = await addressService.addAddress(newValues);
             const newAddress = {
@@ -238,6 +257,8 @@ const AddressBook = ({ open, setOpen }) => {
               ...newValues,
             };
             setAddresses((prev) => [...prev, newAddress]);
+            if (newValues.isDefault)
+              handleChangeDefault(response.data.addressId);
             message.success("Thêm địa chỉ mới thành công!");
           }
           closeDrawer();
@@ -246,8 +267,9 @@ const AddressBook = ({ open, setOpen }) => {
           message.error("Failed to save address");
         }
       })
-      .catch(() => {
+      .catch((error) => {
         message.error("Vui lòng kiểm tra lại thông tin!");
+        console.log("Validation error:", error);
       });
   };
 
@@ -260,7 +282,7 @@ const AddressBook = ({ open, setOpen }) => {
       message.success("Xóa địa chỉ thành công!");
     } catch (error) {
       console.error("Failed to delete address: ", error);
-      message.error("Failed to delete address");
+      message.error("Xóa địa chỉ thất bại!");
     }
   };
 
@@ -315,6 +337,12 @@ const AddressBook = ({ open, setOpen }) => {
               <Text>{addressString(item)}</Text>
               <br />
               <Text>SĐT: {item.contactPhone}</Text>
+              <br />
+              {item.isDefault && (
+                <Text strong className="text-primary">
+                  Địa chỉ mặc định
+                </Text>
+              )}
             </div>
           </List.Item>
         )}
@@ -361,10 +389,7 @@ const AddressBook = ({ open, setOpen }) => {
               onChange={(value) => handleProvinceChange(value)}
             >
               {provinces.map((province) => (
-                <Select.Option
-                  key={province.name}
-                  value={JSON.stringify(province)}
-                >
+                <Select.Option key={province.name} value={province.name}>
                   {province.name}
                 </Select.Option>
               ))}
@@ -381,10 +406,7 @@ const AddressBook = ({ open, setOpen }) => {
               disabled={!selectedProvince}
             >
               {districts.map((district) => (
-                <Select.Option
-                  key={district.name}
-                  value={JSON.stringify(district)}
-                >
+                <Select.Option key={district.name} value={district.name}>
                   {district.name}
                 </Select.Option>
               ))}
@@ -397,7 +419,7 @@ const AddressBook = ({ open, setOpen }) => {
           >
             <Select placeholder="Chọn xã/phường" disabled={!selectedDistrict}>
               {wards.map((ward) => (
-                <Select.Option key={ward.name} value={JSON.stringify(ward)}>
+                <Select.Option key={ward.name} value={ward.name}>
                   {ward.name}
                 </Select.Option>
               ))}
@@ -433,6 +455,9 @@ const AddressBook = ({ open, setOpen }) => {
             ]}
           >
             <Input placeholder="Nhập số điện thoại liên hệ" />
+          </Form.Item>
+          <Form.Item name="isDefault" valuePropName="checked">
+            <Checkbox>Đặt làm địa chỉ mặc định</Checkbox>
           </Form.Item>
         </Form>
       </Drawer>

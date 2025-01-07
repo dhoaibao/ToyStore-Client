@@ -29,7 +29,7 @@ const Profile = ({ open, setOpen }) => {
   const user = useSelector((state) => state.user.user);
   const dispatch = useDispatch();
   const [form] = Form.useForm();
-  const [avatar, setAvatar] = useState(user.avatar.url);
+  const [avatar, setAvatar] = useState(user?.avatar?.url || "");
   const [file, setFile] = useState(null);
 
   const { color, initial } = generateAvatar(user?.email, user?.fullName);
@@ -127,7 +127,7 @@ const Profile = ({ open, setOpen }) => {
             fontSize: 36,
           }}
         >
-          {!user.avatar.url && initial}
+          {!user?.avatar?.url && initial}
         </Avatar>
         {isEditing && (
           <Upload

@@ -250,6 +250,7 @@ const AddressBook = ({ open, setOpen }) => {
               editingAddress.addressId,
               newValues
             );
+            message.success("Chỉnh sửa địa chỉ thành công!");
           } else {
             const response = await addressService.addAddress(newValues);
             const newAddress = {

@@ -104,6 +104,7 @@ const AuthDrawer = ({ open, setOpen }) => {
       await authService.signUp(values);
       message.success("Đăng ký thành công! Vui lòng nhập mã OTP.");
       setRegisteredEmail(values.email);
+      loginForm.setFieldsValue({ email: values.email });
       setOtpSent(true); // Move to OTP step
     } catch (error) {
       message.error("Đăng ký thất bại!");

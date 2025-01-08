@@ -131,7 +131,6 @@ const AddressBook = ({ open, setOpen }) => {
 
   const getAddressFromCoordinates = async (latitude, longitude) => {
     try {
-
       console.log("latitude", latitude);
       const response = await axios.get(
         `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${latitude}&lon=${longitude}`
@@ -244,13 +243,15 @@ const AddressBook = ({ open, setOpen }) => {
                   : item
               )
             );
-            if (newValues.isDefault)
+            message.success("Chỉnh sửa địa chỉ thành công!");
+            closeDrawer();
+            if (newValues.isDefault) {
               handleChangeDefault(editingAddress.addressId);
+            }
             await addressService.updateAddress(
               editingAddress.addressId,
               newValues
             );
-            message.success("Chỉnh sửa địa chỉ thành công!");
           } else {
             const response = await addressService.addAddress(newValues);
             const newAddress = {
@@ -258,11 +259,12 @@ const AddressBook = ({ open, setOpen }) => {
               ...newValues,
             };
             setAddresses((prev) => [...prev, newAddress]);
-            if (newValues.isDefault)
-              handleChangeDefault(response.data.addressId);
             message.success("Thêm địa chỉ mới thành công!");
+            closeDrawer();
+            if (newValues.isDefault) {
+              handleChangeDefault(response.data.addressId);
+            }
           }
-          closeDrawer();
         } catch (error) {
           console.error("Failed to save address: ", error);
           message.error("Failed to save address");

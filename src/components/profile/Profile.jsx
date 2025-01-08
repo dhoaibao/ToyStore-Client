@@ -16,7 +16,6 @@ import { useState } from "react";
 import PropTypes from "prop-types";
 import { useSelector, useDispatch } from "react-redux";
 import moment from "moment";
-import { imageService } from "../../services";
 import generateAvatar from "../../utils/generateAvatar";
 import dayjs from "dayjs";
 import { updateProfile } from "../../redux/thunks/userThunk";
@@ -48,20 +47,15 @@ const Profile = ({ open, setOpen }) => {
         ...values,
         gender: values.gender === "true",
       };
-
+      const formData = new FormData();
       if (file) {
-        try {
-          const formData = new FormData();
-          formData.append("file", file);
-          const image = await imageService.uploadSingleImage(formData);
-          updatedValues.avatarId = image.data.uploadImageId;
-          setAvatar(image.data.url);
-        } catch (uploadError) {
-          console.error("Avatar upload failed:", uploadError);
-          message.error("Tải lên ảnh đại diện thất bại!");
-        }
+        formData.append("avatar", file);
       }
-      dispatch(updateProfile(user.userId, updatedValues));
+      for (const key in updatedValues) {
+        formData.append(key, updatedValues[key]);
+      }
+      await dispatch(updateProfile(user.userId, formData));
+      setAvatar(avatar);
       message.success("Cập nhật thông tin thành công!");
       setIsEditing(false);
     } catch (error) {

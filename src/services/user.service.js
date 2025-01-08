@@ -10,7 +10,12 @@ class authService {
     }
 
     async updateProfile(id, data) {
-        return (await this.api.put(`/${id}`, data)).data;
+        return (await this.api.put(`/${id}`, data,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })).data;
     }
 
     async changePassword(data) {

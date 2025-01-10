@@ -1,6 +1,7 @@
 import authService from "./auth.service";
 import userService from "./user.service";
 import addressService from "./address.service";
-import openApi from "./open-api";
+import provincesOpenApi from "./provinces-open-api";
+import productService from "./product.service";
 
-export { authService, userService, addressService, openApi };
+export { authService, userService, addressService, provincesOpenApi, productService };

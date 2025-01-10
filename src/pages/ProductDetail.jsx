@@ -1,41 +1,41 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button, Breadcrumb, Input, Rate } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
+import { productService } from "../services";
+import { useParams } from "react-router-dom";
 
 const ProductDetail = () => {
-  const product = {
-    images: [
-      "https://www.mykingdom.com.vn/cdn/shop/files/lich-giang-sinh-nguoi-nhen-2024-lego-superheroes-76293_5.jpg?v=1733712457&width=1100",
-      "https://www.mykingdom.com.vn/cdn/shop/files/lich-giang-sinh-nguoi-nhen-2024-lego-superheroes-76293_3.jpg?v=1733712457&width=1100",
-    ],
-    name: "Đồ Chơi Lắp Ráp Lịch Giáng Sinh Người Nhện 2024 LEGO SUPERHEROES 76293",
-    brand: "LEGO SUPERHEROES",
-    price: 1179000,
-    discount: 18,
-    requiredAge: 13,
-    features: [
-      "Hàng Chính Hãng",
-      "Miễn Phí Giao Hàng Toàn Quốc Đơn Trên 500k",
-      "Giao Hàng Hỏa Tốc 4 Tiếng",
-    ],
-    description: `
-        <h2>Đồ Chơi Lắp Ráp Lịch Giáng Sinh Người Nhện 2024 LEGO SUPERHEROES 76293 (246 chi tiết)</h2>
-<p>- Hãy bắt đầu kỳ nghỉ thật đặc biệt cùng Lịch Mùa Vọng Lego® Marvel Spider-Man 2024!</p>
-<p>- Mỗi ngày, mở một cánh cửa để khám phá bất ngờ thú vị từ thế giới Spider-Man. Trong đó có 5 nhân vật nhỏ, nhiều mô hình mini, phụ kiện ngầu và vô vàn niềm vui mùa đông.&nbsp;</p>
-<p>- Khi ngày lễ lớn đến gần, hãy kết hợp các món quà lại để tái hiện những cảnh phim yêu thích hoặc tạo ra các cuộc phiêu lưu Marvel của riêng bạn!</p>
-<p>- Lịch mùa vọng với 24 món quà bất ngờ về Spider-Man dành cho bé từ 7 tuổi trở lên.</p>
-<p>- Các mô hình nhỏ bao gồm Spider-Ham tuyết, xe bán xúc xích và cây mùa đông của Electro.</p>
-<p>- Nhân vật mini gồm Spider-Man, Green Goblin, Miles Morales, Ghost-Spider và Venom.</p>
-<p>- Bé có thể kết hợp các món quà để tái hiện cảnh phim hoặc sáng tạo những cuộc phiêu lưu của riêng mình.</p>
-<p>- Một món quà Giáng Sinh tuyệt vời, mang niềm vui kéo dài ngay cả sau khi mở cánh cửa cuối cùng.</p>
-<p>- Các món quà trong lịch tương thích với các bộ Lego® Marvel khác (bán riêng).</p>
-<p>- Bộ Lego® Marvel mở ra vô vàn khả năng xây dựng và chơi sáng tạo.</p>
-<p>- Hãy làm cho mùa lễ hội năm nay thật đặc biệt với 24 ngày quà tặng bất ngờ từ Spider-Man!&nbsp;</p>
-    `,
-  };
+  const { slug } = useParams();
 
-  const discountedPrice =
-    product?.price - (product?.price * product?.discount) / 100;
+  const [product, setProduct] = useState(null);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      if (slug) {
+        try {
+          const result = await productService.getProductBySlug(slug);
+          console.log("result: ", result);
+          setProduct(result.data);
+        } catch (error) {
+          console.error("Error fetching product:", error);
+        }
+      }
+    };
+
+    fetchProduct();
+  }, [slug]);
+
+  console.log("product: ", product);
+
+  const features = [
+    "Hàng Chính Hãng",
+    "Miễn Phí Giao Hàng Toàn Quốc Đơn Trên 500k",
+    "Giao Hàng Hỏa Tốc 4 Tiếng",
+  ];
+
+  const discountedPrice = product?.discount
+    ? product.price - (product.price * product.discount) / 100
+    : product?.price;
 
   const [quantity, setQuantity] = useState(1);
 
@@ -43,9 +43,18 @@ const ProductDetail = () => {
     setCurrentImage(image);
   };
 
-  const images = useMemo(() => product.images || [], [product.images]);
+  const images = useMemo(
+    () => product?.productImages || [],
+    [product?.productImages]
+  );
 
-  const [currentImage, setCurrentImage] = useState(images[0]);
+  const [currentImage, setCurrentImage] = useState({});
+
+  useEffect(() => {
+    if (images.length > 0) {
+      setCurrentImage(images[0]);
+    }
+  }, [images]);
 
   const handleQuantityChange = (value) => {
     if (value === "increase") {
@@ -107,6 +116,7 @@ const ProductDetail = () => {
   // Tính trung bình sao
   const averageRating =
     reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
+
   return (
     <div>
       <div className="px-4 py-2 bg-gray-300">
@@ -122,8 +132,7 @@ const ProductDetail = () => {
               title: "Sản phẩm",
             },
             {
-              title:
-                "Đồ Chơi Lắp Ráp Lịch Giáng Sinh Người Nhện 2024 LEGO SUPERHEROES 76293",
+              title: product?.productName,
             },
           ]}
         />
@@ -132,15 +141,8 @@ const ProductDetail = () => {
         <div className="w-full p-4">
           <div className="flex flex-col items-center p-2">
             <img
-              src={
-                String(currentImage).startsWith("http")
-                  ? currentImage
-                  : `http://localhost:3000/${String(currentImage).replace(
-                      /\\/g,
-                      "/"
-                    )}`
-              }
-              alt={product.name}
+              src={currentImage?.uploadImage?.url}
+              alt={product?.productName}
               className="w-96 h-96 object-contain"
             />
             {/* Thêm container cho hình ảnh nhỏ có thể cuộn ngang khi màn hình nhỏ */}
@@ -149,14 +151,7 @@ const ProductDetail = () => {
               {images.slice(0, 5).map((image, index) => (
                 <img
                   key={index}
-                  src={
-                    String(image).startsWith("http")
-                      ? image
-                      : `http://localhost:3000/${String(image).replace(
-                          /\\/g,
-                          "/"
-                        )}`
-                  }
+                  src={image.uploadImage.url}
                   alt={`Hình ảnh ${index + 1}`}
                   className={`w-20 h-20 cursor-pointer object-contain border rounded-lg
         ${currentImage === image ? "border-cyan-700" : "border-gray-300"}
@@ -169,25 +164,35 @@ const ProductDetail = () => {
         </div>
         <div className="flex flex-col w-full">
           <div className="w-full p-4">
-            <h1 className="text-2xl font-semibold">{product.name}</h1>
+            <h1 className="text-2xl font-semibold">{product?.productName}</h1>
             <p className="mt-2">
               Thương hiệu:{" "}
-              <span className="text-hover-primary">{product.brand}</span> |{" "}
-              {product.requiredAge}+
+              <span className="text-hover-primary">
+                {product?.brand?.brandName}
+              </span>{" "}
+              | {product?.requiredAge}+
             </p>
             <div className="mt-4">
-              <p className="text-gray-500 line-through font-semibold">
-                Giá gốc: {product.price.toLocaleString("vi-VN")}đ
-              </p>
-              <p className="text-lg text-red-600 font-semibold">
-                Giá hiện tại: {discountedPrice.toLocaleString("vi-VN")}đ
-                <span className="ml-4 text-white bg-red-600 p-1 rounded-md text-sm">
-                  -{product.discount}%
-                </span>
-              </p>
+              {product?.discount ? (
+                <>
+                  <p className="text-gray-500 line-through font-semibold">
+                    Giá gốc: {product?.price?.toLocaleString("vi-VN")}đ
+                  </p>
+                  <p className="text-lg text-red-600 font-semibold">
+                    Giá hiện tại: {discountedPrice.toLocaleString("vi-VN")}đ
+                    <span className="ml-4 text-white bg-red-600 p-1 rounded-md text-sm">
+                      -{product?.discount}%
+                    </span>
+                  </p>
+                </>
+              ) : (
+                <p className="text-lg text-red-600 font-semibold">
+                  Giá: {product?.price?.toLocaleString("vi-VN")}đ
+                </p>
+              )}
             </div>
             <ul className="mt-4 space-y-2 ">
-              {product.features.map((feature, index) => (
+              {features.map((feature, index) => (
                 <li key={index} className="flex items-center">
                   <span className="mr-2">✔️</span>
                   {feature}
@@ -263,7 +268,7 @@ const ProductDetail = () => {
       <div className="container mx-4 px-4 pb-6">
         <hr className="my-4 border-gray-300" />
         <h2 className="text-xl font-bold mb-2">Mô tả sản phẩm</h2>
-        <div dangerouslySetInnerHTML={{ __html: product.description }} />
+        <div dangerouslySetInnerHTML={{ __html: product?.description }} />
       </div>
 
       {/*Rating */}

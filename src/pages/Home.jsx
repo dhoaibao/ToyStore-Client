@@ -1,8 +1,25 @@
 import { Carousel } from "antd";
 import ProductItem from "../components/product/ProductItem";
 import VoucherSection from "../components/voucher/VoucherSection";
+import { productService } from "../services";
+import { useEffect, useState } from "react";
 
 function Home() {
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const result = await productService.getAllProducts();
+        setProducts(result.data);
+      } catch (error) {
+        console.log("Failed to fetch products: ", error);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   const carousel = ["/banner1.png", "/banner2.png", "/banner3.png"];
 
   const categories = [
@@ -32,54 +49,6 @@ function Home() {
     },
   ];
 
-  const products = [
-    {
-      id: 1,
-      image:
-        "https://cdn.shopify.com/s/files/1/0731/6514/4343/files/lich-giang-sinh-nguoi-nhen-2024-lego-superheroes-76293_5.jpg?v=1733712457&width=500",
-      category: "LEGO SUPERHEROES",
-      sku: "76293",
-      name: "Đồ Chơi Lắp Ráp Lịch Giáng Sinh Người Nhện 2024 Lego Superheroes 76293",
-      price: 1179000,
-    },
-    {
-      id: 2,
-      image:
-        "https://cdn.shopify.com/s/files/1/0731/6514/4343/files/76290.jpg?v=1727170924&width=500",
-      category: "LEGO SUPERHEROES",
-      sku: "76293",
-      name: "Đồ Chơi Lắp Ráp Lịch Giáng Sinh Người Nhện 2024 Lego Superheroes 76293",
-      price: 1179000,
-    },
-    {
-      id: 3,
-      image:
-        "https://cdn.shopify.com/s/files/1/0731/6514/4343/files/lich-giang-sinh-nguoi-nhen-2024-lego-superheroes-76293_5.jpg?v=1733712457&width=500",
-      category: "LEGO SUPERHEROES",
-      sku: "76293",
-      name: "Đồ Chơi Lắp Ráp Lịch Giáng Sinh Người Nhện 2024 Lego Superheroes 76293",
-      price: 1179000,
-    },
-    {
-      id: 4,
-      image:
-        "https://cdn.shopify.com/s/files/1/0731/6514/4343/files/lich-giang-sinh-nguoi-nhen-2024-lego-superheroes-76293_5.jpg?v=1733712457&width=500",
-      category: "LEGO SUPERHEROES",
-      sku: "76293",
-      name: "Đồ Chơi Lắp Ráp Lịch Giáng Sinh Người Nhện 2024 Lego Superheroes 76293",
-      price: 1179000,
-    },
-    {
-      id: 5,
-      image:
-        "https://cdn.shopify.com/s/files/1/0731/6514/4343/files/lich-giang-sinh-nguoi-nhen-2024-lego-superheroes-76293_5.jpg?v=1733712457&width=500",
-      category: "LEGO SUPERHEROES",
-      sku: "76293",
-      name: "Đồ Chơi Lắp Ráp Lịch Giáng Sinh Người Nhện 2024 Lego Superheroes 76293",
-      price: 1179000,
-    },
-  ];
-
   return (
     <div className="container mx-auto">
       <div className="w-full h-96 overflow-hidden">
@@ -95,7 +64,7 @@ function Home() {
           ))}
         </Carousel>
       </div>
-      <VoucherSection/>
+      <VoucherSection />
       {/* Featured Products */}
       <section className="mb-4 px-4">
         <hr className="my-4 border-gray-300" />

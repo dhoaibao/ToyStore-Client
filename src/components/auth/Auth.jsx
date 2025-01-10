@@ -13,9 +13,7 @@ import { useDispatch } from "react-redux";
 import PropTypes from "prop-types";
 import { authService } from "../../services";
 import { getLoggedInUser } from "../../redux/thunks/userThunk";
-import { LoginSocialGoogle } from "reactjs-social-login";
-
-const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+import { auth, googleAuthProvider, signInWithPopup } from "../../firebase/firebaseConfig";
 
 const { Title } = Typography;
 
@@ -84,17 +82,6 @@ const AuthDrawer = ({ open, setOpen }) => {
     await processLogin(
       () => authService.signIn(values),
       "Đăng nhập thành công!"
-    );
-  };
-
-  const handleLoginWithGoogle = async (data) => {
-    await processLogin(
-      () =>
-        authService.signInWithGoogle({
-          email: data.email,
-          fullName: data.name,
-        }),
-      "Đăng nhập với Google thành công!"
     );
   };
 
@@ -178,6 +165,27 @@ const AuthDrawer = ({ open, setOpen }) => {
       console.error("Resend OTP error:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    try {
+      const result = await signInWithPopup(auth, googleAuthProvider);
+      const user = result.user;
+
+      await processLogin(
+        () =>
+          authService.signInWithGoogle({
+            email: user.email,
+            fullName: user.displayName,
+            photoUrl: user.photoURL,
+            phoneNumber: user.phoneNumber,
+          }),
+        "Đăng nhập với Google thành công!"
+      );
+    } catch (error) {
+      console.error("Google Sign-In Error:", error);
+      message.error("Đăng nhập thất bại!");
     }
   };
 
@@ -348,39 +356,21 @@ const AuthDrawer = ({ open, setOpen }) => {
                   {isForgotPassword ? "Quay lại đăng nhập" : "Quên mật khẩu?"}
                 </Button>
                 {!isForgotPassword && (
-                  <>
-                    <LoginSocialGoogle
-                      client_id={CLIENT_ID}
-                      onResolve={(response) => {
-                        handleLoginWithGoogle(response.data);
-                        console.log("Login success:", response.data);
-                      }}
-                      onReject={(error) => {
-                        message.error("Đăng nhập thất bại!");
-                        console.error("Login error:", error);
-                      }}
-                      className="w-full mt-4"
-                    >
-                      <Button
-                        type="default"
-                        icon={
-                          <img
-                            src="https://img.icons8.com/?size=100&id=17949&format=png&color=000000"
-                            alt="Google logo"
-                            style={{ width: 20, marginRight: 8 }}
-                          />
-                        }
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          width: "100%",
-                        }}
-                      >
-                        Đăng nhập với Google
-                      </Button>
-                    </LoginSocialGoogle>
-                  </>
+                  <Button
+                    type="default"
+                    onClick={handleGoogleLogin}
+                    loading={loading}
+                    icon={
+                      <img
+                        src="https://img.icons8.com/?size=100&id=17949&format=png&color=000000"
+                        alt="Google logo"
+                        style={{ width: 20, marginRight: 8 }}
+                      />
+                    }
+                    className="w-full mt-4 flex items-center justify-center"
+                  >
+                    Đăng nhập với Google
+                  </Button>
                 )}
               </Form>
             ),

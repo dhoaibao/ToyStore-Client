@@ -3,10 +3,10 @@ import { Rate } from "antd";
 import { Link } from "react-router-dom";
 
 const ProductItem = ({
-  image,
+  productImages,
   category,
-  name,
-  slug = "abc",
+  productName,
+  slug,
   price,
   discount = 18,
   avgRate = 4.5,
@@ -26,8 +26,8 @@ const ProductItem = ({
         {/* Product Image */}
         <div className=" mt-2 flex justify-center transform transition-all duration-500 ease-in-out hover:scale-110">
           <img
-            src={image}
-            alt={name}
+            src={productImages[0].uploadImage.url}
+            alt={productName}
             className="w-full max-h-60 object-contain"
           />
         </div>
@@ -36,14 +36,14 @@ const ProductItem = ({
       {/* Product Info */}
       <div className="mt-2">
         <p className="text-xs font-semibold text-gray-500 uppercase">
-          {category}
+          {category || ""}
           {requiredAge > 0 && (
             <span className="ml-2 text-gray-400">{requiredAge}+</span>
           )}
         </p>
         <Link to={`/products/${slug}`}>
           <h3 className="mt-1 text-sm font-medium text-gray-800 sm:line-clamp-2 line-clamp-3">
-            {name}
+            {productName}
           </h3>
         </Link>
         <div className="flex mt-2 items-center">
@@ -66,15 +66,14 @@ const ProductItem = ({
 };
 
 ProductItem.propTypes = {
-  image: PropTypes.string.isRequired,
-  category: PropTypes.string.isRequired,
-  sku: PropTypes.string.isRequired,
-  name: PropTypes.string.isRequired,
+  productImages: PropTypes.array.isRequired,
+  category: PropTypes.string,
+  productName: PropTypes.string.isRequired,
   price: PropTypes.number.isRequired,
   discount: PropTypes.number,
   avgRate: PropTypes.number,
   slug: PropTypes.string.isRequired,
-  requiredAge: PropTypes.number.isRequired,
+  requiredAge: PropTypes.number,
 };
 
 export default ProductItem;

@@ -9,7 +9,7 @@ const apiClient = axios.create({
     },
 });
 
-class OpenApiService {
+class ProvincesOpenApiService {
     async getProvinces() {
         try {
             const response = await apiClient.get("/p/");
@@ -19,19 +19,18 @@ class OpenApiService {
         }
     }
 
-    async getDistricts(code) {
+    async getDistricts(provinceCode) {
         try {
-            console.log(code);
-            const response = await apiClient.get(`/p/${code}?depth=2`);
+            const response = await apiClient.get(`/p/${provinceCode}?depth=2`);
             return response.data.districts;
         } catch (error) {
             throw new Error(error.response?.data?.error || "Error fetching open api");
         }
     }
 
-    async getWards(code) {
+    async getWards(districtCode) {
         try {
-            const response = await apiClient.get(`/d/${code}?depth=2`);
+            const response = await apiClient.get(`/d/${districtCode}?depth=2`);
             return response.data.wards;
         } catch (error) {
             throw new Error(error.response?.data?.error || "Error fetching open api");
@@ -39,4 +38,4 @@ class OpenApiService {
     }
 }
 
-export default new OpenApiService();
+export default new ProvincesOpenApiService();

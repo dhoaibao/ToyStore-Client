@@ -12,7 +12,7 @@ import {
 } from "antd";
 import { MapPin } from "lucide-react";
 import PropTypes from "prop-types";
-import { addressService, openApi } from "../../services";
+import { addressService, provincesOpenApi } from "../../services";
 import { useSelector } from "react-redux";
 import axios from "axios";
 const { Title, Text } = Typography;
@@ -49,7 +49,7 @@ const AddressBook = ({ open, setOpen }) => {
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
-        const provincesData = await openApi.getProvinces();
+        const provincesData = await provincesOpenApi.getProvinces();
         setProvinces(provincesData);
       } catch (error) {
         console.error("Failed to fetch provinces:", error);
@@ -64,7 +64,7 @@ const AddressBook = ({ open, setOpen }) => {
     const fetchDistricts = async () => {
       if (!selectedProvince) return;
       try {
-        const districtsData = await openApi.getDistricts(selectedProvince);
+        const districtsData = await provincesOpenApi.getDistricts(selectedProvince);
         setDistricts(districtsData);
       } catch (error) {
         console.error("Failed to fetch districts:", error);
@@ -79,7 +79,7 @@ const AddressBook = ({ open, setOpen }) => {
     const fetchWards = async () => {
       if (!selectedDistrict) return;
       try {
-        const wardsData = await openApi.getWards(selectedDistrict);
+        const wardsData = await provincesOpenApi.getWards(selectedDistrict);
         setWards(wardsData);
       } catch (error) {
         console.error("Failed to fetch wards:", error);
@@ -145,7 +145,7 @@ const AddressBook = ({ open, setOpen }) => {
       );
 
       setSelectedProvince(province.code);
-      const districtsData = await openApi.getDistricts(province.code);
+      const districtsData = await provincesOpenApi.getDistricts(province.code);
 
       const districtName = address.suburb.replace(" District", "");
       const district = districtsData.find((district) =>
@@ -153,7 +153,7 @@ const AddressBook = ({ open, setOpen }) => {
       );
 
       setSelectedDistrict(district.code);
-      const wardsData = await openApi.getWards(district.code);
+      const wardsData = await provincesOpenApi.getWards(district.code);
 
       const ward = wardsData.find((ward) =>
         ward.name.includes(address.quarter || address.village)

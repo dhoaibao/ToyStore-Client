@@ -1,63 +1,21 @@
-import { Breadcrumb, Empty, Pagination } from "antd";
-import { HomeOutlined } from "@ant-design/icons";
+import { Breadcrumb, Empty, Pagination, Spin } from "antd";
+import { HomeOutlined, LoadingOutlined } from "@ant-design/icons";
 import Filter from "../components/product/Filter";
 import ProductItem from "../components/product/ProductItem";
 import SortBar from "../components/product/SortBar";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { productService } from "../services";
 
 const Product = () => {
-  const products = [
-    {
-      id: 1,
-      image:
-        "https://cdn.shopify.com/s/files/1/0731/6514/4343/files/lich-giang-sinh-nguoi-nhen-2024-lego-superheroes-76293_5.jpg?v=1733712457&width=500",
-      category: "LEGO SUPERHEROES",
-      sku: "76293",
-      name: "Đồ Chơi Lắp Ráp Lịch Giáng Sinh Người Nhện 2024 Lego Superheroes 76293",
-      price: 1179000,
-    },
-    {
-      id: 2,
-      image:
-        "https://cdn.shopify.com/s/files/1/0731/6514/4343/files/76290.jpg?v=1727170924&width=500",
-      category: "LEGO SUPERHEROES",
-      sku: "76293",
-      name: "Đồ Chơi Lắp Ráp Lịch Giáng Sinh Người Nhện 2024 Lego Superheroes 76293",
-      price: 1179000,
-    },
-    {
-      id: 3,
-      image:
-        "https://cdn.shopify.com/s/files/1/0731/6514/4343/files/lich-giang-sinh-nguoi-nhen-2024-lego-superheroes-76293_5.jpg?v=1733712457&width=500",
-      category: "LEGO SUPERHEROES",
-      sku: "76293",
-      name: "Đồ Chơi Lắp Ráp Lịch Giáng Sinh Người Nhện 2024 Lego Superheroes 76293",
-      price: 1179000,
-    },
-    {
-      id: 4,
-      image:
-        "https://cdn.shopify.com/s/files/1/0731/6514/4343/files/lich-giang-sinh-nguoi-nhen-2024-lego-superheroes-76293_5.jpg?v=1733712457&width=500",
-      category: "LEGO SUPERHEROES",
-      sku: "76293",
-      name: "Đồ Chơi Lắp Ráp Lịch Giáng Sinh Người Nhện 2024 Lego Superheroes 76293",
-      price: 1179000,
-    },
-    {
-      id: 5,
-      image:
-        "https://cdn.shopify.com/s/files/1/0731/6514/4343/files/lich-giang-sinh-nguoi-nhen-2024-lego-superheroes-76293_5.jpg?v=1733712457&width=500",
-      category: "LEGO SUPERHEROES",
-      sku: "76293",
-      name: "Đồ Chơi Lắp Ráp Lịch Giáng Sinh Người Nhện 2024 Lego Superheroes 76293",
-      price: 1179000,
-    },
-  ];
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
+
+  console.log(searchParams.toString());
 
   const page = searchParams.get("page") || 1;
   const [currentPage, setCurrentPage] = useState(page);
@@ -67,6 +25,23 @@ const Product = () => {
     setCurrentPage(page);
   }, [page]);
 
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const result = await productService.getAllProducts();
+        setProducts(result.data);
+        setTotalPage(result.pagination.totalPages);
+      } catch (error) {
+        console.log("Failed to fetch products: ", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
   const updateQuery = (key, value) => {
     searchParams.set(key, value);
     navigate({ search: searchParams.toString() });
@@ -75,8 +50,6 @@ const Product = () => {
   const handlePageChange = (page) => {
     updateQuery("page", page);
   };
-
-  console.log(searchParams.toString());
 
   return (
     <div>
@@ -101,7 +74,11 @@ const Product = () => {
             </div>
             <div className="w-4/5">
               <SortBar />
-              {products?.length > 0 ? (
+              {loading ? (
+                <div className="flex items-center justify-center h-full">
+                  <Spin indicator={<LoadingOutlined spin />} size="large" />
+                </div>
+              ) : products?.length > 0 ? (
                 <div className="mt-4 grid grid-cols-4 gap-3">
                   {products.map((product) => (
                     <ProductItem key={product.id} {...product} />

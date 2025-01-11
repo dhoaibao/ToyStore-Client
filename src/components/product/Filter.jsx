@@ -23,6 +23,7 @@ const Filter = () => {
           (category) => category.categoryName
         );
         setCategories(categoryNames);
+        console.log("Categories: ", categoryNames);
       } catch (error) {
         console.log("Failed to fetch categories: ", error);
       }

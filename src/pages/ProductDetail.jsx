@@ -33,9 +33,9 @@ const ProductDetail = () => {
   const requiredAge = product?.productInfoValues.map(item => item.productInfo.productInfoName === "Tuổi" ? item.value : null).filter(item => item !== null);
 
   const features = [
-    "Hàng Chính Hãng",
-    "Miễn Phí Giao Hàng Toàn Quốc Đơn Trên 500k",
-    "Giao Hàng Hỏa Tốc 4 Tiếng",
+    "Bảo Hành 12 Tháng",
+    "Cam kết hàng chính hãng",
+    "Hỗ Trợ Kỹ Thuật 24/7",
   ];
 
   const discountedPrice = product?.discount

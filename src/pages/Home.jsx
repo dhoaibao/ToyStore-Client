@@ -69,7 +69,7 @@ function Home() {
       <section className="mb-4 px-4">
         <hr className="my-4 border-gray-300" />
         <h2 className="text-3xl text-center font-bold text-primary mb-2">
-          Sản phẩm nổi bật
+          Sản phẩm dành cho bạn
         </h2>
         <span className="mb-6 bg-primary h-2 rounded flex justify-center w-[50vw] md:w-[30vw] mx-auto"></span>
         <div className="grid grid-cols-5 gap-4">

@@ -50,11 +50,11 @@ const routes = [
     path: "/news",
     element: <News />,
   },
-  {
-    id: "promotions",
-    path: "/promotions",
-    element: <Promotions />,
-  },
+  // {
+  //   id: "promotions",
+  //   path: "/promotions",
+  //   element: <Promotions />,
+  // },
 ];
 
 export default routes;

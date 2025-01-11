@@ -1,13 +1,12 @@
 import { Breadcrumb, Empty, Pagination, Spin } from "antd";
 import { HomeOutlined, LoadingOutlined } from "@ant-design/icons";
-import Filter from "../components/product/Filter";
 import ProductItem from "../components/product/ProductItem";
 import SortBar from "../components/product/SortBar";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useEffect, useState, useMemo } from "react";
 import { productService } from "../services";
 
-const Product = () => {
+const Search = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -22,19 +21,21 @@ const Product = () => {
   const [currentPage, setCurrentPage] = useState(page);
   const [totalPage, setTotalPage] = useState(50);
 
-  useEffect(() => {
-    setCurrentPage(page);
-  }, [page]);
+  const { image, result } = location.state || {};
 
-  useEffect(() => {
+useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        const result = await productService.getAllProducts(
-          searchParams.toString()
-        );
-        setProducts(result.data);
-        setTotalPage(result.pagination.totalPages);
+        if (image && result) {
+          setProducts(result);
+        } else {
+          const result = await productService.getAllProducts(
+            searchParams.toString()
+          );
+          setProducts(result.data);
+          setTotalPage(result.pagination.totalPages);
+        }
       } catch (error) {
         console.log("Failed to fetch products: ", error);
       } finally {
@@ -43,7 +44,11 @@ const Product = () => {
     };
 
     fetchProducts();
-  }, [searchParams]);
+  }, [image, result, searchParams]);
+
+  useEffect(() => {
+    setCurrentPage(page);
+  }, [page]);
 
   const updateQuery = (key, value) => {
     searchParams.set(key, value);
@@ -64,7 +69,9 @@ const Product = () => {
               title: <HomeOutlined />,
             },
             {
-              title: "Sản phẩm",
+              title: image
+                ? "Kết quả tìm kiếm bằng hình ảnh"
+                : `Tìm kiếm cho từ khóa: "${searchParams.get("keyword")}"`,
             },
           ]}
         />
@@ -72,13 +79,10 @@ const Product = () => {
       <div className="p-4 ">
         <div>
           <div className="flex space-x-4">
-            <div className="w-1/5 bg-white p-4 rounded-lg shadow-md">
-              <Filter />
-            </div>
-            <div className="w-4/5">
+            <div className="w-full">
               <SortBar />
               {loading ? (
-                <div className="flex items-center justify-center h-full">
+                <div className="flex items-center justify-center h-screen">
                   <Spin indicator={<LoadingOutlined spin />} size="large" />
                 </div>
               ) : products?.length > 0 ? (
@@ -101,7 +105,7 @@ const Product = () => {
                   })}
                 </div>
               ) : (
-                <div className="flex items-center justify-center h-full">
+                <div className="flex items-center justify-center h-screen">
                   <Empty description={"Không có sản phẩm"} />
                 </div>
               )}
@@ -123,4 +127,4 @@ const Product = () => {
   );
 };
 
-export default Product;
+export default Search;

@@ -1,11 +1,21 @@
-import { useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { Select } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
 
 const SortBar = () => {
-  const [active, setActive] = useState("Mới Nhất");
   const navigate = useNavigate();
   const location = useLocation();
+  const searchParams = useMemo(
+    () => new URLSearchParams(location.search),
+    [location.search]
+  );
+
+  const [active, setActive] = useState("newest");
+
+  useEffect(() => {
+    const sort = searchParams.get("sort");
+    setActive(sort || "");
+  }, [searchParams]);
 
   const priceOptions = [
     {
@@ -23,7 +33,6 @@ const SortBar = () => {
   ];
 
   const updateQuery = (key, value) => {
-    const searchParams = new URLSearchParams(location.search);
     searchParams.set(key, value);
     navigate({ search: searchParams.toString() });
   };
@@ -32,24 +41,19 @@ const SortBar = () => {
     updateQuery("sortPrice", value);
   };
 
-  const options1 = [
+  const options = [
     { label: "Mới Nhất", value: "newest" },
     { label: "Bán Chạy", value: "bestseller" },
   ];
 
-  const handleClick = (option) => {
-    setActive(option.label);
-    updateQuery("filter", option.value);
-  };
-
   return (
     <div className="flex items-center space-x-2 shadow-md bg-white p-2 mb-3 rounded-lg">
-      {options1.map((option) => (
+      {options.map((option) => (
         <button
           key={option.value}
-          onClick={() => handleClick(option)}
+          onClick={() => updateQuery("sort", option.value)}
           className={`px-4 py-2 rounded-md text-sm ${
-            active === option.label
+            active === option.value
               ? "bg-primary text-white"
               : "bg-white border border-gray-300 hover:bg-gray-200"
           }`}

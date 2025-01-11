@@ -1,18 +1,24 @@
 // import ProtectedRoute from '../components/ProtectedRoute';
-import Home from '../pages/Home';
-import Login from '../pages/Login';
-import Product from '../pages/Product';
-import About from '../pages/About';
-import PuzzleGame from '../pages/PuzzleGame';
-import ProductDetail from '../pages/ProductDetail'
-import News from '../pages/News';
-import Promotions from '../pages/Promotions';
+import Home from "../pages/Home";
+import Login from "../pages/Login";
+import Product from "../pages/Product";
+import About from "../pages/About";
+import PuzzleGame from "../pages/PuzzleGame";
+import ProductDetail from "../pages/ProductDetail";
+import News from "../pages/News";
+import Promotions from "../pages/Promotions";
+import Search from "../pages/Search";
 
 const routes = [
   {
     id: "home",
     path: "/",
-    element: <Home/>,
+    element: <Home />,
+  },
+  {
+    id: "search",
+    path: "/search",
+    element: <Search />,
   },
   {
     id: "login",

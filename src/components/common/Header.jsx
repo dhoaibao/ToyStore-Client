@@ -10,24 +10,50 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Dropdown, Space } from "antd";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import ProfileDropdown from "../profile/ProfileDropdown";
 import Cart from "../cart/Cart";
 import ChatBox from "../chat/ChatBox";
 import Auth from "../auth/Auth";
 import { getLoggedInUser } from "../../redux/thunks/userThunk";
+import VoiceSearch from "../search/VoiceSearch";
+import ImageSearch from "../search/ImageSearch";
+// import { categoryService } from "../../services";
 
 const Header = () => {
+  const navigate = useNavigate();
   const location = useLocation();
+
   const [scrollDirection, setScrollDirection] = useState("up");
   const [cartOpen, setCartOpen] = useState(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isAuthOpen, setIsAuthOpen] = useState(false);
+  const [searchString, setSearchString] = useState("");
+  const [isVoiceSearchOpen, setIsVoiceSearchOpen] = useState(false);
+  const [isImageSearchOpen, setIsImageSearchOpen] = useState(false);
 
   const dispatch = useDispatch();
 
   const isLogin = useSelector((state) => state.user.isLogin);
+
+  // const [categories, setCategories] = useState([]);
+
+  //   useEffect(() => {
+  //     const fetchCategories = async () => {
+  //       try {
+  //         const result = await categoryService.getAllCategories();
+  //         const categoryNames = result.data.map(
+  //           (category) => category.categoryName
+  //         );
+  //         setCategories(categoryNames);
+  //       } catch (error) {
+  //         console.log("Failed to fetch categories: ", error);
+  //       }
+  //     };
+
+  //     fetchCategories();
+  //   }, []);
 
   useEffect(() => {
     dispatch(getLoggedInUser());
@@ -52,6 +78,18 @@ const Header = () => {
       window.removeEventListener("scroll", updateScrollDirection);
     };
   }, []);
+
+  const handleSearch = () => {
+    const searchParams = new URLSearchParams();
+    searchParams.set("keyword", searchString);
+    navigate(`/search?${searchParams.toString()}`);
+  };
+
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      handleSearch();
+    }
+  };
 
   const navItems = [
     { value: "products", label: "Sản phẩm" },
@@ -109,7 +147,7 @@ const Header = () => {
 
   return (
     <div
-      className={`text-black rounded-md shadow-md sticky top-0 z-50 bg-white transition-transform duration-300 ${
+      className={`text-black rounded-md shadow-sm sticky top-0 z-50 bg-white transition-transform duration-300 ${
         scrollDirection === "down" ? "-translate-y-full" : "translate-y-0"
       }`}
     >
@@ -136,7 +174,7 @@ const Header = () => {
                   items,
                 }}
               >
-                <Link to="/products">
+                <Link to="/products?sort=newest">
                   <Space
                     className={`${
                       location.pathname === `/${item.value}`
@@ -168,18 +206,20 @@ const Header = () => {
         {/* Thanh tìm kiếm */}
         <div className="w-full sm:w-1/4 mx-4 sm:mx-8 relative">
           <input
+            onChange={(e) => setSearchString(e.target.value)}
+            onKeyDown={handleKeyDown}
             type="text"
             placeholder="Nhập từ khóa để tìm kiếm..."
             className="w-full px-4 py-2 rounded-full text-sm bg-gray-200 placeholder-gray-600 pr-20 sm:pr-28 shadow-sm "
           />
           <div className="absolute right-2 top-1/2 transform -translate-y-1/2 flex p-2 space-x-2 sm:space-x-2">
-            <button>
+            <button onClick={() => setIsImageSearchOpen(true)}>
               <ImageUp strokeWidth={1} size={20} />
             </button>
-            <button>
+            <button onClick={() => setIsVoiceSearchOpen(true)}>
               <Mic strokeWidth={1} size={20} />
             </button>
-            <button>
+            <button onClick={handleSearch}>
               <Search strokeWidth={1} size={20} />
             </button>
           </div>
@@ -215,6 +255,14 @@ const Header = () => {
         receiver="B" // Tên người nhận
       />
       <Auth open={isAuthOpen} setOpen={setIsAuthOpen} />
+      <VoiceSearch
+        isOpen={isVoiceSearchOpen}
+        onClose={() => setIsVoiceSearchOpen(false)}
+      />
+      <ImageSearch
+        isOpen={isImageSearchOpen}
+        onClose={() => setIsImageSearchOpen(false)}
+      />
     </div>
   );
 };

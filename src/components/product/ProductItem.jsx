@@ -4,13 +4,13 @@ import { Link } from "react-router-dom";
 
 const ProductItem = ({
   productImages,
-  category,
+  brand,
   productName,
   slug,
   price,
-  discount = 18,
+  discount = 2,
   avgRate = 4.5,
-  requiredAge = 13,
+  requiredAge,
 }) => {
   const discountedPrice = price - (price * discount) / 100;
 
@@ -36,7 +36,7 @@ const ProductItem = ({
       {/* Product Info */}
       <div className="mt-2">
         <p className="text-xs font-semibold text-gray-500 uppercase">
-          {category || ""}
+          {brand?.brandName}
           {requiredAge > 0 && (
             <span className="ml-2 text-gray-400">{requiredAge}+</span>
           )}
@@ -67,7 +67,7 @@ const ProductItem = ({
 
 ProductItem.propTypes = {
   productImages: PropTypes.array.isRequired,
-  category: PropTypes.string,
+  brand: PropTypes.object.isRequired,
   productName: PropTypes.string.isRequired,
   price: PropTypes.number.isRequired,
   discount: PropTypes.number,

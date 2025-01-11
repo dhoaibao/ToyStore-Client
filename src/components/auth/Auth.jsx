@@ -29,6 +29,7 @@ const AuthDrawer = ({ open, setOpen }) => {
   const [resendDisabled, setResendDisabled] = useState(true); // Resend button state
   const [loading, setLoading] = useState(false); // Loading state for buttons
   const [isForgotPassword, setIsForgotPassword] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   useEffect(() => {
     let timer;
@@ -57,7 +58,6 @@ const AuthDrawer = ({ open, setOpen }) => {
   };
 
   const processLogin = async (apiCall, successMessage) => {
-    setLoading(true);
     try {
       const response = await apiCall();
 
@@ -73,16 +73,16 @@ const AuthDrawer = ({ open, setOpen }) => {
     } catch (error) {
       message.error("Đăng nhập thất bại!");
       console.error("Login error:", error.response);
-    } finally {
-      setLoading(false);
     }
   };
 
   const handleLogin = async (values) => {
+    setLoading(true);
     await processLogin(
       () => authService.signIn(values),
       "Đăng nhập thành công!"
     );
+    setLoading(false);
   };
 
   const handleRegister = async (values) => {
@@ -172,7 +172,7 @@ const AuthDrawer = ({ open, setOpen }) => {
     try {
       const result = await signInWithPopup(auth, googleAuthProvider);
       const user = result.user;
-
+      setGoogleLoading(true);
       await processLogin(
         () =>
           authService.signInWithGoogle({
@@ -186,6 +186,8 @@ const AuthDrawer = ({ open, setOpen }) => {
     } catch (error) {
       console.error("Google Sign-In Error:", error);
       message.error("Đăng nhập thất bại!");
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -359,7 +361,7 @@ const AuthDrawer = ({ open, setOpen }) => {
                   <Button
                     type="default"
                     onClick={handleGoogleLogin}
-                    loading={loading}
+                    loading={googleLoading}
                     icon={
                       <img
                         src="https://img.icons8.com/?size=100&id=17949&format=png&color=000000"

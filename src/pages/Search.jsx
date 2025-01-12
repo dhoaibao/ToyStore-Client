@@ -102,7 +102,7 @@ const Search = () => {
                 </div>
               ) : (
                 <div className="flex items-center justify-center h-screen">
-                  <Empty description={"Không có sản phẩm"} />
+                  <Empty description={"Không tìm thấy sản phẩm!"} />
                 </div>
               )}
             </div>

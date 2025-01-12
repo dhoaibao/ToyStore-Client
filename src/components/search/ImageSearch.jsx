@@ -46,22 +46,34 @@ const ImageSearchPopup = ({ isOpen, onClose }) => {
     }
   };
 
-const handleSearch = () => {
-  if (imageFile) {
-    const formData = new FormData();
-    formData.append("file", imageFile);
-    productService.imageSearch(formData).then((result) => {
-    //   console.log("Image search result:", result);
-      navigate("/search", { state: { image: URL.createObjectURL(imageFile), result: result.data } });
-    });
-  } else if (imageUrl) {
-    productService.imageSearch({ url: imageUrl }).then((result) => {
-    //   console.log("Image search result:", result);
-      navigate("/search", { state: { image: imageUrl, result: result.data } });
-    });
-  }
-  onClose();
-};
+  const handleSearch = () => {
+    if (imageFile) {
+      const formData = new FormData();
+      formData.append("file", imageFile);
+      productService.imageSearch(formData).then((result) => {
+        navigate(
+          `/search?ids=${result.data
+            .map((product) => product.productId)
+            .join(",")}`,
+          {
+            state: { isImageSearch: true },
+          }
+        );
+      });
+    } else if (imageUrl) {
+      productService.imageSearch({ url: imageUrl }).then((result) => {
+        navigate(
+          `/search?ids=${result.data
+            .map((product) => product.productId)
+            .join(",")}`,
+          {
+            state: { isImageSearch: true },
+          }
+        );
+      });
+    }
+    onClose();
+  };
 
   return (
     <Modal closable={false} open={isOpen} onCancel={onClose} footer={null}>

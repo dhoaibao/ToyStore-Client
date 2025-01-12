@@ -21,21 +21,17 @@ const Search = () => {
   const [currentPage, setCurrentPage] = useState(page);
   const [totalPage, setTotalPage] = useState(50);
 
-  const { image, result } = location.state || {};
+  const { isImageSearch } = location.state || {};
 
-useEffect(() => {
+  useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
       try {
-        if (image && result) {
-          setProducts(result);
-        } else {
-          const result = await productService.getAllProducts(
-            searchParams.toString()
-          );
-          setProducts(result.data);
-          setTotalPage(result.pagination.totalPages);
-        }
+        const result = await productService.getAllProducts(
+          searchParams.toString()
+        );
+        setProducts(result.data);
+        setTotalPage(result.pagination.totalPages);
       } catch (error) {
         console.log("Failed to fetch products: ", error);
       } finally {
@@ -44,7 +40,7 @@ useEffect(() => {
     };
 
     fetchProducts();
-  }, [image, result, searchParams]);
+  }, [searchParams]);
 
   useEffect(() => {
     setCurrentPage(page);
@@ -69,7 +65,7 @@ useEffect(() => {
               title: <HomeOutlined />,
             },
             {
-              title: image
+              title: isImageSearch
                 ? "Kết quả tìm kiếm bằng hình ảnh"
                 : `Tìm kiếm cho từ khóa: "${searchParams.get("keyword")}"`,
             },

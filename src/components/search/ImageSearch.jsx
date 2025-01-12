@@ -51,25 +51,21 @@ const ImageSearchPopup = ({ isOpen, onClose }) => {
       const formData = new FormData();
       formData.append("file", imageFile);
       productService.imageSearch(formData).then((result) => {
-        navigate(
-          `/search?ids=${result.data
-            .map((product) => product.productId)
-            .join(",")}`,
-          {
-            state: { isImageSearch: true },
-          }
+        const encodedIds = btoa(
+          result.data.map((product) => product.productId).join(",")
         );
+        navigate(`/search?image=${encodedIds}`, {
+          state: { isImageSearch: true },
+        });
       });
     } else if (imageUrl) {
       productService.imageSearch({ url: imageUrl }).then((result) => {
-        navigate(
-          `/search?ids=${result.data
-            .map((product) => product.productId)
-            .join(",")}`,
-          {
-            state: { isImageSearch: true },
-          }
+        const encodedIds = btoa(
+          result.data.map((product) => product.productId).join(",")
         );
+        navigate(`/search?image=${encodedIds}`, {
+          state: { isImageSearch: true },
+        });
       });
     }
     onClose();

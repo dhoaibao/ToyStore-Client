@@ -51,18 +51,24 @@ const ImageSearchPopup = ({ isOpen, onClose }) => {
       const formData = new FormData();
       formData.append("file", imageFile);
       productService.imageSearch(formData).then((result) => {
-        const encodedIds = btoa(
-          result.data.map((product) => product.productId).join(",")
-        );
+        let encodedIds = "-1";
+        if (result.data.length > 0) {
+          encodedIds = btoa(
+            result.data.map((product) => product.productId).join(",")
+          );
+        }
         navigate(`/search?image=${encodedIds}`, {
           state: { isImageSearch: true },
         });
       });
     } else if (imageUrl) {
       productService.imageSearch({ url: imageUrl }).then((result) => {
-        const encodedIds = btoa(
-          result.data.map((product) => product.productId).join(",")
-        );
+        let encodedIds = "-1";
+        if (result.data.length > 0) {
+          encodedIds = btoa(
+            result.data.map((product) => product.productId).join(",")
+          );
+        }
         navigate(`/search?image=${encodedIds}`, {
           state: { isImageSearch: true },
         });

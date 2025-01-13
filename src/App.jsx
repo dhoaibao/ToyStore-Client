@@ -8,6 +8,7 @@ import { ConfigProvider } from "antd";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
+import viVN from "antd/locale/vi_VN";
 
 const MainLayout = lazy(() => import("./layouts/MainLayout"));
 
@@ -29,6 +30,7 @@ const ScrollToTop = () => {
 function App() {
   return (
     <ConfigProvider
+      locale={viVN}
       theme={{
         token: {
           fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif',

@@ -8,6 +8,7 @@ import ProductDetail from "../pages/ProductDetail";
 import News from "../pages/News";
 import Promotions from "../pages/Promotions";
 import Search from "../pages/Search";
+import Checkout from "../pages/Checkout";
 
 const routes = [
   {
@@ -50,11 +51,16 @@ const routes = [
     path: "/news",
     element: <News />,
   },
-  // {
-  //   id: "promotions",
-  //   path: "/promotions",
-  //   element: <Promotions />,
-  // },
+  {
+    id: "checkout",
+    path: "/checkout",
+    element: <Checkout />,
+  },
+  {
+    id: "promotions",
+    path: "/promotions",
+    element: <Promotions />,
+  },
 ];
 
 export default routes;

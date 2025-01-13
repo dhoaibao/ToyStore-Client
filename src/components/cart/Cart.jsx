@@ -2,12 +2,14 @@ import { Drawer, Button, List, Avatar, Typography, Checkbox, Spin } from "antd";
 import { useState } from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import { updateCartItem, removeFromCart } from "../../redux/thunks/cartThunk";
 
 const { Text, Title } = Typography;
 
 const Cart = ({ open, setOpen }) => {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const cartItems = useSelector((state) => state.cart.cartDetails);
   const loading = useSelector((state) => state.cart.loading);
@@ -77,6 +79,10 @@ const Cart = ({ open, setOpen }) => {
             size="large"
             className="mt-2"
             disabled={cartItems.length === 0}
+            onClick={() => {
+              navigate("/checkout", { state: { selectedItems } });
+              onClose();
+            }}
           >
             Thanh toán
           </Button>

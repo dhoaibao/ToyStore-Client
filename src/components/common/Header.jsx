@@ -9,7 +9,7 @@ import {
   MoveLeft,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { Dropdown, Space } from "antd";
+import { Dropdown, Space, Badge } from "antd";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import ProfileDropdown from "../profile/ProfileDropdown";
@@ -17,6 +17,7 @@ import Cart from "../cart/Cart";
 import ChatBox from "../chat/ChatBox";
 import Auth from "../auth/Auth";
 import { getLoggedInUser } from "../../redux/thunks/userThunk";
+import { getCartByUser } from "../../redux/thunks/cartThunk";
 import VoiceSearch from "../search/VoiceSearch";
 import ImageSearch from "../search/ImageSearch";
 // import { categoryService } from "../../services";
@@ -36,6 +37,7 @@ const Header = () => {
   const dispatch = useDispatch();
 
   const isLogin = useSelector((state) => state.user.isLogin);
+  const totalItems = useSelector((state) => state.cart.totalItems);
 
   // const [categories, setCategories] = useState([]);
 
@@ -57,6 +59,7 @@ const Header = () => {
 
   useEffect(() => {
     dispatch(getLoggedInUser());
+    dispatch(getCartByUser());
   }, [dispatch]);
 
   useEffect(() => {
@@ -233,18 +236,30 @@ const Header = () => {
               Trò chơi
             </button>
           </Link>
-          <button onClick={() => setIsChatOpen(true)}>
-            <MessageSquare strokeWidth={1} />
-          </button>
-          <button onClick={() => setCartOpen(true)}>
-            <ShoppingCart strokeWidth={1} />
-          </button>
-          <button onClick={() => !isLogin && setIsAuthOpen(true)}>
-            {isLogin ? <ProfileDropdown /> : <LogIn strokeWidth={1} />}
-          </button>
-          {/* <div className="border rounded px-2 py-1">
-            <span>🇻🇳</span>
-          </div> */}
+          <div className="flex items-center space-x-6">
+            <button
+              onClick={() => setIsChatOpen(true)}
+              className="flex items-center justify-center"
+            >
+              <Badge count={100} overflowCount={99} color="red">
+                <MessageSquare strokeWidth={1} />
+              </Badge>
+            </button>
+            <button
+              onClick={() => setCartOpen(true)}
+              className="flex items-center justify-center"
+            >
+              <Badge count={totalItems} overflowCount={99} color="red">
+                <ShoppingCart strokeWidth={1} />
+              </Badge>
+            </button>
+            <button
+              onClick={() => !isLogin && setIsAuthOpen(true)}
+              className="flex items-center justify-center"
+            >
+              {isLogin ? <ProfileDropdown /> : <LogIn strokeWidth={1} />}
+            </button>
+          </div>
         </div>
       </div>
       <Cart open={cartOpen} setOpen={setCartOpen} />

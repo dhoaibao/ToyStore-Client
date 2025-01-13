@@ -1,14 +1,19 @@
 import { useState, useMemo, useEffect } from "react";
-import { Button, Breadcrumb, Input, Rate, Spin, Image } from "antd";
+import { Button, Breadcrumb, Input, Rate, Spin, Image, message } from "antd";
 import { HomeOutlined, LoadingOutlined } from "@ant-design/icons";
 import { productService } from "../services";
 import { useParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { addToCart } from "../redux/thunks/cartThunk";
 
 const ProductDetail = () => {
   const { slug } = useParams();
+  const dispatch = useDispatch();
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  const addToCartLoading = useSelector((state) => state.cart.loading);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -28,8 +33,6 @@ const ProductDetail = () => {
     fetchProduct();
   }, [slug]);
 
-  console.log("product: ", product);
-
   const requiredAge = product?.productInfoValues.map(item => item.productInfo.productInfoName === "Tuổi" ? item.value : null).filter(item => item !== null);
 
   const features = [
@@ -43,6 +46,11 @@ const ProductDetail = () => {
     : product?.price;
 
   const [quantity, setQuantity] = useState(1);
+
+  const handleAddToCart = async () => {
+    await dispatch(addToCart({ productId: product.productId, quantity }));
+    message.success("Đã thêm sản phẩm vào giỏ hàng!");
+  };
 
   const handleImageClick = (image) => {
     setCurrentImage(image);
@@ -229,6 +237,8 @@ const ProductDetail = () => {
                   <Button
                     type="primary"
                     className="w-full h-12 text-lg font-bold text-white"
+                    onClick={handleAddToCart}
+                    loading={addToCartLoading}
                   >
                     Thêm vào giỏ hàng
                   </Button>

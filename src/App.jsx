@@ -6,6 +6,7 @@ import { lazy, Suspense, useEffect } from "react";
 import { BrowserRouter, Route, Routes, useLocation } from "react-router-dom";
 import { ConfigProvider } from "antd";
 import dayjs from "dayjs";
+import "dayjs/locale/vi";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import viVN from "antd/locale/vi_VN";

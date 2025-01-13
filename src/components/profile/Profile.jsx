@@ -198,6 +198,7 @@ const Profile = ({ open, setOpen }) => {
                 normalize={(value) => value && value.tz().format("YYYY-MM-DD")}
               >
                 <DatePicker
+                  format="DD/MM/YYYY"
                   disabled={!isEditing}
                   className={`mt-2 ${
                     isEditing ? "border-primary" : "border-gray-300"

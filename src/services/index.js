@@ -6,8 +6,9 @@ import productService from "./product.service";
 import brandService from "./brand.service";
 import categoryService from "./category.service";
 import cartService from "./cart.service";
+import discountService from "./discount.service";
 
 export {
     authService, userService, addressService, provincesOpenApi, productService,
-    brandService, categoryService, cartService
+    brandService, categoryService, cartService, discountService
 };

@@ -1,16 +1,17 @@
 import { Carousel } from "antd";
 import ProductItem from "../components/product/ProductItem";
 import VoucherSection from "../components/voucher/VoucherSection";
-import { productService } from "../services";
+import { productService, categoryService } from "../services";
 import { useEffect, useState } from "react";
 
 function Home() {
   const [products, setProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const result = await productService.getAllProducts();
+        const result = await productService.getAllProducts("");
         setProducts(result.data);
       } catch (error) {
         console.log("Failed to fetch products: ", error);
@@ -20,34 +21,20 @@ function Home() {
     fetchProducts();
   }, []);
 
-  const carousel = ["/banner1.png", "/banner2.png", "/banner3.png"];
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const result = await categoryService.getAllCategories();
+        setCategories(result.data);
+      } catch (error) {
+        console.log("Failed to fetch categories: ", error);
+      }
+    };
 
-  const categories = [
-    {
-      id: 1,
-      name: "Robot",
-      image:
-        "https://www.mykingdom.com.vn/cdn/shop/files/4._Robot_-_628x288_55ccbc56-756c-4dee-af08-98651cde48c8.png?v=1733451894",
-    },
-    {
-      id: 2,
-      name: "Đồ chơi phương tiện",
-      image:
-        "https://www.mykingdom.com.vn/cdn/shop/files/5._D_ch_i_ph_ng_ti_n_-_628x288_f366fd94-8739-4f27-a689-8170881365df.png?v=1733451915",
-    },
-    {
-      id: 3,
-      name: "Đồ chơi mầm non",
-      image:
-        "https://www.mykingdom.com.vn/cdn/shop/files/1._D_ch_i_m_m_non_-_628x288_82c01078-814a-483f-8857-66f9c42238ed.png?v=1733451649",
-    },
-    {
-      id: 4,
-      name: "Đồ chơi lắp ghép",
-      image:
-        "https://www.mykingdom.com.vn/cdn/shop/files/3._D_ch_i_l_p_ghep_-_1280x360_6118024a-37c9-4858-9cbf-74c59a866221.png?v=1733451858",
-    },
-  ];
+    fetchCategories();
+  }, []);
+
+  const carousel = ["/banner1.png", "/banner2.png", "/banner3.png"];
 
   return (
     <div className="container mx-auto">
@@ -88,15 +75,15 @@ function Home() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {categories.map((category) => (
             <div
-              key={category.id}
+              key={category?.categoryId}
               className="border rounded-lg p-4 text-center shadow hover:shadow-md"
             >
               <img
-                src={category.image}
-                alt={category.name}
+                src={category?.categoryThumbnail.url}
+                alt={category?.categoryName}
                 className="w-full h-32 object-cover mb-2 rounded-xl"
               />
-              <h3 className="font-semibold text-xl">{category.name}</h3>
+              <h3 className="font-semibold text-xl">{category?.categoryName}</h3>
               <button className="mt-4 px-6 py-2 border-2 border-primary text-primary font-medium rounded-xl hover:bg-red-500 hover:text-white transition-all">
                 Xem Thêm
               </button>

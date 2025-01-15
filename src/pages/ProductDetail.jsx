@@ -33,7 +33,11 @@ const ProductDetail = () => {
     fetchProduct();
   }, [slug]);
 
-  const requiredAge = product?.productInfoValues.map(item => item.productInfo.productInfoName === "Tuổi" ? item.value : null).filter(item => item !== null);
+  const requiredAge = product?.productInfoValues
+    .map((item) =>
+      item.productInfo.productInfoName === "Tuổi" ? item.value : null
+    )
+    .filter((item) => item !== null);
 
   const features = [
     "Bảo Hành 12 Tháng",
@@ -41,9 +45,16 @@ const ProductDetail = () => {
     "Hỗ Trợ Kỹ Thuật 24/7",
   ];
 
-  const discountedPrice = product?.discount
-    ? product.price - (product.price * product.discount) / 100
-    : product?.price;
+  const discountedPrice =
+    product?.discounts?.reduce((acc, discount) => {
+      if (discount.discountType === "percentage") {
+        return acc - (acc * discount.discountValue) / 100;
+      }
+
+      if (discount.discountType === "fixed_amount") {
+        return acc - discount.discountValue;
+      }
+    }, product?.price) || product?.price;
 
   const [quantity, setQuantity] = useState(1);
 
@@ -183,16 +194,39 @@ const ProductDetail = () => {
                   | {requiredAge}+
                 </p>
                 <div className="mt-4">
-                  {product?.discount ? (
+                  {product?.discounts ? (
                     <>
                       <p className="text-gray-500 line-through font-semibold">
-                        Giá gốc: {product?.price?.toLocaleString("vi-VN")}đ
+                        {discountedPrice !== product?.price &&
+                          `Giá gốc: ${product?.price?.toLocaleString(
+                            "vi-VN"
+                          )}đ`}
                       </p>
                       <p className="text-lg text-red-600 font-semibold">
                         Giá hiện tại: {discountedPrice.toLocaleString("vi-VN")}đ
-                        <span className="ml-4 text-white bg-red-600 p-1 rounded-md text-sm">
-                          -{product?.discount}%
-                        </span>
+                        {product?.discounts &&
+                          product.discounts.map((discount, index) => (
+                            <span
+                              key={index}
+                              className="ml-4 text-white bg-red-600 p-1 rounded-md text-sm"
+                            >
+                              {discount.discountType === "percentage" &&
+                                `-${discount.discountValue}%`}
+
+                              {discount.discountType === "fixed_amount" &&
+                                `-${discount.discountValue.toLocaleString(
+                                  "vi-VN"
+                                )}đ`}
+
+                              {discount.discountType.startsWith("buy_") &&
+                                discount.discountType.includes("_get_") &&
+                                (() => {
+                                  const [x, y] =
+                                    discount.discountType.match(/\d+/g);
+                                  return `Mua ${x} tặng ${y}`;
+                                })()}
+                            </span>
+                          ))}
                       </p>
                     </>
                   ) : (
@@ -254,7 +288,7 @@ const ProductDetail = () => {
                           <tr
                             key={index}
                             className={`${
-                              !isExpanded && index > 2 ? "hidden" : ""
+                              !isExpanded && index > 3 ? "hidden" : ""
                             } ${index % 2 === 0 ? "bg-gray-100" : "bg-white"}`}
                           >
                             <td className="px-4 py-3 font-medium text-gray-700">

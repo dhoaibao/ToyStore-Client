@@ -8,19 +8,43 @@ const ProductItem = ({
   productName,
   slug,
   price,
-  discount = 2,
+  discounts,
   avgRate = 4.5,
   requiredAge,
 }) => {
-  const discountedPrice = price - (price * discount) / 100;
+  const discountedPrice =
+    discounts?.reduce((acc, discount) => {
+      if (discount.discountType === "percentage") {
+        return acc - (acc * discount.discountValue) / 100;
+      }
+
+      if (discount.discountType === "fixed_amount") {
+        return acc - discount.discountValue;
+      }
+    }, price) || price;
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4 relative h-96 w-60">
-      {discount > 0 && (
-        <div className="absolute z-10 top-0 left-0 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-tr-lg rounded-br-lg">
-          Giảm {discount}%
-        </div>
-      )}
+      {discounts &&
+        discounts.map((discount) => (
+          <div
+            key={discount.id}
+            className="absolute z-10 top-0 left-0 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-tr-lg rounded-br-lg"
+          >
+            {discount.discountType === "percentage" &&
+              `Giảm ${discount.discountValue}%`}
+
+            {discount.discountType === "fixed_amount" &&
+              `Giảm ${discount.discountValue.toLocaleString("vi-VN")}đ`}
+
+            {discount.discountType.startsWith("buy_") &&
+              discount.discountType.includes("_get_") &&
+              (() => {
+                const [x, y] = discount.discountType.match(/\d+/g);
+                return `Mua ${x} tặng ${y}`;
+              })()}
+          </div>
+        ))}
 
       <Link to={`/products/${slug}`}>
         {/* Product Image */}
@@ -50,9 +74,11 @@ const ProductItem = ({
           <p className="font-extrabold text-hover-primary">
             {discountedPrice.toLocaleString("vi-VN")}đ
           </p>
-          <p className="ml-2 line-through font-semibold text-gray-500">
-            {price.toLocaleString("vi-VN")}đ
-          </p>
+          {discountedPrice !== price && (
+            <p className="ml-2 line-through font-semibold text-gray-500">
+              {price.toLocaleString("vi-VN")}đ
+            </p>
+          )}
         </div>
       </div>
 
@@ -70,7 +96,7 @@ ProductItem.propTypes = {
   brand: PropTypes.object.isRequired,
   productName: PropTypes.string.isRequired,
   price: PropTypes.number.isRequired,
-  discount: PropTypes.number,
+  discounts: PropTypes.array,
   avgRate: PropTypes.number,
   slug: PropTypes.string.isRequired,
   requiredAge: PropTypes.number,

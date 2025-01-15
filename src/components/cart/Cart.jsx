@@ -1,4 +1,13 @@
-import { Drawer, Button, List, Avatar, Typography, Checkbox, Spin } from "antd";
+import {
+  Drawer,
+  Button,
+  List,
+  Avatar,
+  Typography,
+  Checkbox,
+  Spin,
+  Card,
+} from "antd";
 import { useState } from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
@@ -55,9 +64,27 @@ const Cart = ({ open, setOpen }) => {
     setSelectedItems([]);
   };
 
+  const discountedPrice = (product) => {
+    return (
+      product?.discounts?.reduce((acc, discount) => {
+        if (discount.discountType === "percentage") {
+          return acc - (acc * discount.discountValue) / 100;
+        }
+
+        if (discount.discountType === "fixed_amount") {
+          return acc - discount.discountValue;
+        }
+        return acc;
+      }, product.price) || product.price
+    );
+  };
+
   const selectedTotalAmount = cartItems
     .filter((item) => selectedItems.includes(item.productId))
-    .reduce((total, item) => total + item.product.price * item.quantity, 0);
+    .reduce(
+      (total, item) => total + discountedPrice(item.product) * item.quantity,
+      0
+    );
 
   return (
     <Drawer
@@ -167,13 +194,44 @@ const Cart = ({ open, setOpen }) => {
                         <Text>
                           <Text>Giá: </Text>
                           <Text strong style={{ color: "red" }}>
-                            {item?.product.price.toLocaleString("vi-VN")}đ
+                            {discountedPrice(item.product).toLocaleString(
+                              "vi-VN"
+                            )}
+                            đ
                           </Text>
                           <span style={{ margin: "0 4px" }}></span>
-                          <Text delete style={{ color: "gray" }}>
-                            {item?.product.price.toLocaleString("vi-VN")}đ
-                          </Text>
+                          {discountedPrice(item.product) !==
+                            item.product.price && (
+                            <Text delete style={{ color: "gray" }}>
+                              {item?.product.price.toLocaleString("vi-VN")}đ
+                            </Text>
+                          )}
                         </Text>
+                        <Card>
+                          <div className="flex items-center">
+                            <img
+                              src={
+                                item.product.productImages[0].uploadImage.url
+                              }
+                              alt={item.product.productName}
+                              className="w-16 h-16 object-cover rounded mr-4"
+                            />
+                            <div>
+                              <Text className="block font-semibold italic">
+                                Quà tặng:
+                              </Text>
+                              <Text className="block">
+                                {item.product.productName}
+                              </Text>
+                              <Text className="block">
+                                Số lượng: {item.quantity}
+                              </Text>
+                              <Text className="block line-through">
+                                Giá: 0 VND
+                              </Text>
+                            </div>
+                          </div>
+                        </Card>
                       </div>
                     }
                   />

@@ -96,7 +96,7 @@ const Header = () => {
 
   const navItems = [
     { value: "products", label: "Sản phẩm" },
-    { value: "promotions", label: "Khuyến mãi" },
+    { value: "discounts", label: "Khuyến mãi" },
     { value: "news", label: "Tin tức" },
     { value: "about", label: "Giới thiệu" },
   ];

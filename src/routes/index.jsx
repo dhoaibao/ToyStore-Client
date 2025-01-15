@@ -6,7 +6,7 @@ import About from "../pages/About";
 import PuzzleGame from "../pages/PuzzleGame";
 import ProductDetail from "../pages/ProductDetail";
 import News from "../pages/News";
-import Promotions from "../pages/Promotions";
+import Discount from "../pages/Discount";
 import Search from "../pages/Search";
 import Checkout from "../pages/Checkout";
 
@@ -57,9 +57,9 @@ const routes = [
     element: <Checkout />,
   },
   {
-    id: "promotions",
-    path: "/promotions",
-    element: <Promotions />,
+    id: "discount",
+    path: "/discounts",
+    element: <Discount />,
   },
 ];
 

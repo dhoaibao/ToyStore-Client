@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { Modal, Button, Upload, Input } from "antd";
 import { Image } from "lucide-react";
-import { productService } from "../../services";
 import { useNavigate } from "react-router-dom";
 
 const ImageSearchPopup = ({ isOpen, onClose }) => {
@@ -23,7 +22,6 @@ const ImageSearchPopup = ({ isOpen, onClose }) => {
       const file = info.file.originFileObj;
       setImageFile(file);
       setImageUrl("");
-      console.log("Uploaded file:", file);
     }
   };
 
@@ -33,7 +31,6 @@ const ImageSearchPopup = ({ isOpen, onClose }) => {
     if (file) {
       setImageFile(file);
       setImageUrl("");
-      console.log("Dropped file:", file);
     }
   };
 
@@ -42,7 +39,6 @@ const ImageSearchPopup = ({ isOpen, onClose }) => {
     if (pastedText) {
       setImageUrl(pastedText);
       setImageFile(null);
-      console.log("Pasted URL:", pastedText);
     }
   };
 
@@ -50,28 +46,12 @@ const ImageSearchPopup = ({ isOpen, onClose }) => {
     if (imageFile) {
       const formData = new FormData();
       formData.append("file", imageFile);
-      productService.imageSearch(formData).then((result) => {
-        let encodedIds = "-1";
-        if (result.data.length > 0) {
-          encodedIds = btoa(
-            result.data.map((product) => product.productId).join(",")
-          );
-        }
-        navigate(`/search?image=${encodedIds}`, {
-          state: { isImageSearch: true },
-        });
+      navigate("/search?image", {
+        state: { imageSearchData: formData },
       });
     } else if (imageUrl) {
-      productService.imageSearch({ url: imageUrl }).then((result) => {
-        let encodedIds = "-1";
-        if (result.data.length > 0) {
-          encodedIds = btoa(
-            result.data.map((product) => product.productId).join(",")
-          );
-        }
-        navigate(`/search?image=${encodedIds}`, {
-          state: { isImageSearch: true },
-        });
+      navigate("/search?image", {
+        state: { imageSearchData: { url: imageUrl } },
       });
     }
     onClose();

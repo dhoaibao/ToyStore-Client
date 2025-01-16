@@ -1,13 +1,4 @@
-import {
-  Drawer,
-  Button,
-  List,
-  Avatar,
-  Typography,
-  Checkbox,
-  Spin,
-  Card,
-} from "antd";
+import { Drawer, Button, List, Avatar, Typography, Checkbox, Spin } from "antd";
 import { useState } from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
@@ -64,6 +55,14 @@ const Cart = ({ open, setOpen }) => {
     setSelectedItems([]);
   };
 
+  const handleCheckout = () => {
+    const orderItems = selectedItems.map((productId) => {
+      return cartItems.find((item) => item.productId === productId);
+    });
+    navigate("/checkout", { state: { orderItems } });
+    onClose();
+  };
+
   const discountedPrice = (product) => {
     return (
       product?.discounts?.reduce((acc, discount) => {
@@ -106,10 +105,7 @@ const Cart = ({ open, setOpen }) => {
             size="large"
             className="mt-2"
             disabled={cartItems.length === 0}
-            onClick={() => {
-              navigate("/checkout", { state: { selectedItems } });
-              onClose();
-            }}
+            onClick={handleCheckout}
           >
             Thanh toán
           </Button>
@@ -129,6 +125,7 @@ const Cart = ({ open, setOpen }) => {
               const isSelected = selectedItems.includes(item.productId);
               return (
                 <List.Item
+                  key={item.productId}
                   className={`${
                     isSelected ? "bg-blue-100" : "hover:bg-gray-100"
                   } rounded-lg mb-2 px-4 py-2 transition-all`}
@@ -207,31 +204,53 @@ const Cart = ({ open, setOpen }) => {
                             </Text>
                           )}
                         </Text>
-                        <Card>
-                          <div className="flex items-center">
-                            <img
-                              src={
-                                item.product.productImages[0].uploadImage.url
-                              }
-                              alt={item.product.productName}
-                              className="w-16 h-16 object-cover rounded mr-4"
-                            />
-                            <div>
-                              <Text className="block font-semibold italic">
-                                Quà tặng:
+                        {item?.product?.discounts?.map((discount) => {
+                          if (
+                            discount.discountType.startsWith("buy_") &&
+                            discount.discountType.includes("_get_")
+                          ) {
+                            const [x, y] = discount.discountType.match(/\d+/g);
+                            return (
+                              <Text key={discount.discountId}>
+                                <div className="flex mt-2 items-center">
+                                  <img
+                                    src={
+                                      item.product.productImages[0].uploadImage
+                                        .url
+                                    }
+                                    alt={item.product.productName}
+                                    className="w-16 h-16 object-cover rounded mr-4"
+                                  />
+                                  <div>
+                                    <Text className="block text-xs font-semibold">
+                                      Quà tặng:
+                                    </Text>
+                                    <Text ellipsis className="block text-xs">
+                                      {item.product.productName}
+                                    </Text>
+                                    <Text className="block text-xs">
+                                      Số lượng:{" "}
+                                      {parseInt((item.quantity / x) * y)}
+                                    </Text>
+                                    <div className="flex items-center">
+                                      <Text className="block text-xs">
+                                        Giá: 0đ
+                                      </Text>
+                                      <span style={{ margin: "0 2px" }}></span>
+                                      <Text className="block line-through text-xs">
+                                        {item?.product.price.toLocaleString(
+                                          "vi-VN"
+                                        )}
+                                        đ
+                                      </Text>
+                                    </div>
+                                  </div>
+                                </div>
                               </Text>
-                              <Text className="block">
-                                {item.product.productName}
-                              </Text>
-                              <Text className="block">
-                                Số lượng: {item.quantity}
-                              </Text>
-                              <Text className="block line-through">
-                                Giá: 0 VND
-                              </Text>
-                            </div>
-                          </div>
-                        </Card>
+                            );
+                          }
+                          return null;
+                        })}
                       </div>
                     }
                   />

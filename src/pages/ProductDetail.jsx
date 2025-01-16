@@ -140,9 +140,8 @@ const ProductDetail = () => {
         </div>
       ) : (
         <div>
-          <div className="px-4 py-2 bg-gray-300">
+          <div className="px-4 py-2 rounded-sm bg-primary">
             <Breadcrumb
-              className="text-white"
               items={[
                 {
                   href: "/",
@@ -206,26 +205,40 @@ const ProductDetail = () => {
                         Giá hiện tại: {discountedPrice.toLocaleString("vi-VN")}đ
                         {product?.discounts &&
                           product.discounts.map((discount, index) => (
-                            <span
-                              key={index}
-                              className="ml-4 text-white bg-red-600 p-1 rounded-md text-sm"
-                            >
-                              {discount.discountType === "percentage" &&
-                                `-${discount.discountValue}%`}
+                            <>
+                              <span
+                                key={index}
+                                className="ml-4 text-white bg-red-600 p-1 rounded-md text-sm"
+                              >
+                                {discount.discountType === "percentage" &&
+                                  `-${discount.discountValue}%`}
 
-                              {discount.discountType === "fixed_amount" &&
-                                `-${discount.discountValue.toLocaleString(
+                                {discount.discountType === "fixed_amount" &&
+                                  `-${discount.discountValue.toLocaleString(
+                                    "vi-VN"
+                                  )}đ`}
+
+                                {discount.discountType.startsWith("buy_") &&
+                                  discount.discountType.includes("_get_") &&
+                                  (() => {
+                                    const [x, y] =
+                                      discount.discountType.match(/\d+/g);
+                                    return `Mua ${x} tặng ${y}`;
+                                  })()}
+                              </span>
+                              <br />
+                              <span className="text-sm font-normal text-gray-800 italic">
+                                (Thời gian khuyến mãi:{" "}
+                                {new Date(
+                                  discount.startDate
+                                ).toLocaleDateString("vi-VN")}{" "}
+                                -{" "}
+                                {new Date(discount.endDate).toLocaleDateString(
                                   "vi-VN"
-                                )}đ`}
-
-                              {discount.discountType.startsWith("buy_") &&
-                                discount.discountType.includes("_get_") &&
-                                (() => {
-                                  const [x, y] =
-                                    discount.discountType.match(/\d+/g);
-                                  return `Mua ${x} tặng ${y}`;
-                                })()}
-                            </span>
+                                )}
+                                )
+                              </span>
+                            </>
                           ))}
                       </p>
                     </>
@@ -235,6 +248,7 @@ const ProductDetail = () => {
                     </p>
                   )}
                 </div>
+                {/* <CountDown /> */}
                 <ul className="mt-4 space-y-2 ">
                   {features.map((feature, index) => (
                     <li key={index} className="flex items-center">

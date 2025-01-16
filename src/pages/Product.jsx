@@ -56,20 +56,22 @@ const Product = () => {
 
   return (
     <div>
-      <div className="px-4 py-2 rounded-md bg-gray-300">
+      <div className="px-4 py-2 rounded-sm bg-primary">
         <Breadcrumb
           items={[
-            {
+            { 
+              className: "text-white",
               href: "/",
-              title: <HomeOutlined />,
+              title: <HomeOutlined color="white" />,
             },
             {
+              className: "text-white",
               title: "Sản phẩm",
             },
           ]}
         />
       </div>
-      <div className="p-4 ">
+      <div className="p-4">
         <div>
           <div className="flex space-x-4">
             <div className="w-1/5 bg-white p-4 rounded-lg shadow-md">

@@ -20,7 +20,7 @@ import { getLoggedInUser } from "../../redux/thunks/userThunk";
 import { getCartByUser } from "../../redux/thunks/cartThunk";
 import VoiceSearch from "../search/VoiceSearch";
 import ImageSearch from "../search/ImageSearch";
-// import { categoryService } from "../../services";
+import { categoryService } from "../../services";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -39,23 +39,22 @@ const Header = () => {
   const isLogin = useSelector((state) => state.user.isLogin);
   const totalItems = useSelector((state) => state.cart.totalItems);
 
-  // const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState([]);
 
-  //   useEffect(() => {
-  //     const fetchCategories = async () => {
-  //       try {
-  //         const result = await categoryService.getAllCategories();
-  //         const categoryNames = result.data.map(
-  //           (category) => category.categoryName
-  //         );
-  //         setCategories(categoryNames);
-  //       } catch (error) {
-  //         console.log("Failed to fetch categories: ", error);
-  //       }
-  //     };
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const result = await categoryService.getAllCategories();
+        setCategories(result.data);
+      } catch (error) {
+        console.log("Failed to fetch categories: ", error);
+      }
+    };
 
-  //     fetchCategories();
-  //   }, []);
+    fetchCategories();
+  }, []);
+
+  console.log(categories);
 
   useEffect(() => {
     dispatch(getLoggedInUser());
@@ -101,52 +100,22 @@ const Header = () => {
     { value: "about", label: "Giới thiệu" },
   ];
 
-  const items = [
-    {
-      key: "1",
-      type: "group",
-      label: "Group title",
-      children: [
-        {
-          key: "1-1",
-          label: "1st menu item",
-        },
-        {
-          key: "1-2",
-          label: "2nd menu item",
-        },
-      ],
-    },
-    {
-      key: "2",
-      label: "sub menu",
-      children: [
-        {
-          key: "2-1",
-          label: "3rd menu item",
-        },
-        {
-          key: "2-2",
-          label: "4th menu item",
-        },
-      ],
-    },
-    {
-      key: "3",
-      label: "disabled sub menu",
-      disabled: true,
-      children: [
-        {
-          key: "3-1",
-          label: "5d menu item",
-        },
-        {
-          key: "3-2",
-          label: "6th menu item",
-        },
-      ],
-    },
-  ];
+  const items = categories.map((category) => ({
+    label: (
+      <Link to={`/products?category=${category?.categoryName}`}>
+        <div className="border border-gray-200 rounded-lg p-4 text-center shadow hover:shadow-lg transition-shadow duration-300">
+          <img
+            src={category?.categoryThumbnail.url}
+            alt={category?.categoryName}
+            className="w-full h-32 object-cover mb-3 rounded-md transition-transform duration-300 hover:scale-105"
+          />
+          <h3 className="font-semibold text-lg text-gray-700 hover:text-blue-500 transition-colors duration-300">
+            {category?.categoryName}
+          </h3>
+        </div>
+      </Link>
+    ),
+  }));
 
   return (
     <div
@@ -181,8 +150,8 @@ const Header = () => {
                   <Space
                     className={`${
                       location.pathname === `/${item.value}`
-                        ? "text-hover-primary bg-blue-100"
-                        : "hover:text-hover-primary hover:bg-blue-100"
+                        ? "text-hover-primary"
+                        : "hover:text-hover-primary"
                     } p-2 rounded-xl font-bold cursor-pointer`}
                   >
                     <TableOfContents strokeWidth={1} />
@@ -196,8 +165,8 @@ const Header = () => {
                 to={`/${item.value}`}
                 className={`${
                   location.pathname === `/${item.value}`
-                    ? "text-hover-primary bg-blue-100"
-                    : "hover:text-hover-primary hover:bg-blue-100"
+                    ? "text-hover-primary"
+                    : "hover:text-hover-primary"
                 } p-2 rounded-xl font-bold cursor-pointer`}
               >
                 {item.label}

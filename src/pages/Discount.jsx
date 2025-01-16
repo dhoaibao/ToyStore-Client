@@ -61,7 +61,7 @@ const Discount = () => {
 
   return (
     <div>
-      <div className="px-4 py-2 rounded-md bg-gray-300">
+      <div className="px-4 py-2 rounded-sm bg-primary">
         <Breadcrumb
           items={[
             {

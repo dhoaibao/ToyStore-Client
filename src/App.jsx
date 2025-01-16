@@ -37,6 +37,15 @@ function App() {
           fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif',
           colorPrimary: "#122da6",
         },
+        components: {
+          Breadcrumb: {
+            itemColor: "white",
+            linkColor: "white",
+            lastItemColor: "white",
+            linkHoverColor: "white",
+            separatorColor: "white",
+          }
+        }
       }}
     >
       <Suspense fallback={<LoadingPage />}>

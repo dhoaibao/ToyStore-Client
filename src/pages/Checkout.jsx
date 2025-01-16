@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import {
   Breadcrumb,
   Card,
@@ -8,38 +8,58 @@ import {
   Input,
   Select,
   Form,
-  Radio,
   Button,
   List,
   Divider,
   message,
   Modal,
+  Empty,
 } from "antd";
-import { HomeOutlined } from "@ant-design/icons";
+import {
+  HomeOutlined,
+  DollarOutlined,
+  CreditCardOutlined,
+} from "@ant-design/icons";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { addressService } from "../services";
 
 const { Text } = Typography;
 
 const CheckoutPage = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [form] = Form.useForm();
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [selectedVoucher, setSelectedVoucher] = useState("");
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
 
-  const addresses = [
-    {
-      id: 1,
-      name: "The 80s iCafe",
-      address: "Nguyễn Văn Linh, Phường An Khánh, Quận Ninh Kiều, TP. Cần Thơ",
-      phone: "0942463758",
-    },
-    {
-      id: 2,
-      name: "Nhà riêng",
-      address: "123 Đường ABC, Phường DEF, Quận GHI, TP. Hồ Chí Minh",
-      phone: "0987654321",
-    },
-  ];
+  const [addresses, setAddresses] = useState([]);
+
+  const { orderItems } = location.state || [];
+
+  useEffect(() => {
+    const fetchAddresses = async () => {
+      try {
+        const result = await addressService.getAddressByUser();
+        setAddresses(result.data);
+        setSelectedAddress(
+          result.data.find((addr) => addr.isDefault)?.addressId || null
+        );
+      } catch (error) {
+        console.log("Failed to fetch addresses: ", error);
+      }
+    };
+
+    fetchAddresses();
+  }, []);
+
+  const addressString = useMemo(
+    () => (address) =>
+      `${address.detail}, ${address.wardName}, ${address.districtName}, ${address.provinceName}`,
+    []
+  );
 
   const vouchers = [
     {
@@ -50,50 +70,28 @@ const CheckoutPage = () => {
     { id: 2, code: "FREESHIP", description: "Miễn phí vận chuyển" },
   ];
 
-  const cartItems = [
-    {
-      id: 1,
-      name: "New Balance 57/40 Men's Sneakers - Mindful Grey",
-      price: 129,
-      size: "42 EU - 8.5 US",
-      image:
-        "https://icons.iconarchive.com/icons/graphicloads/filetype/128/png-icon.png",
-    },
-    {
-      id: 2,
-      name: "New Balance 997H Men's Sneakers - Grey",
-      price: 119,
-      size: "42.5 EU - 9 US",
-      image:
-        "https://icons.iconarchive.com/icons/graphicloads/filetype/128/png-icon.png",
-    },
-    {
-      id: 3,
-      name: "New Balance 57/40 Women's - Oyster Pink",
-      price: 149,
-      size: "41.5 EU - 8 US",
-      image:
-        "https://icons.iconarchive.com/icons/graphicloads/filetype/128/png-icon.png",
-    },
-  ];
+  const discountedPriceTotal = () => {
+    return orderItems?.reduce(
+      (total, item) => total + discountedPrice(item.product) * item.quantity,
+      0
+    );
+  };
+
+  const priceTotal = () => {
+    return orderItems?.reduce(
+      (total, item) => total + item.product.price * item.quantity,
+      0
+    );
+  };
 
   const calculateTotal = () => {
-    return cartItems.reduce((total, item) => total + item.price, 0);
+    return discountedPriceTotal() + 20000;
   };
 
   const handleSubmit = () => {
     form.validateFields().then(() => {
       alert("Thanh toán thành công!");
     });
-  };
-
-  const handleSelectAddress = () => {
-    if (!selectedAddress) {
-      message.error("Vui lòng chọn địa chỉ!");
-      return;
-    }
-    message.success("Địa chỉ được chọn thành công!");
-    setIsAddressModalOpen(false);
   };
 
   const handleApplyVoucher = () => {
@@ -105,11 +103,25 @@ const CheckoutPage = () => {
     setIsVoucherModalOpen(false);
   };
 
+  const discountedPrice = (product) => {
+    return (
+      product?.discounts?.reduce((acc, discount) => {
+        if (discount.discountType === "percentage") {
+          return acc - (acc * discount.discountValue) / 100;
+        }
+
+        if (discount.discountType === "fixed_amount") {
+          return acc - discount.discountValue;
+        }
+        return acc;
+      }, product?.price) || product?.price
+    );
+  };
+
   return (
     <>
-      <div className="px-4 py-2 bg-gray-300">
+      <div className="px-4 py-2 rounded-sm bg-primary">
         <Breadcrumb
-          className="text-white"
           items={[
             {
               href: "/",
@@ -124,97 +136,213 @@ const CheckoutPage = () => {
 
       <div className="p-4 bg-gray-100 min-h-screen">
         <div>
-          <Row gutter={16}>
+          <Row gutter={12}>
             {/* Summary Order Section */}
             <Col className="w-3/5">
-              <Card
-                title="Chi tiết đơn hàng"
-                bordered={false}
-                className="rounded-lg shadow-md bg-white"
-              >
-                <List
-                  itemLayout="horizontal"
-                  dataSource={cartItems}
-                  renderItem={(item) => (
-                    <List.Item>
-                      <List.Item.Meta
-                        avatar={
-                          <img
-                            src={item.image}
-                            alt={item.name}
-                            className="w-20 h-20 object-cover rounded-lg"
-                          />
+              <Col className="w-full mb-4">
+                <Card
+                  title={
+                    <Text strong className="text-lg">
+                      Địa chỉ nhận hàng
+                    </Text>
+                  }
+                >
+                  {selectedAddress ? (
+                    <div>
+                      <Text>
+                        <b>Địa chỉ: </b>
+                        {addressString(
+                          addresses.find(
+                            (addr) => addr.addressId === selectedAddress
+                          )
+                        )}
+                      </Text>
+                      <br />
+                      <Text>
+                        <b>Người nhận: </b>
+                        {
+                          addresses.find(
+                            (addr) => addr.addressId === selectedAddress
+                          ).contactName
                         }
-                        title={<Text strong>{item.name}</Text>}
-                        description={
-                          <div>
-                            <Text>Số lượng: {item.size}</Text>
-                            <br />
-                            <Text strong>${item.price.toFixed(2)}</Text>
-                          </div>
+                      </Text>
+                      <br />
+                      <Text>
+                        <b>Số điện thoại: </b>
+                        {
+                          addresses.find(
+                            (addr) => addr.addressId === selectedAddress
+                          ).contactPhone
                         }
-                      />
-                    </List.Item>
+                      </Text>
+                    </div>
+                  ) : (
+                    <Empty description="Không có địa chỉ được chọn" />
                   )}
-                />
-              </Card>
-            </Col>
-
-            {/* Payment Details Section */}
-            <Col className="w-2/5">
-              <Card
-                title="Chi tiết thanh toán"
-                bordered={false}
-                className="rounded-lg shadow-md bg-white"
-              >
-                <Form layout="vertical" form={form}>
-                  <Form.Item
-                    label="Địa chỉ nhận hàng"
-                    name="shippingInfo"
-                    rules={[
-                      {
-                        required: true,
-                        message: "Vui lòng nhập thông tin nhận hàng!",
-                      },
-                    ]}
-                  >
-                    <Card>
-                      <div>
-                        <Text strong>
-                          {selectedAddress
-                            ? addresses.find(
-                                (addr) => addr.id === selectedAddress
-                              ).name
-                            : ""}
-                        </Text>
-                        <br />
-                        <Text>
-                          {selectedAddress
-                            ? addresses.find(
-                                (addr) => addr.id === selectedAddress
-                              ).address
-                            : ""}
-                        </Text>
-                        <br />
-                        <Text>
-                          SĐT:{" "}
-                          {selectedAddress
-                            ? addresses.find(
-                                (addr) => addr.id === selectedAddress
-                              ).phone
-                            : ""}
-                        </Text>
-                      </div>
-                    </Card>
+                  <div className="flex items-center justify-center">
                     <Button
                       type="link"
                       onClick={() => setIsAddressModalOpen(true)}
                     >
                       Chọn địa chỉ
                     </Button>
-                  </Form.Item>
+                  </div>
+                </Card>
+              </Col>
+              <Col className="w-full">
+                <Card
+                  title={
+                    <Text className="text-lg" strong>
+                      Chi tiết đơn hàng
+                    </Text>
+                  }
+                  bordered={false}
+                  className="rounded-lg shadow-md bg-white"
+                >
+                  <List
+                    itemLayout="horizontal"
+                    dataSource={orderItems}
+                    renderItem={(item) => (
+                      <List.Item>
+                        <List.Item.Meta
+                          avatar={
+                            <img
+                              src={
+                                item?.product.productImages[0].uploadImage.url
+                              }
+                              alt={item?.product.productName}
+                              className="w-20 h-20 object-cover rounded-lg"
+                            />
+                          }
+                          title={
+                            <Link to={`/products/${item?.product.slug}`}>
+                              <Text
+                                ellipsis
+                                style={{
+                                  fontWeight: 500,
+                                  fontSize: "16px",
+                                  color: "#333",
+                                }}
+                              >
+                                {item?.product.productName}
+                              </Text>
+                            </Link>
+                          }
+                          description={
+                            <div>
+                              <Text>
+                                <Text>Số lượng:</Text>{" "}
+                                <Text>{item?.quantity}</Text>
+                              </Text>
+                              <br />
+                              <Text>
+                                <Text>Giá: </Text>
+                                <Text strong style={{ color: "red" }}>
+                                  {discountedPrice(item.product).toLocaleString(
+                                    "vi-VN"
+                                  )}
+                                  đ
+                                </Text>
+                                <span style={{ margin: "0 4px" }}></span>
+                                {discountedPrice(item.product) !==
+                                  item.product.price && (
+                                  <Text delete style={{ color: "gray" }}>
+                                    {item?.product.price.toLocaleString(
+                                      "vi-VN"
+                                    )}
+                                    đ
+                                  </Text>
+                                )}
+                              </Text>
+                              {item?.product?.discounts?.map((discount) => {
+                                if (
+                                  discount.discountType.startsWith("buy_") &&
+                                  discount.discountType.includes("_get_")
+                                ) {
+                                  const [x, y] =
+                                    discount.discountType.match(/\d+/g);
+                                  return (
+                                    <Text key={discount.discountId}>
+                                      <div className="flex mt-2 items-center">
+                                        <img
+                                          src={
+                                            item.product.productImages[0]
+                                              .uploadImage.url
+                                          }
+                                          alt={item.product.productName}
+                                          className="w-16 h-16 object-cover rounded mr-4"
+                                        />
+                                        <div>
+                                          <Text className="block text-xs font-semibold">
+                                            Quà tặng:
+                                          </Text>
+                                          <Text
+                                            ellipsis
+                                            className="block text-xs"
+                                          >
+                                            {item.product.productName}
+                                          </Text>
+                                          <Text className="block text-xs">
+                                            Số lượng:{" "}
+                                            {parseInt((item.quantity / x) * y)}
+                                          </Text>
+                                          <div className="flex items-center">
+                                            <Text className="block text-xs">
+                                              Giá: 0đ
+                                            </Text>
+                                            <span
+                                              style={{ margin: "0 2px" }}
+                                            ></span>
+                                            <Text className="block line-through text-xs">
+                                              {item?.product.price.toLocaleString(
+                                                "vi-VN"
+                                              )}
+                                              đ
+                                            </Text>
+                                          </div>
+                                        </div>
+                                      </div>
+                                    </Text>
+                                  );
+                                }
+                                return null;
+                              })}
+                            </div>
+                          }
+                        />
+                      </List.Item>
+                    )}
+                  />
+                  <div className="text-right">
+                    <Text strong>Tổng: </Text>
+                    <Text strong className="text-red-600">
+                      {discountedPriceTotal().toLocaleString("vi-VN")}đ
+                    </Text>
+                    <span style={{ margin: "0 4px" }}></span>
+                    {priceTotal() !== discountedPriceTotal() && (
+                      <Text delete style={{ color: "gray" }}>
+                        {priceTotal().toLocaleString("vi-VN")}đ
+                      </Text>
+                    )}
+                  </div>
+                </Card>
+              </Col>
+            </Col>
+
+            {/* Payment Details Section */}
+            <Col className="w-2/5">
+              <Card
+                title={
+                  <Text className="text-lg" strong>
+                    Thông tin thanh toán
+                  </Text>
+                }
+                bordered={false}
+                className="rounded-lg shadow-md bg-white"
+              >
+                <Form layout="vertical" form={form}>
                   <Form.Item
-                    label="Phương thức thanh toán"
+                    label={<Text strong>Phương thức thanh toán:</Text>}
                     name="paymentMethod"
                     rules={[
                       {
@@ -227,13 +355,29 @@ const CheckoutPage = () => {
                       placeholder="Chọn phương thức thanh toán"
                       allowClear
                       options={[
-                        { label: "Thanh toán khi nhận hàng", value: "cod" },
-                        { label: "Thanh toán qua VNPay", value: "vnpay" },
+                        {
+                          label: (
+                            <>
+                              <DollarOutlined style={{ marginRight: 8 }} />{" "}
+                              Thanh toán khi nhận hàng
+                            </>
+                          ),
+                          value: "cod",
+                        },
+                        {
+                          label: (
+                            <>
+                              <CreditCardOutlined style={{ marginRight: 8 }} />{" "}
+                              Thanh toán qua VNPay
+                            </>
+                          ),
+                          value: "vnpay",
+                        },
                       ]}
                     ></Select>
                   </Form.Item>
                   <Form.Item
-                    label="Mã voucher"
+                    label={<Text strong>Mã giảm giá:</Text>}
                     name="voucherCode"
                     rules={[
                       {
@@ -242,101 +386,113 @@ const CheckoutPage = () => {
                       },
                     ]}
                   >
-                    <Text strong>
+                    <Text>
                       {selectedVoucher
                         ? `Mã đã chọn: ${selectedVoucher}`
-                        : "Chưa có mã giảm giá"}
+                        : "Không có mã giảm giá được chọn"}
                     </Text>
                     <br />
-                    <Button
-                      type="link"
-                      onClick={() => setIsVoucherModalOpen(true)}
-                    >
-                      Chọn voucher
-                    </Button>
+                    <div className="flex w-full items-center justify-center">
+                      <Button
+                        type="link"
+                        onClick={() => setIsVoucherModalOpen(true)}
+                      >
+                        Chọn mã giảm giá
+                      </Button>
+                    </div>
                   </Form.Item>
                 </Form>
                 <Divider />
-                <div className="mb-5">
+                <div className="mb-4">
                   <Text>Tổng tiền hàng: </Text>
-                  <Text strong>${calculateTotal().toFixed(2)}</Text>
+                  <Text strong>{priceTotal().toLocaleString("vi-VN")}đ</Text>
                 </div>
-                <div className="mb-5">
+                <div>
                   <Text>Phí vận chuyển: </Text>
-                  <Text strong>${(calculateTotal() * 0.2).toFixed(2)}</Text>
+                  <Text strong>20.000đ</Text>
                 </div>
-                <div className="mb-5">
+                <div className="mb-4">
+                  <Text className="italic text-xs">(Đơn vị vận chuyển: Giao Hàng Nhanh)</Text>
+                </div>
+                <div className="mb-4">
                   <Text>Giảm: </Text>
-                  <Text strong>-${(calculateTotal() * 0.2).toFixed(2)}</Text>
+                  <Text strong>
+                    -
+                    {(priceTotal() - discountedPriceTotal()).toLocaleString(
+                      "vi-VN"
+                    )}
+                    đ
+                  </Text>
                 </div>
-                <div className="mb-5 text-lg font-bold">
+                <div className="mb-5  text-lg font-bold">
                   <Text>Tổng: </Text>
-                  <Text strong>${(calculateTotal() * 1.2).toFixed(2)}</Text>
+                  <Text className="text-red-600" strong>
+                    {calculateTotal().toLocaleString("vi-VN")}đ
+                  </Text>
                 </div>
                 <Button
                   type="primary"
                   block
+                  className="font-bold"
                   size="large"
                   onClick={handleSubmit}
                 >
-                  Thanh toán ${(calculateTotal() * 1.2).toFixed(2)}
+                  Thanh toán
                 </Button>
               </Card>
             </Col>
           </Row>
         </div>
       </div>
+
       {/* Modal Chọn Địa Chỉ */}
       <Modal
-        title="Chọn Địa Chỉ Nhận Hàng"
-        visible={isAddressModalOpen}
+        title="Chọn địa chỉ nhận hàng"
+        open={isAddressModalOpen}
         onCancel={() => setIsAddressModalOpen(false)}
-        onOk={handleSelectAddress}
-        okText="Xác nhận"
-        cancelText="Hủy"
+        footer={null}
       >
-        <Radio.Group
-          onChange={(e) => setSelectedAddress(e.target.value)}
-          value={selectedAddress}
-          style={{ width: "100%" }}
-        >
+        <div style={{ maxHeight: "400px", overflowY: "auto" }}>
           {addresses.map((address) => (
             <Card
-              key={address.id}
-              style={{
-                marginBottom: "10px",
-                borderRadius: "8px",
-                padding: "10px",
-                border:
-                  selectedAddress === address.id
-                    ? "2px solid #1890ff"
-                    : "1px solid #d9d9d9",
+              key={address.addressId}
+              className={`mb-2 cursor-pointer rounded-lg hover:bg-blue-50 ${
+                selectedAddress === address.addressId
+                  ? "border-2 border-primary"
+                  : "border border-gray-200"
+              }`}
+              onClick={() => {
+                setSelectedAddress(address.addressId);
+                setIsAddressModalOpen(false);
               }}
-              bordered={false}
             >
-              <Radio value={address.id} style={{ display: "block" }}>
-                <Text strong>{address.name}</Text>
-                <br />
-                <Text>{address.address}</Text>
-                <br />
-                <Text>SĐT: {address.phone}</Text>
-              </Radio>
+              <Text strong>{address.addressName}</Text>
+              <br />
+              <Text>{addressString(address)}</Text>
+              <br />
+              <Text>
+                <b>Người nhận:</b> {address.contactName}
+              </Text>
+              <br />
+              <Text>
+                <b>Số điện thoại:</b> {address.contactPhone}
+              </Text>
             </Card>
           ))}
-        </Radio.Group>
+        </div>
       </Modal>
 
       {/* Modal Chọn Voucher */}
       <Modal
+        closable={false}
         title="Chọn Mã Giảm Giá"
-        visible={isVoucherModalOpen}
+        open={isVoucherModalOpen}
         onCancel={() => setIsVoucherModalOpen(false)}
         onOk={handleApplyVoucher}
         okText="Áp dụng"
         cancelText="Hủy"
       >
         <List
-          bordered
           dataSource={vouchers}
           renderItem={(voucher) => (
             <List.Item

@@ -21,39 +21,63 @@ import {
   CreditCardOutlined,
 } from "@ant-design/icons";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import { addressService } from "../services";
+import { GHNService } from "../services";
+import { useSelector, useDispatch } from "react-redux";
+import { getAddressByUser } from "../redux/thunks/addressThunk";
 
 const { Text } = Typography;
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const dispatch = useDispatch();
 
   const [form] = Form.useForm();
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [selectedVoucher, setSelectedVoucher] = useState("");
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
+  const [shippingFee, setShippingFee] = useState(0);
 
-  const [addresses, setAddresses] = useState([]);
+  const addresses = useSelector((state) => state.address.addresses);
 
   const { orderItems } = location.state || [];
 
   useEffect(() => {
-    const fetchAddresses = async () => {
-      try {
-        const result = await addressService.getAddressByUser();
-        setAddresses(result.data);
-        setSelectedAddress(
-          result.data.find((addr) => addr.isDefault)?.addressId || null
-        );
-      } catch (error) {
-        console.log("Failed to fetch addresses: ", error);
-      }
-    };
+    dispatch(getAddressByUser());
+  }, [dispatch]);
 
-    fetchAddresses();
-  }, []);
+  useEffect(() => {
+    const defaultAddress = addresses.find((addr) => addr.isDefault);
+    if (defaultAddress) {
+      setSelectedAddress(defaultAddress.addressId);
+    }
+  }, [addresses]);
+
+  const calculateShippingFee = async (address, quantity) => {
+    try {
+      const fee = await GHNService.getShippingFee(address, quantity);
+      setShippingFee(fee);
+    } catch (error) {
+      console.error("Error calculating shipping fee:", error);
+      message.error("Không thể tính phí vận chuyển.");
+    }
+  };
+
+  useEffect(() => {
+    if (selectedAddress) {
+      const address = addresses.find(
+        (item) => item.addressId === selectedAddress
+      );
+      const quantity = orderItems.reduce(
+        (total, item) => total + item.quantity,
+        0
+      );
+      calculateShippingFee(address, quantity);
+    }
+  }, [selectedAddress, orderItems, addresses]);
+
+  console.log(shippingFee);
 
   const addressString = useMemo(
     () => (address) =>
@@ -409,10 +433,12 @@ const CheckoutPage = () => {
                 </div>
                 <div>
                   <Text>Phí vận chuyển: </Text>
-                  <Text strong>20.000đ</Text>
+                  <Text strong>{shippingFee.toLocaleString("vi-VN")}đ</Text>
                 </div>
                 <div className="mb-4">
-                  <Text className="italic text-xs">(Đơn vị vận chuyển: Giao Hàng Nhanh)</Text>
+                  <Text className="italic text-xs">
+                    (Đơn vị vận chuyển: Giao Hàng Nhanh)
+                  </Text>
                 </div>
                 <div className="mb-4">
                   <Text>Giảm: </Text>

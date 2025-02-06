@@ -1,4 +1,13 @@
-import { Drawer, Button, List, Avatar, Typography, Checkbox, Spin } from "antd";
+import {
+  Drawer,
+  Button,
+  List,
+  Avatar,
+  Typography,
+  Checkbox,
+  Spin,
+  message,
+} from "antd";
 import { useState } from "react";
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
@@ -59,8 +68,12 @@ const Cart = ({ open, setOpen }) => {
     const orderItems = selectedItems.map((productId) => {
       return cartItems.find((item) => item.productId === productId);
     });
-    navigate("/checkout", { state: { orderItems } });
-    onClose();
+    if (orderItems.length === 0) {
+      message.error("Vui lòng chọn sản phẩm để thanh toán!");
+    } else {
+      navigate("/checkout", { state: { orderItems } });
+      onClose();
+    }
   };
 
   const discountedPrice = (product) => {

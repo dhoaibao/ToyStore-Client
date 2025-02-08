@@ -59,4 +59,4 @@ class GHN {
     }
 }
 
-export default new GHN;
+export const GHNService = new GHN();

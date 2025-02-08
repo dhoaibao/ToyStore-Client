@@ -1,6 +1,6 @@
 import createApiClient from './api.service';
 
-class cartService {
+class CartService {
     constructor(path = '/cart') {
         this.api = createApiClient(path);
     }
@@ -22,4 +22,4 @@ class cartService {
     }
 }
 
-export default new cartService();
+export const cartService = new CartService();

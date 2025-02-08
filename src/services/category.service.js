@@ -1,6 +1,6 @@
 import createApiClient from './api.service';
 
-class categoryService {
+class CategoryService {
     constructor(path = '/category') {
         this.api = createApiClient(path);
     }
@@ -10,4 +10,4 @@ class categoryService {
     }
 }
 
-export default new categoryService();
+export const categoryService = new CategoryService();

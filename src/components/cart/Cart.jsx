@@ -1,21 +1,69 @@
 import { Drawer, Button, Typography, Checkbox, Spin, message } from "antd";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
-import { removeFromCart } from "../../redux/thunks/cartThunk";
+import { addToCart, removeFromCart } from "../../redux/thunks/cartThunk";
 import discountedPrice from "../../utils/discountedPrice";
 import CartItem from "./CartItem";
+import { productService } from "../../services";
 
 const { Text, Title } = Typography;
 
 const Cart = ({ open, setOpen }) => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const cartItems = useSelector((state) => state.cart.cartDetails);
+  const cartDetails = useSelector((state) => state.cart.cartDetails);
   const loading = useSelector((state) => state.cart.loading);
+  const isLogin = useSelector((state) => state.user.isLogin);
 
   const [selectedItemIds, setSelectedItemIds] = useState([]);
+  const [cartItems, setCartItems] = useState([]);
+
+  useEffect(() => {
+    const fetchCartItems = async () => {
+      try {
+        let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
+        if (cart.length > 0) {
+          cart = await Promise.all(
+            cart.map(async (item) => {
+              const productData = await productService.getProductBySlug(
+                item.slug
+              );
+              return {
+                quantity: item.quantity,
+                product: productData?.data || null,
+              };
+            })
+          );
+        }
+
+        if (isLogin) {
+          if (cart.length > 0) {
+            await Promise.all(
+              cart.map(async (item) => {
+                dispatch(
+                  addToCart({
+                    productId: item.product.productId,
+                    quantity: item.quantity,
+                  })
+                );
+              })
+            );
+          }
+          setCartItems(cartDetails);
+          localStorage.removeItem("cart");
+        } else {
+          setCartItems(cart);
+        }
+      } catch (error) {
+        console.error("Lỗi khi tải giỏ hàng:", error);
+      }
+    };
+
+    fetchCartItems();
+  }, [isLogin, cartDetails, open, dispatch]);
 
   const onClose = () => {
     setOpen(false);
@@ -38,7 +86,17 @@ const Cart = ({ open, setOpen }) => {
   };
 
   const deleteSelectedItems = () => {
-    selectedItemIds.forEach((productId) => dispatch(removeFromCart(productId)));
+    if (isLogin) {
+      selectedItemIds.forEach((productId) =>
+        dispatch(removeFromCart(productId))
+      );
+    } else {
+      const updatedCartItems = cartItems.filter((item) =>
+        selectedItemIds.includes(item.product.productId)
+      );
+      setCartItems(updatedCartItems);
+      localStorage.setItem("cart", JSON.stringify(updatedCartItems));
+    }
     setSelectedItemIds([]);
   };
 

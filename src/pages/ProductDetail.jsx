@@ -14,6 +14,8 @@ const ProductDetail = () => {
   const [loading, setLoading] = useState(true);
 
   const addToCartLoading = useSelector((state) => state.cart.loading);
+  const errorCart = useSelector((state) => state.cart.error);
+  const isLogin = useSelector((state) => state.user.isLogin);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -59,8 +61,32 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
 
   const handleAddToCart = async () => {
-    await dispatch(addToCart({ productId: product.productId, quantity }));
-    message.success("Đã thêm sản phẩm vào giỏ hàng!");
+    if (isLogin) {
+      await dispatch(addToCart({ productId: product.productId, quantity }));
+    } else {
+      let cart = JSON.parse(localStorage.getItem("cart")) || [];
+      const existingProduct = cart.find(
+        (item) => item.slug === product.slug
+      );
+      if (existingProduct) {
+        cart = cart.map((item) =>
+          item.slug === product.slug
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        );
+      } else {
+        cart.push({ slug: product.slug, quantity });
+      }
+      localStorage.setItem("cart", JSON.stringify(cart));
+      console.log("Cart", cart);
+    }
+
+    if (errorCart && isLogin) {
+      console.log("Error when add to cart: ", errorCart);
+      message.error("Đã xảy ra lỗi!");
+    } else {
+      message.success("Đã thêm sản phẩm vào giỏ hàng!");
+    }
   };
 
   const handleImageClick = (image) => {

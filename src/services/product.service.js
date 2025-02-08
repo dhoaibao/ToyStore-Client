@@ -1,6 +1,6 @@
 import createApiClient from './api.service';
 
-class productService {
+class ProductService {
     constructor(path = '/product') {
         this.api = createApiClient(path);
     }
@@ -13,6 +13,7 @@ class productService {
         return (await this.api.get(`/${slug}`)).data;
     }
 
+
     async imageSearch(data) {
         return (await this.api.post('/image-search', data,
             {
@@ -23,4 +24,4 @@ class productService {
     }
 }
 
-export default new productService();
+export const productService = new ProductService();

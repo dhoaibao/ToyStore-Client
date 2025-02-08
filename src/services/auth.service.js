@@ -1,6 +1,6 @@
 import createApiClient from './api.service';
 
-class authService {
+class AuthService {
     constructor(path = '/auth') {
         this.api = createApiClient(path);
     }
@@ -35,4 +35,4 @@ class authService {
     }
 }
 
-export default new authService();
+export const authService = new AuthService();

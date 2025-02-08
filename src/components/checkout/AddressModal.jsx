@@ -28,7 +28,7 @@ const AddressModal = ({
         {addresses.map((address) => (
           <Card
             key={address.addressId}
-            className={`mb-2 cursor-pointer rounded-lg hover:bg-blue-50 ${
+            className={`mb-2 cursor-pointer rounded-lg ${
               selectedAddress === address.addressId
                 ? "border-2 border-primary"
                 : "border border-gray-200"

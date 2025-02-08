@@ -1,6 +1,6 @@
 import createApiClient from './api.service';
 
-class discountService {
+class DiscountService {
     constructor(path = '/discount') {
         this.api = createApiClient(path);
     }
@@ -10,4 +10,4 @@ class discountService {
     }
 }
 
-export default new discountService();
+export const discountService = new DiscountService();

@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { Breadcrumb, Row, Col, Form, message } from "antd";
+import { useState, useEffect, useMemo } from "react";
+import { Breadcrumb, Row, Col, message } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
 import { useLocation } from "react-router-dom";
-import { GHNService } from "../services";
+import { GHNService, orderService } from "../services";
 import { useSelector, useDispatch } from "react-redux";
 import { getAddressByUser } from "../redux/thunks/addressThunk";
 import discountedPrice from "../utils/discountedPrice";
@@ -11,6 +11,7 @@ import AddressModal from "../components/checkout/AddressModal";
 import OrderDetail from "../components/checkout/OrderDetail";
 import PaymentInfo from "../components/checkout/PaymentInfo";
 import VoucherModal from "../components/checkout/VoucherModal";
+import OrderSuccess from "../components/checkout/OrderSuccess";
 
 const CheckoutPage = () => {
   const location = useLocation();
@@ -21,8 +22,17 @@ const CheckoutPage = () => {
   const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
   const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
   const [shippingFee, setShippingFee] = useState(0);
+  const [paymentMethod, setPaymentMethod] = useState(null);
+  const [orderSuccess, setOrderSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const addresses = useSelector((state) => state.address.addresses);
+
+  const addressString = useMemo(
+    () => (address) =>
+      `${address.detail}, ${address.wardName}, ${address.districtName}, ${address.provinceName}`,
+    []
+  );
 
   const { orderItems } = location.state || [];
 
@@ -69,14 +79,14 @@ const CheckoutPage = () => {
     { id: 2, code: "FREESHIP", description: "Miễn phí vận chuyển" },
   ];
 
-  const discountedPriceTotal = () => {
+  const totalDiscount = () => {
     return orderItems?.reduce(
       (total, item) => total + discountedPrice(item.product) * item.quantity,
       0
     );
   };
 
-  const priceTotal = () => {
+  const totalPrice = () => {
     return orderItems?.reduce(
       (total, item) => total + item.product.price * item.quantity,
       0
@@ -84,15 +94,34 @@ const CheckoutPage = () => {
   };
 
   const finalPrice = () => {
-    return discountedPriceTotal() + shippingFee;
+    return totalDiscount() + shippingFee;
   };
 
-  const [form] = Form.useForm();
-
-  const handleSubmit = () => {
-    form.validateFields().then(() => {
-      alert("Thanh toán thành công!");
-    });
+  const handleSubmit = async () => {
+    setLoading(true);
+    const address = addresses.find(
+      (item) => item.addressId === selectedAddress
+    );
+    const data = {
+      totalPrice: totalPrice(),
+      totalDiscount: totalDiscount(),
+      shippingFee,
+      finalPrice: finalPrice(),
+      paymentMethodId: paymentMethod,
+      orderItems,
+      addressString: addressString(address),
+      contactName: address.contactName,
+      contactPhone: address.contactPhone,
+    };
+    try {
+      await orderService.createOrder(data);
+      setOrderSuccess(true);
+      setLoading(false);
+    } catch (error) {
+      console.log("Error when order: ", error);
+      setLoading(false);
+      message.error("Xảy ra lỗi trong quá trình đặt hàng!");
+    }
   };
 
   const handleApplyVoucher = () => {
@@ -119,43 +148,49 @@ const CheckoutPage = () => {
           ]}
         />
       </div>
-
-      <div className="p-4 bg-gray-100 min-h-screen">
-        <div>
-          <Row gutter={12}>
-            {/* Summary Order Section */}
-            <Col className="w-3/5">
-              <Col className="w-full mb-4">
-                <ShippingAddress
-                  addresses={addresses}
-                  selectedAddress={selectedAddress}
-                  setIsAddressModalOpen={setIsAddressModalOpen}
-                ></ShippingAddress>
+      {!orderSuccess ? (
+        <div className="p-4 bg-gray-100 min-h-screen">
+          <div>
+            <Row gutter={12}>
+              {/* Summary Order Section */}
+              <Col className="w-3/5">
+                <Col className="w-full mb-4">
+                  <ShippingAddress
+                    addresses={addresses}
+                    selectedAddress={selectedAddress}
+                    setIsAddressModalOpen={setIsAddressModalOpen}
+                  ></ShippingAddress>
+                </Col>
+                <Col className="w-full">
+                  <OrderDetail
+                    orderItems={orderItems}
+                    totalDiscount={totalDiscount}
+                    totalPrice={totalPrice}
+                  ></OrderDetail>
+                </Col>
               </Col>
-              <Col className="w-full">
-                <OrderDetail
-                  orderItems={orderItems}
-                  discountedPriceTotal={discountedPriceTotal}
-                  priceTotal={priceTotal}
-                ></OrderDetail>
-              </Col>
-            </Col>
 
-            {/* Payment Details Section */}
-            <Col className="w-2/5">
-              <PaymentInfo
-                selectedVoucher={selectedVoucher}
-                setIsVoucherModalOpen={setIsVoucherModalOpen}
-                priceTotal={priceTotal}
-                shippingFee={shippingFee}
-                finalPrice={finalPrice}
-                discountedPriceTotal={discountedPriceTotal}
-                handleSubmit={handleSubmit}
-              />
-            </Col>
-          </Row>
+              {/* Payment Details Section */}
+              <Col className="w-2/5">
+                <PaymentInfo
+                  selectedVoucher={selectedVoucher}
+                  setIsVoucherModalOpen={setIsVoucherModalOpen}
+                  totalPrice={totalPrice}
+                  shippingFee={shippingFee}
+                  finalPrice={finalPrice}
+                  totalDiscount={totalDiscount}
+                  setPaymentMethod={setPaymentMethod}
+                  onSubmit={handleSubmit}
+                  loading={loading}
+                />
+              </Col>
+            </Row>
+          </div>
         </div>
-      </div>
+      ) : (
+        <OrderSuccess></OrderSuccess>
+      )}
+
       <AddressModal
         open={isAddressModalOpen}
         setOpen={setIsAddressModalOpen}

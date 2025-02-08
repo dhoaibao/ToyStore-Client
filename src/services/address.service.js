@@ -1,6 +1,6 @@
 import createApiClient from './api.service';
 
-class addressService {
+class AddressService {
     constructor(path = '/address') {
         this.api = createApiClient(path);
     }
@@ -22,4 +22,4 @@ class addressService {
     }
 }
 
-export default new addressService();
+export const addressService = new AddressService();

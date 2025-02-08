@@ -38,6 +38,7 @@ const Header = () => {
 
   const isLogin = useSelector((state) => state.user.isLogin);
   const totalItems = useSelector((state) => state.cart.totalItems);
+  const totalItemsLocal = JSON.parse(localStorage.getItem("cart") || "[]").length;
 
   const [categories, setCategories] = useState([]);
 
@@ -218,7 +219,11 @@ const Header = () => {
               onClick={() => setCartOpen(true)}
               className="flex items-center justify-center"
             >
-              <Badge count={totalItems} overflowCount={99} color="red">
+              <Badge
+                count={isLogin ? totalItems : totalItemsLocal}
+                overflowCount={99}
+                color="red"
+              >
                 <ShoppingCart strokeWidth={1} />
               </Badge>
             </button>

@@ -7,14 +7,20 @@ const { Text } = Typography;
 const PaymentInfo = ({
   selectedVoucher,
   setIsVoucherModalOpen,
-  priceTotal,
+  setPaymentMethod,
+  totalPrice,
   shippingFee,
   finalPrice,
-  discountedPriceTotal,
-  handleSubmit,
+  totalDiscount,
+  onSubmit,
+  loading,
 }) => {
   const [form] = Form.useForm();
-  
+
+  const handleSubmit = () => {
+    form.validateFields().then(onSubmit);
+  };
+
   return (
     <Card
       title={
@@ -39,6 +45,7 @@ const PaymentInfo = ({
           <Select
             placeholder="Chọn phương thức thanh toán"
             allowClear
+            onChange={setPaymentMethod}
             options={[
               {
                 label: (
@@ -47,7 +54,7 @@ const PaymentInfo = ({
                     nhận hàng
                   </>
                 ),
-                value: "cod",
+                value: 1,
               },
               {
                 label: (
@@ -56,7 +63,7 @@ const PaymentInfo = ({
                     qua VNPay
                   </>
                 ),
-                value: "vnpay",
+                value: 2,
               },
             ]}
           ></Select>
@@ -87,7 +94,7 @@ const PaymentInfo = ({
       <Divider />
       <div className="mb-4">
         <Text>Tổng tiền hàng: </Text>
-        <Text strong>{priceTotal().toLocaleString("vi-VN")}đ</Text>
+        <Text strong>{totalPrice().toLocaleString("vi-VN")}đ</Text>
       </div>
       <div>
         <Text>Phí vận chuyển: </Text>
@@ -101,7 +108,7 @@ const PaymentInfo = ({
       <div className="mb-4">
         <Text>Giảm: </Text>
         <Text strong>
-          -{(priceTotal() - discountedPriceTotal()).toLocaleString("vi-VN")}đ
+          -{(totalPrice() - totalDiscount()).toLocaleString("vi-VN")}đ
         </Text>
       </div>
       <div className="mb-5  text-lg font-bold">
@@ -115,6 +122,7 @@ const PaymentInfo = ({
         block
         className="font-bold"
         size="large"
+        loading={loading}
         onClick={handleSubmit}
       >
         Thanh toán
@@ -126,11 +134,13 @@ const PaymentInfo = ({
 PaymentInfo.propTypes = {
   selectedVoucher: PropTypes.string,
   setIsVoucherModalOpen: PropTypes.func.isRequired,
-  priceTotal: PropTypes.func.isRequired,
+  setPaymentMethod: PropTypes.func.isRequired,
+  totalPrice: PropTypes.func.isRequired,
   shippingFee: PropTypes.number.isRequired,
   finalPrice: PropTypes.func.isRequired,
-  discountedPriceTotal: PropTypes.func.isRequired,
-  handleSubmit: PropTypes.func.isRequired,
+  totalDiscount: PropTypes.func.isRequired,
+  onSubmit: PropTypes.func.isRequired,
+  loading: PropTypes.bool.isRequired,
 };
 
 export default PaymentInfo;

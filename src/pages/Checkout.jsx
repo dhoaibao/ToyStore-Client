@@ -104,7 +104,7 @@ const CheckoutPage = () => {
     );
     const data = {
       totalPrice: totalPrice(),
-      totalDiscount: totalDiscount(),
+      totalDiscount: (totalPrice() - totalDiscount()),
       shippingFee,
       finalPrice: finalPrice(),
       paymentMethodId: paymentMethod,
@@ -113,12 +113,13 @@ const CheckoutPage = () => {
       contactName: address.contactName,
       contactPhone: address.contactPhone,
     };
+    console.log("data: ", data)
     try {
       await orderService.createOrder(data);
       setOrderSuccess(true);
       setLoading(false);
     } catch (error) {
-      console.log("Error when order: ", error);
+      console.log("Error when order: ", error.message);
       setLoading(false);
       message.error("Xảy ra lỗi trong quá trình đặt hàng!");
     }

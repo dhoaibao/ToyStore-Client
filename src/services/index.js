@@ -8,3 +8,4 @@ export * from "./cart.service";
 export * from "./discount.service";
 export * from "./ghn.service";
 export * from "./order.service";
+export * from "./orderStatus.service"

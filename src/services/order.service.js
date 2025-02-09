@@ -9,11 +9,11 @@ class OrderService {
         return (await this.api.post('/', data)).data;
     }
 
-    async getCartByUser() {
-        return (await this.api.get('/by-user')).data;
+    async getOrderByUser(query) {
+        return (await this.api.get(`/by-user?${query}`)).data;
     }
 
-    async getCartById(id) {
+    async getOrderById(id) {
         return (await this.api.get(`/${id}`)).data;
     }
 }

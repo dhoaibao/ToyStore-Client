@@ -1,26 +1,74 @@
-import { Drawer, Card, Typography, Button, Tag, Table, Empty } from "antd";
+import {
+  Drawer,
+  Card,
+  Typography,
+  Button,
+  Tag,
+  Table,
+  Empty,
+  Select,
+  Input,
+  Spin,
+  Pagination,
+} from "antd";
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { orderService } from "../../services";
+import { orderService, orderStatusService } from "../../services";
+import { LoadingOutlined } from "@ant-design/icons";
 import moment from "moment";
 
 const { Text, Title } = Typography;
 
 const OrderManagement = ({ open, setOpen }) => {
   const [orders, setOrders] = useState([]);
-
-  useEffect(() => {
-    const fetchOrders = async () => {
-      const response = await orderService.getCartByUser();
-      console.log("orders: ", response.data);
-      setOrders(response.data);
-    };
-
-    fetchOrders();
-  }, [open]);
+  const [orderStatuses, setOrderStatuses] = useState([]);
+  const [searchText, setSearchText] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isChildDrawerOpen, setIsChildDrawerOpen] = useState(false);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPage, setTotalPage] = useState(0);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const query = `orderId=${searchText}&orderStatusId=${selectedStatus}&page=${currentPage}&limit=${10}`;
+        const orderResponse = await orderService.getOrderByUser(query);
+        console.log("orders: ", orderResponse.data);
+        setOrders(orderResponse.data);
+        setTotalPage(orderResponse.pagination.totalPages * 10);
+
+        // Order Status Options
+        const orderStatusResponse =
+          await orderStatusService.getAllOrderStatuses();
+
+        let options = [{ value: 0, label: "Tất cả" }];
+        orderStatusResponse.data.map((item) =>
+          options.push({ value: item.orderStatusId, label: item.statusName })
+        );
+        setOrderStatuses(options);
+      } catch (error) {
+        console.error("Failed to fetch data", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [open, searchText, selectedStatus, currentPage]);
+
+  const handleOrderSearch = (event) => {
+    const id = event.target.value.replace("#", "");
+    setSearchText(id);
+  };
+
+  const changeOrderStatus = (value) => {
+    setSelectedStatus(value);
+  };
 
   const onClose = () => {
     setOpen(false);
@@ -82,14 +130,40 @@ const OrderManagement = ({ open, setOpen }) => {
       onClose={onClose}
       open={open}
       footer={
-        <div className="text-right">
-          <Button type="default" size="large" onClick={onClose}>
-            Đóng
-          </Button>
+        <div>
+          {orders?.length > 0 && (
+            <Pagination
+              align="center"
+              defaultCurrent={1}
+              current={currentPage}
+              total={totalPage}
+              onChange={setCurrentPage}
+              className="mt-4"
+            />
+          )}
         </div>
       }
     >
-      {orders.length > 0 ? (
+      <div className="flex items-center justify-between space-x-2 mb-4">
+        <Select
+          value={selectedStatus}
+          options={orderStatuses}
+          onChange={changeOrderStatus}
+          placeholder="Trạng thái"
+          className="w-36"
+        />
+        <Input
+          className="w-80"
+          value={searchText}
+          onChange={handleOrderSearch}
+          placeholder="Nhập mã đơn hàng để tìm kiếm..."
+        ></Input>
+      </div>
+      {loading ? (
+        <div className="flex items-center justify-center h-full">
+          <Spin indicator={<LoadingOutlined spin />} size="large" />
+        </div>
+      ) : orders.length > 0 ? (
         <div className="grid grid-cols-1 gap-3">
           {orders.map((order) => (
             <Card
@@ -145,7 +219,9 @@ const OrderManagement = ({ open, setOpen }) => {
           ))}
         </div>
       ) : (
-        <Empty description={"Bạn chưa có đơn hàng nào!"}></Empty>
+        <div className="flex justify-center items-center h-full">
+          <Empty description={"Không có đơn hàng nào!"} />
+        </div>
       )}
 
       {/* Drawer Con */}

@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 
 const { Text } = Typography;
 
-const OrderDetail = ({ orderItems, totalDiscount, totalPrice }) => {
+const OrderItem = ({ orderItems, totalDiscount, totalPrice }) => {
   return (
     <Card
       title={
@@ -32,10 +32,10 @@ const OrderDetail = ({ orderItems, totalDiscount, totalPrice }) => {
   );
 };
 
-OrderDetail.propTypes = {
+OrderItem.propTypes = {
   orderItems: PropTypes.array.isRequired,
   totalDiscount: PropTypes.number.isRequired,
   totalPrice: PropTypes.number.isRequired,
 };
 
-export default OrderDetail;
+export default OrderItem;

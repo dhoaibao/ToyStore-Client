@@ -8,7 +8,7 @@ import { getAddressByUser } from "../redux/thunks/addressThunk";
 import discountedPrice from "../utils/discountedPrice";
 import ShippingAddress from "../components/checkout/ShippingAddress";
 import AddressModal from "../components/checkout/AddressModal";
-import OrderDetail from "../components/checkout/OrderDetail";
+import OrderItem from "../components/checkout/OrderItem";
 import PaymentInfo from "../components/checkout/PaymentInfo";
 import VoucherModal from "../components/checkout/VoucherModal";
 import OrderSuccess from "../components/checkout/OrderSuccess";
@@ -104,7 +104,7 @@ const CheckoutPage = () => {
     );
     const data = {
       totalPrice: totalPrice(),
-      totalDiscount: (totalPrice() - totalDiscount()),
+      totalDiscount: totalPrice() - totalDiscount(),
       shippingFee,
       finalPrice: finalPrice(),
       paymentMethodId: paymentMethod,
@@ -113,7 +113,7 @@ const CheckoutPage = () => {
       contactName: address.contactName,
       contactPhone: address.contactPhone,
     };
-    console.log("data: ", data)
+    console.log("data: ", data);
     try {
       await orderService.createOrder(data);
       setOrderSuccess(true);
@@ -163,11 +163,11 @@ const CheckoutPage = () => {
                   ></ShippingAddress>
                 </Col>
                 <Col className="w-full">
-                  <OrderDetail
+                  <OrderItem
                     orderItems={orderItems}
                     totalDiscount={totalDiscount}
                     totalPrice={totalPrice}
-                  ></OrderDetail>
+                  ></OrderItem>
                 </Col>
               </Col>
 

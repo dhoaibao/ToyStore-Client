@@ -16,6 +16,7 @@ import { orderService, orderStatusService } from "../../services";
 import { LoadingOutlined } from "@ant-design/icons";
 import OrderDetail from "./OrderDetail";
 import moment from "moment";
+import { useLocation } from "react-router-dom";
 
 const { Text, Title } = Typography;
 
@@ -25,6 +26,7 @@ const OrderManagement = ({ open, setOpen }) => {
   const [searchText, setSearchText] = useState("");
   const [selectedStatus, setSelectedStatus] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [cancelOrder, setCancelOrder] = useState(false);
 
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isChildDrawerOpen, setIsChildDrawerOpen] = useState(false);
@@ -32,16 +34,16 @@ const OrderManagement = ({ open, setOpen }) => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPage, setTotalPage] = useState(0);
 
+  const location = useLocation();
+
+  useEffect(() => {
+    setIsChildDrawerOpen(false);
+  }, [location]);
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const query = `orderId=${searchText}&orderStatusId=${selectedStatus}&page=${currentPage}&limit=${10}`;
-        const orderResponse = await orderService.getOrderByUser(query);
-        console.log("orders: ", orderResponse.data);
-        setOrders(orderResponse.data);
-        setTotalPage(orderResponse.pagination.totalPages * 10);
-
         // Order Status Options
         const orderStatusResponse =
           await orderStatusService.getAllOrderStatuses();
@@ -51,6 +53,13 @@ const OrderManagement = ({ open, setOpen }) => {
           options.push({ value: item.orderStatusId, label: item.statusName })
         );
         setOrderStatuses(options);
+
+        // Orders
+        const query = `orderId=${searchText}&orderStatusId=${selectedStatus}&page=${currentPage}&limit=${10}`;
+        const orderResponse = await orderService.getOrderByUser(query);
+        console.log("orders: ", orderResponse.data);
+        setOrders(orderResponse.data);
+        setTotalPage(orderResponse.pagination.totalPages * 10);
       } catch (error) {
         console.error("Failed to fetch data", error);
       } finally {
@@ -58,8 +67,9 @@ const OrderManagement = ({ open, setOpen }) => {
       }
     };
 
-    fetchData();
-  }, [open, searchText, selectedStatus, currentPage]);
+    if (open || cancelOrder) fetchData();
+    setCancelOrder(false);
+  }, [open, cancelOrder, searchText, selectedStatus, currentPage]);
 
   const handleOrderSearch = (event) => {
     const id = event.target.value.replace("#", "");
@@ -133,7 +143,11 @@ const OrderManagement = ({ open, setOpen }) => {
             <Card
               key={order.orderId}
               title={
-                <Text strong style={{ fontSize: "16px" }}>
+                <Text
+                  strong
+                  className="text-primary"
+                  style={{ fontSize: "16px" }}
+                >
                   Mã đơn hàng: #{order.orderId}
                 </Text>
               }
@@ -151,7 +165,7 @@ const OrderManagement = ({ open, setOpen }) => {
                 borderRadius: "8px",
                 boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
               }}
-              className="hover:shadow-lg hover:bg-blue-50"
+              className="hover:shadow-lg hover:bg-gray-100"
             >
               <p>
                 Thời gian đặt hàng:{" "}
@@ -160,6 +174,7 @@ const OrderManagement = ({ open, setOpen }) => {
               <p>
                 Trạng thái:{" "}
                 <Tag
+                  className="rounded-lg font-medium"
                   color={
                     order.orderStatus.statusName === "Chờ xác nhận"
                       ? "orange"
@@ -190,6 +205,7 @@ const OrderManagement = ({ open, setOpen }) => {
       <OrderDetail
         open={isChildDrawerOpen}
         onClose={closeChildDrawer}
+        setCancelOrder={setCancelOrder}
         selectedOrder={selectedOrder}
         orderStatuses={orderStatuses}
       ></OrderDetail>

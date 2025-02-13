@@ -38,7 +38,9 @@ const Header = () => {
 
   const isLogin = useSelector((state) => state.user.isLogin);
   const totalItems = useSelector((state) => state.cart.totalItems);
-  const totalItemsLocal = JSON.parse(localStorage.getItem("cart") || "[]").length;
+  const totalItemsLocal = JSON.parse(
+    localStorage.getItem("cart") || "[]"
+  ).length;
 
   const [categories, setCategories] = useState([]);
 
@@ -54,8 +56,6 @@ const Header = () => {
 
     fetchCategories();
   }, []);
-
-  console.log(categories);
 
   useEffect(() => {
     dispatch(getLoggedInUser());

@@ -12,8 +12,9 @@ import Order from "./OrderManagement";
 import AddressBook from "../address/AddressBook";
 import VoucherManagement from "./VoucherManagement";
 import ChangePassword from "./ChangePassword";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 import generateAvatar from "../../utils/generateAvatar";
 
 const ProfileDropdown = () => {
@@ -23,9 +24,19 @@ const ProfileDropdown = () => {
   const [voucherOpen, setVoucherOpen] = useState(false);
   const [changePassOpen, setChangePassOpen] = useState(false);
 
+  const location = useLocation();
+
   const user = useSelector((state) => state.user.user);
 
   const { color, initial } = generateAvatar(user?.email, user?.fullName);
+
+  useEffect(() => {
+    setAddressOpen(false);
+    setChangePassOpen(false);
+    setOrderOpen(false);
+    setProfileOpen(false);
+    setVoucherOpen(false);
+  }, [location]);
 
   const items = [
     {

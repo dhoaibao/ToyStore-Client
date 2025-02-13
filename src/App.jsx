@@ -36,6 +36,7 @@ function App() {
         token: {
           fontFamily: '"Plus Jakarta Sans", system-ui, sans-serif',
           colorPrimary: "#122da6",
+
         },
         components: {
           Breadcrumb: {
@@ -44,7 +45,7 @@ function App() {
             lastItemColor: "white",
             linkHoverColor: "white",
             separatorColor: "white",
-          }
+          },
         }
       }}
     >

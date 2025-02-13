@@ -99,6 +99,7 @@ const CartItem = ({
                   </Text>
                 </Link>
               }
+              className="px-2"
               description={
                 <div>
                   <Text>

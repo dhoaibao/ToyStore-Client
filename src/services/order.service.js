@@ -16,6 +16,10 @@ class OrderService {
     async getOrderById(id) {
         return (await this.api.get(`/${id}`)).data;
     }
+
+    async cancelOrder(id) {
+        return (await this.api.put(`/cancel/${id}`)).data;
+    }
 }
 
 export const orderService = new OrderService();

@@ -5,6 +5,7 @@ import { productService } from "../services";
 import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../redux/thunks/cartThunk";
+import moment from "moment";
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -65,9 +66,7 @@ const ProductDetail = () => {
       await dispatch(addToCart({ productId: product.productId, quantity }));
     } else {
       let cart = JSON.parse(localStorage.getItem("cart")) || [];
-      const existingProduct = cart.find(
-        (item) => item.slug === product.slug
-      );
+      const existingProduct = cart.find((item) => item.slug === product.slug);
       if (existingProduct) {
         cart = cart.map((item) =>
           item.slug === product.slug
@@ -255,14 +254,11 @@ const ProductDetail = () => {
                               <br />
                               <span className="text-sm font-normal text-gray-800 italic">
                                 (Thời gian khuyến mãi:{" "}
-                                {new Date(
-                                  discount.startDate
-                                ).toLocaleDateString("vi-VN")}{" "}
+                                {moment(discount.startDate).format(
+                                  "DD/MM/YYYY"
+                                )}{" "}
                                 -{" "}
-                                {new Date(discount.endDate).toLocaleDateString(
-                                  "vi-VN"
-                                )}
-                                )
+                                {moment(discount.endDate).format("DD/MM/YYYY")})
                               </span>
                             </>
                           ))}

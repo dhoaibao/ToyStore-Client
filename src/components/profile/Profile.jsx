@@ -20,7 +20,7 @@ import generateAvatar from "../../utils/generateAvatar";
 import dayjs from "dayjs";
 import { updateProfile } from "../../redux/thunks/userThunk";
 
-const { Text, Title } = Typography;
+const { Title } = Typography;
 
 const Profile = ({ open, setOpen }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -146,6 +146,7 @@ const Profile = ({ open, setOpen }) => {
         form={form}
         layout="vertical"
         initialValues={{
+          fullName: user?.fullName,
           email: user?.email,
           phone: user?.phone,
           birthday: user?.birthday ? moment(user?.birthday) : null,
@@ -155,78 +156,59 @@ const Profile = ({ open, setOpen }) => {
       >
         <List itemLayout="vertical" className="mt-6">
           <List.Item className="mb-6">
-            <div className="mb-4">
-              <Text strong>Email:</Text>
-              <Form.Item
-                name="email"
-                rules={[{ required: false, message: "Vui lòng nhập email!" }]}
-              >
-                <Input
-                  disabled={!isEditing}
-                  className={`mt-2 ${
-                    isEditing ? "border-primary" : "border-gray-300"
-                  }`}
-                />
-              </Form.Item>
-            </div>
-            <div className="mb-4">
-              <Text strong>Số điện thoại:</Text>
-              <Form.Item
-                name="phone"
-                rules={[
-                  { required: false, message: "Vui lòng nhập số điện thoại!" },
-                ]}
-              >
-                <Input
-                  disabled={!isEditing}
-                  className={`mt-2 ${
-                    isEditing ? "border-primary" : "border-gray-300"
-                  }`}
-                />
-              </Form.Item>
-            </div>
-            <div className="mb-4">
-              <Text strong>Ngày sinh:</Text>
-              <Form.Item
-                name="birthday"
-                rules={[
-                  { required: false, message: "Vui lòng chọn ngày sinh!" },
-                ]}
-                getValueProps={(value) => ({
-                  value: value && dayjs(value),
-                })}
-                normalize={(value) => value && value.tz().format("YYYY-MM-DD")}
-              >
-                <DatePicker
-                  format="DD/MM/YYYY"
-                  disabled={!isEditing}
-                  className={`mt-2 ${
-                    isEditing ? "border-primary" : "border-gray-300"
-                  }`}
-                  style={{ width: "100%" }}
-                />
-              </Form.Item>
-            </div>
-            <div className="mb-4">
-              <Text strong>Giới tính:</Text>
-              <Form.Item
-                name="gender"
-                rules={[
-                  { required: false, message: "Vui lòng chọn giới tính!" },
-                ]}
-              >
-                <Select
-                  disabled={!isEditing}
-                  className={`mt-2 ${
-                    isEditing ? "border-primary" : "border-gray-300"
-                  }`}
-                  style={{ width: "100%" }}
-                >
-                  <Select.Option value="true">Nam</Select.Option>
-                  <Select.Option value="false">Nữ</Select.Option>
-                </Select>
-              </Form.Item>
-            </div>
+            <Form.Item
+              label="Họ tên:"
+              name="fullName"
+              rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}
+            >
+              <Input disabled={!isEditing} placeholder="Nhập họ tên" />
+            </Form.Item>
+
+            <Form.Item
+              label="Email:"
+              name="email"
+              rules={[{ required: true, message: "Vui lòng nhập email!" }]}
+            >
+              <Input disabled={!isEditing} placeholder="Nhập email" />
+            </Form.Item>
+
+            <Form.Item
+              label="Số điện thoại:"
+              name="phone"
+              rules={[
+                { required: true, message: "Vui lòng nhập số điện thoại!" },
+              ]}
+            >
+              <Input disabled={!isEditing} placeholder="Nhập số điện thoại" />
+            </Form.Item>
+
+            <Form.Item
+              label="Ngày sinh:"
+              name="birthday"
+              rules={[{ required: true, message: "Vui lòng chọn ngày sinh!" }]}
+              getValueProps={(value) => ({
+                value: value && dayjs(value),
+              })}
+              normalize={(value) => value && value.tz().format("YYYY-MM-DD")}
+            >
+              <DatePicker
+                format="DD/MM/YYYY"
+                disabled={!isEditing}
+                placeholder="Chọn ngày sinh"
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+
+            <Form.Item
+              label="Giới tính:"
+              name="gender"
+              rules={[{ required: true, message: "Vui lòng chọn giới tính!" }]}
+            >
+              <Select disabled={!isEditing} placeholder="Chọn giới tính">
+                <Select.Option value="true">Nam</Select.Option>
+                <Select.Option value="false">Nữ</Select.Option>
+              </Select>
+            </Form.Item>
           </List.Item>
         </List>
       </Form>

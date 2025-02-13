@@ -53,7 +53,7 @@ const OrderDetail = ({
       title={
         selectedOrder && (
           <div className="flex justify-between">
-            <p className="text-lg">Đơn hàng: #{selectedOrder.orderId}</p>
+            <p className="text-lg">Đơn hàng #{selectedOrder.orderId}</p>
             {selectedOrder.orderStatus.orderStatusId === 1 && (
               <Button
                 danger
@@ -94,14 +94,20 @@ const OrderDetail = ({
               Địa chỉ nhận hàng
             </p>
             <div className="space-y-1">
-              <span className="font-semibold">Địa chỉ: </span>
-              {selectedOrder.orderAddress.address}
-              <br />
-              <span className="font-semibold">Người nhận: </span>
-              {selectedOrder.orderAddress.contactName}
-              <br />
-              <span className="font-semibold">Số điện thoại:</span>
-              {selectedOrder.orderAddress.contactPhone}
+              <p>
+                <span className="font-semibold">Địa chỉ: </span>
+                {selectedOrder.orderAddress.address}
+              </p>
+
+              <p>
+                <span className="font-semibold">Người nhận: </span>
+                {selectedOrder.orderAddress.contactName}
+              </p>
+
+              <p>
+                <span className="font-semibold">Số điện thoại:</span>
+                {selectedOrder.orderAddress.contactPhone}
+              </p>
             </div>
           </div>
 

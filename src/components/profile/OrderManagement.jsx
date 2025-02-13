@@ -5,11 +5,13 @@ import {
   Button,
   Tag,
   Empty,
-  Select,
+  Tabs,
   Input,
   Spin,
   Pagination,
+  DatePicker,
 } from "antd";
+const { RangePicker } = DatePicker;
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { orderService, orderStatusService } from "../../services";
@@ -18,13 +20,15 @@ import OrderDetail from "./OrderDetail";
 import moment from "moment";
 import { useLocation } from "react-router-dom";
 
-const { Text, Title } = Typography;
+const { Text } = Typography;
 
 const OrderManagement = ({ open, setOpen }) => {
   const [orders, setOrders] = useState([]);
   const [orderStatuses, setOrderStatuses] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [selectedStatus, setSelectedStatus] = useState(0);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [cancelOrder, setCancelOrder] = useState(false);
 
@@ -41,21 +45,25 @@ const OrderManagement = ({ open, setOpen }) => {
   }, [location]);
 
   useEffect(() => {
+    const fetchOrderStatuses = async () => {
+      const orderStatusResponse =
+        await orderStatusService.getAllOrderStatuses();
+
+      let options = [{ key: 0, label: "Tất cả" }];
+      orderStatusResponse.data.map((item) =>
+        options.push({ key: item.orderStatusId, label: item.statusName })
+      );
+      setOrderStatuses(options);
+    };
+
+    fetchOrderStatuses();
+  }, []);
+
+  useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Order Status Options
-        const orderStatusResponse =
-          await orderStatusService.getAllOrderStatuses();
-
-        let options = [{ value: 0, label: "Tất cả" }];
-        orderStatusResponse.data.map((item) =>
-          options.push({ value: item.orderStatusId, label: item.statusName })
-        );
-        setOrderStatuses(options);
-
-        // Orders
-        const query = `orderId=${searchText}&orderStatusId=${selectedStatus}&page=${currentPage}&limit=${10}`;
+        const query = `orderId=${searchText}&orderStatusId=${selectedStatus}&page=${currentPage}&limit=${10}&startDate=${startDate}&endDate=${endDate}`;
         const orderResponse = await orderService.getOrderByUser(query);
         console.log("orders: ", orderResponse.data);
         setOrders(orderResponse.data);
@@ -69,7 +77,7 @@ const OrderManagement = ({ open, setOpen }) => {
 
     if (open || cancelOrder) fetchData();
     setCancelOrder(false);
-  }, [open, cancelOrder, searchText, selectedStatus, currentPage]);
+  }, [open, cancelOrder, searchText, selectedStatus, currentPage, startDate, endDate]);
 
   const handleOrderSearch = (event) => {
     const id = event.target.value.replace("#", "");
@@ -78,6 +86,16 @@ const OrderManagement = ({ open, setOpen }) => {
 
   const changeOrderStatus = (value) => {
     setSelectedStatus(value);
+  };
+
+  const handleDateChange = (dates) => {
+    if (dates) {
+      setStartDate(dates[0].format("YYYY-MM-DD"));
+      setEndDate(dates[1].format("YYYY-MM-DD"));
+    } else {
+      setStartDate("");
+      setEndDate("");
+    }
   };
 
   const onClose = () => {
@@ -100,7 +118,29 @@ const OrderManagement = ({ open, setOpen }) => {
     <Drawer
       width={600}
       closable={false}
-      title={<Title level={3}>Quản lý đơn hàng</Title>}
+      title={
+        <div className="font-normal">
+          <p className="mb-4 text-xl font-semibold">Quản lý đơn hàng</p>
+          <Tabs
+            type="card"
+            defaultActiveKey="1"
+            items={orderStatuses}
+            onChange={changeOrderStatus}
+          ></Tabs>
+          <div className="flex items-center justify-between space-x-2">
+            <Input
+              className="w-1/2"
+              value={searchText}
+              onChange={handleOrderSearch}
+              placeholder="Nhập mã đơn hàng để tìm kiếm..."
+            ></Input>
+            <RangePicker
+              className="w-1/2"
+              onChange={handleDateChange}
+            ></RangePicker>
+          </div>
+        </div>
+      }
       onClose={onClose}
       open={open}
       footer={
@@ -108,6 +148,7 @@ const OrderManagement = ({ open, setOpen }) => {
           {orders?.length > 0 && (
             <Pagination
               align="center"
+              simple
               defaultCurrent={1}
               current={currentPage}
               total={totalPage}
@@ -118,54 +159,26 @@ const OrderManagement = ({ open, setOpen }) => {
         </div>
       }
     >
-      <div className="flex items-center justify-between space-x-2 mb-4">
-        <Select
-          value={selectedStatus}
-          options={orderStatuses}
-          onChange={changeOrderStatus}
-          placeholder="Trạng thái"
-          className="w-36"
-        />
-        <Input
-          className="w-80"
-          value={searchText}
-          onChange={handleOrderSearch}
-          placeholder="Nhập mã đơn hàng để tìm kiếm..."
-        ></Input>
-      </div>
       {loading ? (
         <div className="flex items-center justify-center h-full">
           <Spin indicator={<LoadingOutlined spin />} size="large" />
         </div>
       ) : orders.length > 0 ? (
-        <div className="grid grid-cols-1 gap-3">
+        <div className="grid grid-cols-1 gap-2">
           {orders.map((order) => (
             <Card
               key={order.orderId}
               title={
-                <Text
-                  strong
-                  className="text-primary"
-                  style={{ fontSize: "16px" }}
-                >
+                <Text strong className="text-primary text-base">
                   Mã đơn hàng: #{order.orderId}
                 </Text>
               }
               extra={
-                <Button
-                  type="link"
-                  onClick={() => openChildDrawer(order)}
-                  className="hover:text-blue-500"
-                >
+                <Button type="link" onClick={() => openChildDrawer(order)}>
                   Xem chi tiết
                 </Button>
               }
-              hoverable
-              style={{
-                borderRadius: "8px",
-                boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-              }}
-              className="hover:shadow-lg hover:bg-gray-100"
+              className="bg-gray-100"
             >
               <p>
                 Thời gian đặt hàng:{" "}

@@ -5,7 +5,7 @@ import { getAddressByUser, deleteAddress } from "../../redux/thunks/addressThunk
 import { useDispatch, useSelector } from "react-redux";
 import AddressForm from "./AddressForm";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const AddressBook = ({ open, setOpen }) => {
   const [isFormOpen, setIsFormOpen] = useState(false);
@@ -31,22 +31,15 @@ const AddressBook = ({ open, setOpen }) => {
   return (
     <Drawer
       closable={false}
-      title={<Title level={3}>Sổ quản lý địa chỉ</Title>}
+      title={<p className="text-xl font-semibold">Sổ địa chỉ</p>}
       open={open}
       onClose={() => setOpen(false)}
       width={600}
-      footer={
-        <div style={{ textAlign: "right" }}>
-          <Button onClick={() => setOpen(false)} style={{ marginRight: 8 }}>
-            Đóng
-          </Button>
-        </div>
-      }
     >
       <Button
         type="primary"
         onClick={() => openAddressForm()}
-        style={{ marginBottom: "20px" }}
+        className="mb-4"
       >
         Thêm địa chỉ mới
       </Button>

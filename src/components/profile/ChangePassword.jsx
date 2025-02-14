@@ -48,7 +48,7 @@ const ChangePassword = ({ open, setOpen }) => {
       footer={
         <div className="text-right">
           <Button type="default" onClick={onClose}>
-            Đóng
+            Hủy bỏ
           </Button>
           <Button
             type="primary"

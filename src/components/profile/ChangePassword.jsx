@@ -1,9 +1,7 @@
-import { Drawer, Typography, Input, Button, Form, message } from "antd";
+import { Drawer, Input, Button, Form, message } from "antd";
 import PropTypes from "prop-types";
 import { useState } from "react";
 import { userService } from "../../services";
-
-const { Title } = Typography;
 
 const ChangePassword = ({ open, setOpen }) => {
   const [loading, setLoading] = useState(false);
@@ -29,7 +27,7 @@ const ChangePassword = ({ open, setOpen }) => {
         confirmNewPassword,
       });
       message.success("Thay đổi mật khẩu thành công!");
-      setOpen(false); 
+      setOpen(false);
     } catch (error) {
       console.error("Change password error:", error);
       message.error(
@@ -43,28 +41,33 @@ const ChangePassword = ({ open, setOpen }) => {
   return (
     <Drawer
       closable={false}
-      title={<Title level={3}>Đổi mật khẩu</Title>}
+      title={<p className="text-xl font-semibold">Đổi mật khẩu</p>}
       onClose={onClose}
+      maskClosable={false}
       open={open}
       footer={
         <div className="text-right">
-          <Button type="default" size="large" onClick={onClose}>
+          <Button type="default" onClick={onClose}>
             Đóng
           </Button>
           <Button
             type="primary"
-            size="large"
             form="changePasswordForm"
             htmlType="submit"
             loading={loading}
-            className="ml-4"
+            className="ml-2"
           >
             Lưu thay đổi
           </Button>
         </div>
       }
     >
-      <Form id="changePasswordForm" form={form} layout="vertical" onFinish={handleSubmit}>
+      <Form
+        id="changePasswordForm"
+        form={form}
+        layout="vertical"
+        onFinish={handleSubmit}
+      >
         <Form.Item
           label="Mật khẩu hiện tại"
           name="oldPassword"

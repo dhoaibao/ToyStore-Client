@@ -7,7 +7,7 @@ import { addAddress, updateAddress } from "../../redux/thunks/addressThunk";
 import { useDispatch, useSelector } from "react-redux";
 import getCurrentLocation from "../../utils/getCurrentLocation";
 
-const AddressForm = ({ open, setOpen, editingAddress, setEditingAddress }) => {
+const AddressForm = ({ open, setOpen, editingAddress }) => {
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
   const [wards, setWards] = useState([]);
@@ -119,7 +119,6 @@ const AddressForm = ({ open, setOpen, editingAddress, setEditingAddress }) => {
   const closeDrawer = () => {
     setOpen(false);
     form.resetFields();
-    setEditingAddress(null);
   };
 
   const handleSave = () => {
@@ -163,6 +162,8 @@ const AddressForm = ({ open, setOpen, editingAddress, setEditingAddress }) => {
     <Drawer
       title={editingAddress ? "Chỉnh sửa địa chỉ" : "Thêm địa chỉ mới"}
       open={open}
+      closable={false}
+      maskClosable={false}
       onClose={closeDrawer}
       width={400}
       footer={
@@ -283,7 +284,6 @@ AddressForm.propTypes = {
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
   editingAddress: PropTypes.object.isRequired,
-  setEditingAddress: PropTypes.func.isRequired,
 };
 
 export default AddressForm;

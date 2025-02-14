@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { List, Button, Drawer, Typography, message } from "antd";
 import PropTypes from "prop-types";
-import { getAddressByUser, deleteAddress } from "../../redux/thunks/addressThunk";
+import {
+  getAddressByUser,
+  deleteAddress,
+} from "../../redux/thunks/addressThunk";
 import { useDispatch, useSelector } from "react-redux";
 import AddressForm from "./AddressForm";
 
@@ -36,11 +39,7 @@ const AddressBook = ({ open, setOpen }) => {
       onClose={() => setOpen(false)}
       width={600}
     >
-      <Button
-        type="primary"
-        onClick={() => openAddressForm()}
-        className="mb-4"
-      >
+      <Button type="primary" onClick={() => openAddressForm()} className="mb-4">
         Thêm địa chỉ mới
       </Button>
       <List
@@ -70,7 +69,8 @@ const AddressBook = ({ open, setOpen }) => {
               <Text strong>{item.addressName}</Text>
               <br />
               <Text>
-                {item.detail}, {item.wardName}, {item.districtName}, {item.provinceName}
+                {item.detail}, {item.wardName}, {item.districtName},{" "}
+                {item.provinceName}
               </Text>
               <br />
               <Text>SĐT: {item.contactPhone}</Text>
@@ -88,7 +88,6 @@ const AddressBook = ({ open, setOpen }) => {
         open={isFormOpen}
         setOpen={setIsFormOpen}
         editingAddress={editingAddress}
-        setEditingAddress={setEditingAddress}
       ></AddressForm>
     </Drawer>
   );

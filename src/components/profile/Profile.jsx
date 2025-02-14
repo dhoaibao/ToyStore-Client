@@ -2,7 +2,6 @@ import {
   Drawer,
   List,
   Avatar,
-  Typography,
   Input,
   Button,
   Select,
@@ -20,8 +19,6 @@ import generateAvatar from "../../utils/generateAvatar";
 import dayjs from "dayjs";
 import { updateProfile } from "../../redux/thunks/userThunk";
 
-const { Title } = Typography;
-
 const Profile = ({ open, setOpen }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -34,7 +31,6 @@ const Profile = ({ open, setOpen }) => {
   const { color, initial } = generateAvatar(user?.email, user?.fullName);
 
   const onClose = () => {
-    setOpen(false);
     setIsEditing(false);
     setFile(null);
     form.resetFields();
@@ -91,18 +87,29 @@ const Profile = ({ open, setOpen }) => {
   return (
     <Drawer
       closable={false}
-      title={<Title level={3}>Thông tin cá nhân</Title>}
-      onClose={onClose}
+      title={<p className="text-xl font-semibold">Thông tin cá nhân</p>}
+      onClose={() => {
+        onClose();
+        setOpen(false);
+      }}
+      maskClosable={!isEditing}
       open={open}
       footer={
         <div className="text-right">
-          <Button type="default" size="large" onClick={onClose}>
-            Đóng
-          </Button>
+          {isEditing && (
+            <Button
+              type="default"
+              onClick={() => {
+                setAvatar(user?.avatar?.url || "");
+                onClose();
+              }}
+            >
+              Hủy bỏ
+            </Button>
+          )}
           <Button
             type="primary"
-            size="large"
-            className={"ml-4"}
+            className={"ml-2"}
             onClick={toggleEdit}
             loading={loading}
           >
@@ -140,7 +147,7 @@ const Profile = ({ open, setOpen }) => {
             </Button>
           </Upload>
         )}
-        <Title level={4}>{user?.fullName}</Title>
+        <p className="text-xl font-semibold">{user?.fullName}</p>
       </div>
       <Form
         form={form}

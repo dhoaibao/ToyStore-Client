@@ -1,4 +1,5 @@
-import { Drawer, Steps, Button, message } from "antd";
+import { Drawer, Steps, Button, message, Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 import PropTypes from "prop-types";
 import moment from "moment";
 import CartItem from "../cart/CartItem";
@@ -13,12 +14,24 @@ const OrderDetail = ({
   setCancelOrder,
 }) => {
   const [items, setItems] = useState([]);
+  const [loadingOrder, setLoadingOrder] = useState(false);
   const [loading, setLoading] = useState(false);
   const [order, setOrder] = useState(null);
 
   useEffect(() => {
     const fetchOrder = async () => {
-      const orderResponse = await orderService.getOrderById(selectedOrder.orderId);
+      setLoadingOrder(true);
+      const orderResponse = await orderService.getOrderById(
+        selectedOrder.orderId
+      );
+      setOrder(orderResponse.data);
+      setLoadingOrder(false);
+    };
+
+    if (selectedOrder) {
+      fetchOrder();
+    }
+  }, [selectedOrder]);
 
   useEffect(() => {
     if (selectedOrder) {
@@ -78,89 +91,97 @@ const OrderDetail = ({
       onClose={onClose}
       closable={false}
     >
-      {selectedOrder && (
-        <div>
-          <div className="rounded-md p-2 mb-4">
-            <Steps
-              className="py-4"
-              status={getStepStatus(selectedOrder.orderStatus.orderStatusId)}
-              size="small"
-              current={
-                selectedOrder.orderStatus.orderStatusId !== 5
-                  ? selectedOrder.orderStatus.orderStatusId - 1
-                  : 0
-              }
-              items={items}
-            ></Steps>
-          </div>
-
-          <div className="bg-gray-100 p-4 rounded-md mb-4">
-            <p className="text-base font-semibold mb-2 text-primary">
-              Địa chỉ nhận hàng
-            </p>
-            <div className="space-y-1">
-              <p>
-                <span className="font-semibold">Địa chỉ: </span>
-                {selectedOrder.orderAddress.address}
-              </p>
-
-              <p>
-                <span className="font-semibold">Người nhận: </span>
-                {selectedOrder.orderAddress.contactName}
-              </p>
-
-              <p>
-                <span className="font-semibold">Số điện thoại:</span>
-                {selectedOrder.orderAddress.contactPhone}
-              </p>
-            </div>
-          </div>
-
-          <div className="bg-gray-100 p-4 rounded-md mb-4">
-            <p className="text-base font-semibold mb-2 text-primary">
-              Thông tin thanh toán
-            </p>
-            <div className="space-y-1">
-              <p>
-                <span className="font-semibold">Thời gian đặt hàng: </span>
-                {moment(selectedOrder.createdAt).format("DD/MM/YYYY  HH:mm")}
-              </p>
-              <p>
-                <span className="font-semibold">Phương thức thanh toán: </span>
-                {selectedOrder.paymentMethod.paymentMethodName}
-              </p>
-              <p>
-                <span className="font-semibold">Tổng tiền hàng: </span>
-                {selectedOrder.totalPrice.toLocaleString("vi-VN")}đ
-              </p>
-              <p>
-                <span className="font-semibold">Giảm: </span>-
-                {selectedOrder.totalDiscount.toLocaleString("vi-VN")}đ
-              </p>
-              <p>
-                <span className="font-semibold">Phí vận chuyển: </span>
-                {selectedOrder.shippingFee.toLocaleString("vi-VN")}đ
-              </p>
-              <p>
-                <span className="font-semibold">Tổng tiền: </span>
-                <span className="text-red-600 font-semibold">
-                  {selectedOrder.finalPrice.toLocaleString("vi-VN")}đ
-                </span>
-              </p>
-            </div>
-          </div>
-
-          <div className="p-4 rounded-md mb-4">
-            <p className="text-base font-semibold mb-2 text-primary">
-              Sản phẩm đã đặt
-            </p>
-            <CartItem
-              items={selectedOrder.orderDetails}
-              action={false}
-              checkbox={false}
-            ></CartItem>
-          </div>
+      {loadingOrder ? (
+        <div className="flex items-center justify-center h-full">
+          <Spin indicator={<LoadingOutlined spin />} size="large" />
         </div>
+      ) : (
+        order && (
+          <div>
+            <div className="rounded-md p-2 mb-4">
+              <Steps
+                className="py-4"
+                status={getStepStatus(order.orderStatus.orderStatusId)}
+                size="small"
+                current={
+                  order.orderStatus.orderStatusId !== 5
+                    ? order.orderStatus.orderStatusId - 1
+                    : 0
+                }
+                items={items}
+              ></Steps>
+            </div>
+
+            <div className="bg-gray-100 p-4 rounded-md mb-4">
+              <p className="text-base font-semibold mb-2 text-primary">
+                Địa chỉ nhận hàng
+              </p>
+              <div className="space-y-1">
+                <p>
+                  <span className="font-semibold">Địa chỉ: </span>
+                  {order.orderAddress.address}
+                </p>
+
+                <p>
+                  <span className="font-semibold">Người nhận: </span>
+                  {order.orderAddress.contactName}
+                </p>
+
+                <p>
+                  <span className="font-semibold">Số điện thoại:</span>
+                  {order.orderAddress.contactPhone}
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-gray-100 p-4 rounded-md mb-4">
+              <p className="text-base font-semibold mb-2 text-primary">
+                Thông tin thanh toán
+              </p>
+              <div className="space-y-1">
+                <p>
+                  <span className="font-semibold">Thời gian đặt hàng: </span>
+                  {moment(order.createdAt).format("DD/MM/YYYY  HH:mm")}
+                </p>
+                <p>
+                  <span className="font-semibold">
+                    Phương thức thanh toán:{" "}
+                  </span>
+                  {order.paymentMethod.paymentMethodName}
+                </p>
+                <p>
+                  <span className="font-semibold">Tổng tiền hàng: </span>
+                  {order.totalPrice.toLocaleString("vi-VN")}đ
+                </p>
+                <p>
+                  <span className="font-semibold">Giảm: </span>-
+                  {order.totalDiscount.toLocaleString("vi-VN")}đ
+                </p>
+                <p>
+                  <span className="font-semibold">Phí vận chuyển: </span>
+                  {order.shippingFee.toLocaleString("vi-VN")}đ
+                </p>
+                <p>
+                  <span className="font-semibold">Tổng tiền: </span>
+                  <span className="text-red-600 font-semibold">
+                    {order.finalPrice.toLocaleString("vi-VN")}đ
+                  </span>
+                </p>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-md mb-4">
+              <p className="text-base font-semibold mb-2 text-primary">
+                Sản phẩm đã đặt
+              </p>
+              <CartItem
+                items={order.orderDetails}
+                action={false}
+                checkbox={false}
+              ></CartItem>
+            </div>
+          </div>
+        )
       )}
     </Drawer>
   );

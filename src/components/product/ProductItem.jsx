@@ -8,39 +8,39 @@ const ProductItem = ({
   productName,
   slug,
   price,
-  discounts,
+  promotions,
   avgRate = 4.5,
   requiredAge,
 }) => {
   const discountedPrice =
-    discounts?.reduce((acc, discount) => {
-      if (discount.discountType === "percentage") {
-        return acc - (acc * discount.discountValue) / 100;
+    promotions?.reduce((acc, promotion) => {
+      if (promotion.discountType === "percentage") {
+        return acc - (acc * promotion.discountValue) / 100;
       }
 
-      if (discount.discountType === "fixed_amount") {
-        return acc - discount.discountValue;
+      if (promotion.discountType === "fixed_amount") {
+        return acc - promotion.discountValue;
       }
     }, price) || price;
 
   return (
     <div className="bg-white rounded-lg shadow-md p-4 relative h-96 w-60">
-      {discounts &&
-        discounts.map((discount) => (
+      {promotions &&
+        promotions.map((promotion) => (
           <div
-            key={discount.id}
+            key={promotion.id}
             className="absolute z-10 top-0 left-0 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-tr-lg rounded-br-lg"
           >
-            {discount.discountType === "percentage" &&
-              `Giảm ${discount.discountValue}%`}
+            {promotion.discountType === "percentage" &&
+              `Giảm ${promotion.discountValue}%`}
 
-            {discount.discountType === "fixed_amount" &&
-              `Giảm ${discount.discountValue.toLocaleString("vi-VN")}đ`}
+            {promotion.discountType === "fixed_amount" &&
+              `Giảm ${promotion.discountValue.toLocaleString("vi-VN")}đ`}
 
-            {discount.discountType.startsWith("buy_") &&
-              discount.discountType.includes("_get_") &&
+            {promotion.discountType.startsWith("buy_") &&
+              promotion.discountType.includes("_get_") &&
               (() => {
-                const [x, y] = discount.discountType.match(/\d+/g);
+                const [x, y] = promotion.discountType.match(/\d+/g);
                 return `Mua ${x} tặng ${y}`;
               })()}
           </div>
@@ -96,7 +96,7 @@ ProductItem.propTypes = {
   brand: PropTypes.object.isRequired,
   productName: PropTypes.string.isRequired,
   price: PropTypes.number.isRequired,
-  discounts: PropTypes.array,
+  promotions: PropTypes.array,
   avgRate: PropTypes.number,
   slug: PropTypes.string.isRequired,
   requiredAge: PropTypes.number,

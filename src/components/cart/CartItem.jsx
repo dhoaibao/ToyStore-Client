@@ -118,14 +118,14 @@ const CartItem = ({
                       </Text>
                     )}
                   </Text>
-                  {item?.product?.discounts?.map((discount) => {
+                  {item?.product?.promotions?.map((promotion) => {
                     if (
-                      discount.discountType.startsWith("buy_") &&
-                      discount.discountType.includes("_get_")
+                      promotion.discountType.startsWith("buy_") &&
+                      promotion.discountType.includes("_get_")
                     ) {
-                      const [x, y] = discount.discountType.match(/\d+/g);
+                      const [x, y] = promotion.discountType.match(/\d+/g);
                       return (
-                        <Text key={discount.discountId}>
+                        <Text key={promotion.promotionId}>
                           <div className="flex mt-2 items-center">
                             <img
                               src={

@@ -1,13 +1,13 @@
 import createApiClient from './api.service';
 
-class DiscountService {
+class PromotionService {
     constructor(path = '/discount') {
         this.api = createApiClient(path);
     }
 
-    async getAllDiscounts() {
+    async getAllPromotions() {
         return (await this.api.get('/')).data;
     }
 }
 
-export const discountService = new DiscountService();
+export const discountService = new PromotionService();

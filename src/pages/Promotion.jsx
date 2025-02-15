@@ -10,11 +10,11 @@ import {
   Spin,
 } from "antd";
 import { HomeOutlined, LoadingOutlined } from "@ant-design/icons";
-import { discountService } from "../services";
+import { promotiontService } from "../services";
 
 const { Paragraph, Text } = Typography;
 
-const Discount = () => {
+const Promotion = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const searchParams = useMemo(
@@ -27,27 +27,27 @@ const Discount = () => {
   const [totalPage, setTotalPage] = useState(50);
   const [loading, setLoading] = useState(false);
 
-  const [discounts, setDiscounts] = useState([]);
+  const [promotionts, setPromotions] = useState([]);
 
   useEffect(() => {
     setCurrentPage(page);
   }, [page]);
 
   useEffect(() => {
-    const fetchDiscounts = async () => {
+    const fetchPromotions = async () => {
       setLoading(true);
       try {
-        const result = await discountService.getAllDiscounts();
-        setDiscounts(result.data);
+        const result = await promotiontService.getAllPromotions();
+        setPromotions(result.data);
         setTotalPage(result.pagination.totalPages);
       } catch (error) {
-        console.log("Failed to fetch discounts: ", error);
+        console.log("Failed to fetch promotionts: ", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchDiscounts();
+    fetchPromotions();
   }, []);
 
   const updateQuery = (key, value) => {
@@ -87,21 +87,21 @@ const Discount = () => {
           <div className="flex items-center justify-center h-screen">
             <Spin indicator={<LoadingOutlined spin />} size="large" />
           </div>
-        ) : discounts?.length > 0 ? (
+        ) : promotionts?.length > 0 ? (
           <List
             grid={{ gutter: 14, column: 2 }}
-            dataSource={discounts}
-            renderItem={(discount) => (
+            dataSource={promotionts}
+            renderItem={(promotiont) => (
               <List.Item>
                 <Card
                   onClick={() =>
-                    navigate(`/products?discount=${discount.discountId}`)
+                    navigate(`/products?promotion=${promotiont.promotiontId}`)
                   }
                   hoverable
                   cover={
                     <img
-                      alt={discount?.discountName}
-                      src={discount?.discountThumbnail.url}
+                      alt={promotiont?.promotiontName}
+                      src={promotiont?.promotiontThumbnail.url}
                       className="h-52 object-cover rounded-lg"
                     />
                   }
@@ -110,7 +110,7 @@ const Discount = () => {
                   <Card.Meta
                     title={
                       <p className="text-xl font-bold text-primary line-clamp-1">
-                        {discount?.discountName}
+                        {promotiont?.promotiontName}
                       </p>
                     }
                     description={
@@ -119,11 +119,11 @@ const Discount = () => {
                           ellipsis={{ rows: 3 }}
                           className="text-base text-gray-700"
                         >
-                          {discount.description}
+                          {promotiont.description}
                         </Paragraph>
                         <Text className="text-sm text-gray-700">
                           Khuyến mãi đến ngày:{" "}
-                          {new Date(discount?.endDate).toLocaleDateString()}
+                          {new Date(promotiont?.endDate).toLocaleDateString()}
                         </Text>
                       </>
                     }
@@ -137,7 +137,7 @@ const Discount = () => {
             <Empty description={"Không có khuyến mãi"} />
           </div>
         )}
-        {discounts?.length > 0 && (
+        {promotionts?.length > 0 && (
           <Pagination
             align="center"
             defaultCurrent={1}
@@ -152,4 +152,4 @@ const Discount = () => {
   );
 };
 
-export default Discount;
+export default Promotion;

@@ -49,13 +49,13 @@ const ProductDetail = () => {
   ];
 
   const discountedPrice =
-    product?.discounts?.reduce((acc, discount) => {
-      if (discount.discountType === "percentage") {
-        return acc - (acc * discount.discountValue) / 100;
+    product?.promotions?.reduce((acc, promotion) => {
+      if (promotion.discountType === "percentage") {
+        return acc - (acc * promotion.discountValue) / 100;
       }
 
-      if (discount.discountType === "fixed_amount") {
-        return acc - discount.discountValue;
+      if (promotion.discountType === "fixed_amount") {
+        return acc - promotion.discountValue;
       }
     }, product?.price) || product?.price;
 
@@ -218,7 +218,7 @@ const ProductDetail = () => {
                   | {requiredAge}+
                 </p>
                 <div className="mt-4">
-                  {product?.discounts ? (
+                  {product?.promotions ? (
                     <>
                       <p className="text-gray-500 line-through font-semibold">
                         {discountedPrice !== product?.price &&
@@ -228,37 +228,38 @@ const ProductDetail = () => {
                       </p>
                       <p className="text-lg text-red-600 font-semibold">
                         Giá hiện tại: {discountedPrice.toLocaleString("vi-VN")}đ
-                        {product?.discounts &&
-                          product.discounts.map((discount, index) => (
+                        {product?.promotions &&
+                          product.promotions.map((promotion, index) => (
                             <>
                               <span
                                 key={index}
                                 className="ml-4 text-white bg-red-600 p-1 rounded-md text-sm"
                               >
-                                {discount.discountType === "percentage" &&
-                                  `-${discount.discountValue}%`}
+                                {promotion.discountType === "percentage" &&
+                                  `-${promotion.discountValue}%`}
 
-                                {discount.discountType === "fixed_amount" &&
-                                  `-${discount.discountValue.toLocaleString(
+                                {promotion.discountType === "fixed_amount" &&
+                                  `-${promotion.discountValue.toLocaleString(
                                     "vi-VN"
                                   )}đ`}
 
-                                {discount.discountType.startsWith("buy_") &&
-                                  discount.discountType.includes("_get_") &&
+                                {promotion.discountType.startsWith("buy_") &&
+                                  promotion.discountType.includes("_get_") &&
                                   (() => {
                                     const [x, y] =
-                                      discount.discountType.match(/\d+/g);
+                                      promotion.discountType.match(/\d+/g);
                                     return `Mua ${x} tặng ${y}`;
                                   })()}
                               </span>
                               <br />
                               <span className="text-sm font-normal text-gray-800 italic">
                                 (Thời gian khuyến mãi:{" "}
-                                {moment(discount.startDate).format(
+                                {moment(promotion.startDate).format(
                                   "DD/MM/YYYY"
                                 )}{" "}
                                 -{" "}
-                                {moment(discount.endDate).format("DD/MM/YYYY")})
+                                {moment(promotion.endDate).format("DD/MM/YYYY")}
+                                )
                               </span>
                             </>
                           ))}

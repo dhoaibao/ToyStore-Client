@@ -1,8 +1,8 @@
-import { Drawer, List, Tag, Typography, Button, Divider } from "antd";
+import { Drawer, List, Tag, Typography, Empty, Divider } from "antd";
 import PropTypes from "prop-types";
 import { useState } from "react";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const VoucherManagement = ({ open, setOpen }) => {
   const [vouchers, setVouchers] = useState([
@@ -40,23 +40,14 @@ const VoucherManagement = ({ open, setOpen }) => {
   return (
     <Drawer
       closable={false}
-      title={<Title level={3}>Kho voucher của bạn</Title>}
+      title={<p className="text-xl font-semibold">Kho mã giảm giá</p>}
       open={open}
       onClose={closeDrawer}
       width={600}
-      footer={
-        <div style={{ textAlign: "right" }}>
-          <Button type="primary" onClick={closeDrawer}>
-            Đóng
-          </Button>
-        </div>
-      }
     >
       {vouchers.length === 0 ? (
-        <div style={{ textAlign: "center", marginTop: "50px" }}>
-          <Text style={{ fontSize: "16px", color: "#888" }}>
-            Hiện tại bạn chưa có voucher nào.
-          </Text>
+        <div className="flex justify-center items-center h-full">
+          <Empty description={"Hiện tại bạn không có voucher nào!"} />
         </div>
       ) : (
         <List
@@ -65,6 +56,7 @@ const VoucherManagement = ({ open, setOpen }) => {
           renderItem={(item) => (
             <List.Item>
               <div
+                className=""
                 style={{
                   padding: "15px",
                   border: "1px solid #f0f0f0",

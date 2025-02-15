@@ -10,7 +10,7 @@ import {
   Spin,
 } from "antd";
 import { HomeOutlined, LoadingOutlined } from "@ant-design/icons";
-import { promotiontService } from "../services";
+import { promotionService } from "../services";
 
 const { Paragraph, Text } = Typography;
 
@@ -27,7 +27,7 @@ const Promotion = () => {
   const [totalPage, setTotalPage] = useState(50);
   const [loading, setLoading] = useState(false);
 
-  const [promotionts, setPromotions] = useState([]);
+  const [promotions, setPromotions] = useState([]);
 
   useEffect(() => {
     setCurrentPage(page);
@@ -37,11 +37,11 @@ const Promotion = () => {
     const fetchPromotions = async () => {
       setLoading(true);
       try {
-        const result = await promotiontService.getAllPromotions();
+        const result = await promotionService.getAllPromotions();
         setPromotions(result.data);
         setTotalPage(result.pagination.totalPages);
       } catch (error) {
-        console.log("Failed to fetch promotionts: ", error);
+        console.log("Failed to fetch promotions: ", error);
       } finally {
         setLoading(false);
       }
@@ -87,21 +87,21 @@ const Promotion = () => {
           <div className="flex items-center justify-center h-screen">
             <Spin indicator={<LoadingOutlined spin />} size="large" />
           </div>
-        ) : promotionts?.length > 0 ? (
+        ) : promotions?.length > 0 ? (
           <List
             grid={{ gutter: 14, column: 2 }}
-            dataSource={promotionts}
-            renderItem={(promotiont) => (
+            dataSource={promotions}
+            renderItem={(promotion) => (
               <List.Item>
                 <Card
                   onClick={() =>
-                    navigate(`/products?promotion=${promotiont.promotiontId}`)
+                    navigate(`/products?promotion=${promotion.promotionId}`)
                   }
                   hoverable
                   cover={
                     <img
-                      alt={promotiont?.promotiontName}
-                      src={promotiont?.promotiontThumbnail.url}
+                      alt={promotion?.promotionName}
+                      src={promotion?.promotionThumbnail.url}
                       className="h-52 object-cover rounded-lg"
                     />
                   }
@@ -110,7 +110,7 @@ const Promotion = () => {
                   <Card.Meta
                     title={
                       <p className="text-xl font-bold text-primary line-clamp-1">
-                        {promotiont?.promotiontName}
+                        {promotion?.promotionName}
                       </p>
                     }
                     description={
@@ -119,11 +119,11 @@ const Promotion = () => {
                           ellipsis={{ rows: 3 }}
                           className="text-base text-gray-700"
                         >
-                          {promotiont.description}
+                          {promotion.description}
                         </Paragraph>
                         <Text className="text-sm text-gray-700">
                           Khuyến mãi đến ngày:{" "}
-                          {new Date(promotiont?.endDate).toLocaleDateString()}
+                          {new Date(promotion?.endDate).toLocaleDateString()}
                         </Text>
                       </>
                     }
@@ -137,7 +137,7 @@ const Promotion = () => {
             <Empty description={"Không có khuyến mãi"} />
           </div>
         )}
-        {promotionts?.length > 0 && (
+        {promotions?.length > 0 && (
           <Pagination
             align="center"
             defaultCurrent={1}

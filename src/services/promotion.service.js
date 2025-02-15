@@ -10,4 +10,4 @@ class PromotionService {
     }
 }
 
-export const discountService = new PromotionService();
+export const promotionService = new PromotionService();

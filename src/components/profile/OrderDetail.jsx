@@ -14,6 +14,11 @@ const OrderDetail = ({
 }) => {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [order, setOrder] = useState(null);
+
+  useEffect(() => {
+    const fetchOrder = async () => {
+      const orderResponse = await orderService.getOrderById(selectedOrder.orderId);
 
   useEffect(() => {
     if (selectedOrder) {

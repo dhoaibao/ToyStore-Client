@@ -1,8 +1,33 @@
-# React + Vite
+# ToyStore
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+ToyStore is an e-commerce website specializing in toy products, providing users with a seamless shopping experience. Customers can browse products, view detailed information, search by image and voice, add items to their cart, and place orders with ease.
 
-Currently, two official plugins are available:
+<p align="center">
+  <img src="public/home_page.png" alt="HomePage" width="45%" />
+  <img src="public/checkout.png" alt="CheckoutPage" width="45%" />
+</p>
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+<p align="center">
+  <img src="public/product_detail.png" alt="ProductDetail" width="45%" />
+  <img src="public/order_detail.png" alt="OrderDetail" width="45%" />
+</p>
+
+***<p align="center">(Sample Screenshot)</p>***
+
+## Key Features
+- Browse toy products with detailed information.
+- Add products to cart and complete orders.
+- Image-based product search using vector embeddings (TransformerJS - Hugging Face).
+- Voice search for finding products.
+- Retrieve user's current location via Browser Geolocation API.
+- User authentication with JWT and Google login (Firebase).
+- OTP verification during user registration.
+- Redis caching for user information and OTP validation.
+
+## Technologies Used
+- **Frontend:** React, Ant Design, Tailwind CSS
+- **Backend:** Node.js, Express.js, PostgreSQL, Redis
+- **Authentication:** JWT, Firebase Authentication (Google login)
+- **Search:** Image Search with TransformerJS (Hugging Face), Cosine Similarity for vector comparison
+- **Geolocation:** Browser Geolocation API
+- **Storage:** Supabase Storage

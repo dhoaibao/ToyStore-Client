@@ -3,13 +3,13 @@
 ToyStore is an e-commerce website specializing in toy products, providing users with a seamless shopping experience. Customers can browse products, view detailed information, search by image and voice, add items to their cart, and place orders with ease.
 
 <p align="center">
-  <img src="public/home_page.png" alt="HomePage" width="45%" />
-  <img src="public/checkout.png" alt="CheckoutPage" width="45%" />
+  <img src="https://github.com/dhoaibao/ToyStore-Client/blob/main/public/home_page.png" alt="HomePage" width="45%" />
+  <img src="https://github.com/dhoaibao/ToyStore-Client/blob/main/public/checkout.png" alt="CheckoutPage" width="45%" />
 </p>
 
 <p align="center">
-  <img src="public/product_detail.png" alt="ProductDetail" width="45%" />
-  <img src="public/order_detail.png" alt="OrderDetail" width="45%" />
+  <img src="https://github.com/dhoaibao/ToyStore-Client/blob/main/public/product_detail.png" alt="ProductDetail" width="45%" />
+  <img src="https://github.com/dhoaibao/ToyStore-Client/blob/main/public/order_detail.png" alt="OrderDetail" width="45%" />
 </p>
 
 ***<p align="center">(Sample Screenshot)</p>***

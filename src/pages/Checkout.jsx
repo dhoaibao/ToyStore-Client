@@ -67,7 +67,7 @@ const CheckoutPage = () => {
   };
 
   useEffect(() => {
-    if (selectedAddress) {
+    if (selectedAddress && orderItems.length > 0) {
       const address = addresses.find(
         (item) => item.addressId === selectedAddress
       );

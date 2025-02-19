@@ -1,38 +1,31 @@
-import { Drawer, List, Tag, Typography, Empty, Divider } from "antd";
+import { Drawer, Empty, Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
 import PropTypes from "prop-types";
-import { useState } from "react";
-
-const { Text } = Typography;
+import { useState, useEffect } from "react";
+import { Ticket } from "lucide-react";
+import { voucherService } from "../../services";
+import moment from "moment";
 
 const VoucherManagement = ({ open, setOpen }) => {
-  const [vouchers, setVouchers] = useState([
-    {
-      id: 1,
-      name: "Giảm 10% toàn bộ sản phẩm",
-      code: "SALE10",
-      discount: "10%",
-      expiry: "2024-12-31",
-      status: "Còn hiệu lực",
-    },
-    {
-      id: 2,
-      name: "Giảm 20k cho đơn từ 200k",
-      code: "SALE20K",
-      discount: "20,000đ",
-      expiry: "2024-11-30",
-      status: "Đã sử dụng",
-    },
-    {
-      id: 3,
-      name: "Giảm 50% dịch vụ vận chuyển",
-      code: "SHIP50",
-      discount: "50%",
-      expiry: "2024-10-15",
-      status: "Hết hạn",
-    },
-  ]);
+  const [vouchers, setVouchers] = useState([]);
+  const [loading, setLoading] = useState(false);
 
-  // Hàm đóng drawer
+  useEffect(() => {
+    const fetchVouchers = async () => {
+      setLoading(true);
+      try {
+        const response = await voucherService.getVoucherByUser();
+        setVouchers(response.data);
+        setLoading(false);
+      } catch (error) {
+        console.error(error);
+        setLoading(false);
+      }
+    };
+
+    if (open) fetchVouchers();
+  }, [open]);
+
   const closeDrawer = () => {
     setOpen(false);
   };
@@ -40,73 +33,58 @@ const VoucherManagement = ({ open, setOpen }) => {
   return (
     <Drawer
       closable={false}
-      title={<p className="text-xl font-semibold">Kho mã giảm giá</p>}
+      title={<p className="mb-4 text-xl font-semibold">Kho mã giảm giá</p>}
       open={open}
       onClose={closeDrawer}
       width={600}
     >
-      {vouchers.length === 0 ? (
-        <div className="flex justify-center items-center h-full">
-          <Empty description={"Hiện tại bạn không có voucher nào!"} />
+      {loading ? (
+        <div className="flex items-center justify-center h-full">
+          <Spin indicator={<LoadingOutlined spin />} size="large" />
+        </div>
+      ) : vouchers.length > 0 ? (
+        <div className="grid grid-cols-1 gap-3">
+          {vouchers.map((voucher) => (
+            <div
+              key={voucher.voucherId}
+              className="bg-gray-100 p-4 rounded-lg shadow-sm space-y-1"
+            >
+              <div className="flex text-primary">
+                <Ticket strokeWidth={1} size={30} />
+                <p className="text-lg ml-2 font-bold text-primary">
+                  {voucher.discountType === "percentage" &&
+                    `Giảm ${voucher.discountValue}%`}
+
+                  {voucher.discountType === "fixed_amount" &&
+                    `Giảm ${voucher.discountValue.toLocaleString("vi-VN")}đ`}
+                </p>
+              </div>
+              <p>
+                <span className="font-semibold">Mã voucher: </span>
+                {voucher.voucherCode}
+              </p>
+              <p>
+                <span className="font-semibold">Điều kiện áp dụng: </span>
+                giảm
+                {voucher.discountType === "percentage" &&
+                  ` tối đa ${voucher.maxPriceDiscount.toLocaleString(
+                    "vi-VN"
+                  )}đ`}
+                {` cho đơn hàng từ ${voucher.minOrderPrice.toLocaleString(
+                  "vi-VN"
+                )}đ.`}
+              </p>
+              <p>
+                <span className="font-semibold">Ngày hết hạn: </span>
+                {moment(voucher.endDate).format("DD/MM/YYYY")}
+              </p>
+            </div>
+          ))}
         </div>
       ) : (
-        <List
-          itemLayout="vertical"
-          dataSource={vouchers}
-          renderItem={(item) => (
-            <List.Item>
-              <div
-                className=""
-                style={{
-                  padding: "15px",
-                  border: "1px solid #f0f0f0",
-                  borderRadius: "8px",
-                  backgroundColor:
-                    item.status === "Còn hiệu lực"
-                      ? "#f6ffed"
-                      : item.status === "Đã sử dụng"
-                      ? "#fffbe6"
-                      : "#fff1f0",
-                }}
-              >
-                <Text strong style={{ fontSize: "16px" }}>
-                  {item.name}
-                </Text>
-                <Divider style={{ margin: "10px 0" }} />
-                <div>
-                  <Text>Mã: </Text>
-                  <Tag color="blue" style={{ fontSize: "14px" }}>
-                    {item.code}
-                  </Tag>
-                </div>
-                <div style={{ marginTop: "5px" }}>
-                  <Text>Giảm giá: </Text>
-                  <Text strong style={{ color: "#52c41a" }}>
-                    {item.discount}
-                  </Text>
-                </div>
-                <div style={{ marginTop: "5px" }}>
-                  <Text>Hạn sử dụng: </Text>
-                  <Text>{item.expiry}</Text>
-                </div>
-                <div style={{ marginTop: "5px" }}>
-                  <Text>Trạng thái: </Text>
-                  <Tag
-                    color={
-                      item.status === "Còn hiệu lực"
-                        ? "green"
-                        : item.status === "Đã sử dụng"
-                        ? "gold"
-                        : "red"
-                    }
-                  >
-                    {item.status}
-                  </Tag>
-                </div>
-              </div>
-            </List.Item>
-          )}
-        />
+        <div className="flex justify-center items-center h-full">
+          <Empty description={"Không có mã giảm giá nào!"} />
+        </div>
       )}
     </Drawer>
   );

@@ -10,8 +10,9 @@ const PaymentInfo = ({
   setPaymentMethod,
   totalPrice,
   shippingFee,
+  voucherDiscount,
   finalPrice,
-  totalDiscount,
+  totalDiscountedPrice,
   onSubmit,
   loading,
 }) => {
@@ -28,8 +29,6 @@ const PaymentInfo = ({
           Thông tin thanh toán
         </Text>
       }
-      bordered={false}
-      className="rounded-lg shadow-md bg-white"
     >
       <Form layout="vertical" form={form}>
         <Form.Item
@@ -69,7 +68,9 @@ const PaymentInfo = ({
           ></Select>
         </Form.Item>
         <Form.Item
-          label={<Text strong>Mã giảm giá:</Text>}
+          label={
+            <Text strong>Mã giảm giá: {selectedVoucher?.voucherCode}</Text>
+          }
           name="voucherCode"
           rules={[
             {
@@ -80,7 +81,19 @@ const PaymentInfo = ({
         >
           <Text>
             {selectedVoucher
-              ? `Mã đã chọn: ${selectedVoucher}`
+              ? selectedVoucher.discountType === "percentage"
+                ? `Giảm ${
+                    selectedVoucher.discountValue
+                  }%  tối đa ${selectedVoucher.maxPriceDiscount.toLocaleString(
+                    "vi-VN"
+                  )}đ cho đơn hàng từ ${selectedVoucher.minOrderPrice.toLocaleString(
+                    "vi-VN"
+                  )}đ`
+                : `Giảm ${selectedVoucher.discountValue.toLocaleString(
+                    "vi-VN"
+                  )}đ cho đơn hàng từ ${selectedVoucher.minOrderPrice.toLocaleString(
+                    "vi-VN"
+                  )}đ`
               : "Không có mã giảm giá được chọn"}
           </Text>
           <br />
@@ -92,7 +105,7 @@ const PaymentInfo = ({
         </Form.Item>
       </Form>
       <Divider />
-      <div className="mb-4">
+      <div className="mb-3">
         <Text>Tổng tiền hàng: </Text>
         <Text strong>{totalPrice().toLocaleString("vi-VN")}đ</Text>
       </div>
@@ -100,18 +113,24 @@ const PaymentInfo = ({
         <Text>Phí vận chuyển: </Text>
         <Text strong>{shippingFee.toLocaleString("vi-VN")}đ</Text>
       </div>
-      <div className="mb-4">
+      <div className="mb-3">
         <Text className="italic text-xs">
           (Đơn vị vận chuyển: Giao Hàng Nhanh)
         </Text>
       </div>
-      <div className="mb-4">
-        <Text>Giảm: </Text>
+      <div className="mb-3">
+        <Text>Khuyến mãi: </Text>
         <Text strong>
-          -{(totalPrice() - totalDiscount()).toLocaleString("vi-VN")}đ
+          -{(totalPrice() - totalDiscountedPrice()).toLocaleString("vi-VN")}đ
         </Text>
       </div>
-      <div className="mb-5  text-lg font-bold">
+      <div className="mb-3">
+        <Text>Voucher: </Text>
+        <Text strong>
+          -{voucherDiscount().toLocaleString("vi-VN")}đ
+        </Text>
+      </div>
+      <div className="mb-3  text-lg font-bold">
         <Text>Tổng: </Text>
         <Text className="text-red-600" strong>
           {finalPrice().toLocaleString("vi-VN")}đ
@@ -137,8 +156,9 @@ PaymentInfo.propTypes = {
   setPaymentMethod: PropTypes.func.isRequired,
   totalPrice: PropTypes.func.isRequired,
   shippingFee: PropTypes.number.isRequired,
+  voucherDiscount: PropTypes.func.isRequired,
   finalPrice: PropTypes.func.isRequired,
-  totalDiscount: PropTypes.func.isRequired,
+  totalDiscountedPrice: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   loading: PropTypes.bool.isRequired,
 };

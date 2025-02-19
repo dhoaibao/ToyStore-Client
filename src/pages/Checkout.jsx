@@ -2,9 +2,10 @@ import { useState, useEffect, useMemo } from "react";
 import { Breadcrumb, Row, Col, message } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
 import { useLocation } from "react-router-dom";
-import { GHNService, orderService } from "../services";
+import { GHNService, orderService, voucherService } from "../services";
 import { useSelector, useDispatch } from "react-redux";
 import { getAddressByUser } from "../redux/thunks/addressThunk";
+import { getCartByUser } from "../redux/thunks/cartThunk";
 import discountedPrice from "../utils/discountedPrice";
 import ShippingAddress from "../components/checkout/ShippingAddress";
 import AddressModal from "../components/checkout/AddressModal";
@@ -25,8 +26,10 @@ const CheckoutPage = () => {
   const [paymentMethod, setPaymentMethod] = useState(null);
   const [orderSuccess, setOrderSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [vouchers, setVouchers] = useState([]);
 
   const addresses = useSelector((state) => state.address.addresses);
+  const cartId = useSelector((state) => state.cart.cartId);
 
   const addressString = useMemo(
     () => (address) =>
@@ -35,6 +38,14 @@ const CheckoutPage = () => {
   );
 
   const { orderItems } = location.state || [];
+
+  useEffect(() => {
+    const fetchVouchers = async () => {
+      const response = await voucherService.getVoucherByUser();
+      setVouchers(response.data);
+    };
+    fetchVouchers();
+  }, []);
 
   useEffect(() => {
     dispatch(getAddressByUser());
@@ -70,16 +81,7 @@ const CheckoutPage = () => {
     }
   }, [selectedAddress, orderItems, addresses]);
 
-  const vouchers = [
-    {
-      id: 1,
-      code: "DISCOUNT10",
-      description: "Giảm 10% cho đơn hàng trên 1,000,000đ",
-    },
-    { id: 2, code: "FREESHIP", description: "Miễn phí vận chuyển" },
-  ];
-
-  const totalDiscount = () => {
+  const totalDiscountedPrice = () => {
     return orderItems?.reduce(
       (total, item) => total + discountedPrice(item.product) * item.quantity,
       0
@@ -93,8 +95,26 @@ const CheckoutPage = () => {
     );
   };
 
+  const voucherDiscount = () => {
+    if (selectedVoucher) {
+      if (selectedVoucher.discountType === "percentage") {
+        if (
+          totalPrice() * (selectedVoucher.discountValue / 100) >
+          selectedVoucher.maxPriceDiscount
+        ) {
+          return selectedVoucher.maxPriceDiscount;
+        } else {
+          return totalPrice() * (selectedVoucher.discountValue / 100);
+        }
+      } else {
+        return totalPrice() - selectedVoucher.discountValue;
+      }
+    }
+    return 0;
+  };
+
   const finalPrice = () => {
-    return totalDiscount() + shippingFee;
+    return totalDiscountedPrice() + shippingFee - voucherDiscount();
   };
 
   const handleSubmit = async () => {
@@ -103,19 +123,21 @@ const CheckoutPage = () => {
       (item) => item.addressId === selectedAddress
     );
     const data = {
+      voucherId: selectedVoucher ? selectedVoucher.voucherId : null,
       totalPrice: totalPrice(),
-      totalDiscount: totalPrice() - totalDiscount(),
+      totalDiscount: totalPrice() - totalDiscountedPrice() + voucherDiscount(),
       shippingFee,
       finalPrice: finalPrice(),
       paymentMethodId: paymentMethod,
       orderItems,
+      cartId,
       addressString: addressString(address),
       contactName: address.contactName,
       contactPhone: address.contactPhone,
     };
-    console.log("data: ", data);
     try {
       await orderService.createOrder(data);
+      dispatch(getCartByUser());
       setOrderSuccess(true);
       setLoading(false);
     } catch (error) {
@@ -123,15 +145,6 @@ const CheckoutPage = () => {
       setLoading(false);
       message.error("Xảy ra lỗi trong quá trình đặt hàng!");
     }
-  };
-
-  const handleApplyVoucher = () => {
-    if (!selectedVoucher) {
-      message.error("Vui lòng chọn hoặc nhập mã voucher!");
-      return;
-    }
-    message.success(`Áp dụng mã voucher: ${selectedVoucher}`);
-    setIsVoucherModalOpen(false);
   };
 
   return (
@@ -165,7 +178,7 @@ const CheckoutPage = () => {
                 <Col className="w-full">
                   <OrderItem
                     orderItems={orderItems}
-                    totalDiscount={totalDiscount}
+                    totalDiscountedPrice={totalDiscountedPrice}
                     totalPrice={totalPrice}
                   ></OrderItem>
                 </Col>
@@ -178,8 +191,9 @@ const CheckoutPage = () => {
                   setIsVoucherModalOpen={setIsVoucherModalOpen}
                   totalPrice={totalPrice}
                   shippingFee={shippingFee}
+                  voucherDiscount={voucherDiscount}
                   finalPrice={finalPrice}
-                  totalDiscount={totalDiscount}
+                  totalDiscountedPrice={totalDiscountedPrice}
                   setPaymentMethod={setPaymentMethod}
                   onSubmit={handleSubmit}
                   loading={loading}
@@ -203,9 +217,7 @@ const CheckoutPage = () => {
         open={isVoucherModalOpen}
         setOpen={setIsVoucherModalOpen}
         vouchers={vouchers}
-        selectedVoucher={selectedVoucher}
-        setSelectedVoucher={setSelectedVoucher}
-        handleApplyVoucher={handleApplyVoucher}
+        handleApplyVoucher={setSelectedVoucher}
       ></VoucherModal>
     </>
   );

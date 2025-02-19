@@ -1,59 +1,74 @@
-import { Input, Form, List, Modal, Typography } from "antd";
+import { Input, List, Modal, message } from "antd";
 import PropTypes from "prop-types";
+import { Ticket } from "lucide-react";
+import { useState } from "react";
 
-const { Text } = Typography;
-
-const VoucherModal = ({
-  open,
-  setOpen,
-  handleApplyVoucher,
-  vouchers,
-  selectedVoucher,
-  setSelectedVoucher,
-}) => {
-  const [form] = Form.useForm();
-
+const VoucherModal = ({ open, setOpen, vouchers, handleApplyVoucher }) => {
+  const [selectedVoucherCode, setSelectedVoucherCode] = useState("");
+  const handleSubmit = () => {
+    const voucher = vouchers.find(
+      (voucher) => voucher.voucherCode === selectedVoucherCode
+    );
+    if (voucher) {
+      handleApplyVoucher(voucher);
+      setOpen(false);
+    } else {
+      message.error("Mã giảm giá không tồn tại!");
+    }
+  };
   return (
     <Modal
       closable={false}
-      title="Chọn Mã Giảm Giá"
+      title="Chọn mã giảm giá"
       open={open}
       onCancel={() => setOpen(false)}
-      onOk={handleApplyVoucher}
+      onOk={handleSubmit}
       okText="Áp dụng"
       cancelText="Hủy"
+      maskClosable={false}
     >
-      <List
-        dataSource={vouchers}
-        renderItem={(voucher) => (
-          <List.Item
-            onClick={() => setSelectedVoucher(voucher.code)}
-            style={{
-              cursor: "pointer",
-              padding: "10px",
-              border:
-                selectedVoucher === voucher.code
-                  ? "2px solid #1890ff"
-                  : "1px solid #d9d9d9",
-              borderRadius: "8px",
-              marginBottom: "10px",
-            }}
-          >
-            <Text strong>{voucher.code}</Text>
-            <br />
-            <Text>{voucher.description}</Text>
-          </List.Item>
-        )}
-      />
-      <Form layout="vertical" form={form}>
-        <Form.Item label="Hoặc nhập mã voucher">
-          <Input
-            placeholder="Nhập mã voucher"
-            value={selectedVoucher}
-            onChange={(e) => setSelectedVoucher(e.target.value)}
-          />
-        </Form.Item>
-      </Form>
+      <div style={{ maxHeight: "300px", overflowY: "auto" }}>
+        <List
+          dataSource={vouchers}
+          renderItem={(voucher) => (
+            <List.Item
+              onClick={() => setSelectedVoucherCode(voucher.voucherCode)}
+              className={`cursor-pointer bg-gray-100 rounded-lg mb-2 ${
+                selectedVoucherCode === voucher.voucherCode ? "bg-gray-200" : ""
+              }`}
+            >
+              <div className="flex flex-col px-4">
+                <div className="flex items-center text-primary">
+                  <Ticket strokeWidth={1} size={30} />
+                  <p className="ml-2 font-semibold">{voucher.voucherCode}</p>
+                </div>
+                <p>
+                  {voucher.discountType === "percentage" &&
+                    `Giảm ${
+                      voucher.discountValue
+                    }%  tối đa ${voucher.maxPriceDiscount.toLocaleString(
+                      "vi-VN"
+                    )}đ`}
+                  {voucher.discountType === "fixed_amount" &&
+                    `Giảm ${voucher.discountValue.toLocaleString(
+                      "vi-VN"
+                    )}đ`}{" "}
+                  cho đơn hàng từ{" "}
+                  {voucher.minOrderPrice.toLocaleString("vi-VN")}đ
+                </p>
+              </div>
+            </List.Item>
+          )}
+        />
+      </div>
+      <div>
+        <p className="mb-2">Hoặc nhập mã giảm giá:</p>
+        <Input
+          placeholder="Nhập mã giảm giá"
+          value={selectedVoucherCode}
+          onChange={(e) => setSelectedVoucherCode(e.target.value)}
+        />
+      </div>
     </Modal>
   );
 };
@@ -61,10 +76,8 @@ const VoucherModal = ({
 VoucherModal.propTypes = {
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
-  handleApplyVoucher: PropTypes.func.isRequired,
   vouchers: PropTypes.array.isRequired,
-  selectedVoucher: PropTypes.string.isRequired,
-  setSelectedVoucher: PropTypes.func.isRequired,
+  handleApplyVoucher: PropTypes.func.isRequired,
 };
 
 export default VoucherModal;

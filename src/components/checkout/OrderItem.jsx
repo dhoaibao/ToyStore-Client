@@ -4,7 +4,7 @@ import PropTypes from "prop-types";
 
 const { Text } = Typography;
 
-const OrderItem = ({ orderItems, totalDiscount, totalPrice }) => {
+const OrderItem = ({ orderItems, totalDiscountedPrice, totalPrice }) => {
   return (
     <Card
       title={
@@ -19,10 +19,10 @@ const OrderItem = ({ orderItems, totalDiscount, totalPrice }) => {
       <div className="text-right">
         <Text strong>Tổng: </Text>
         <Text strong className="text-red-600">
-          {totalDiscount().toLocaleString("vi-VN")}đ
+          {totalDiscountedPrice().toLocaleString("vi-VN")}đ
         </Text>
         <span style={{ margin: "0 4px" }}></span>
-        {totalPrice() !== totalDiscount() && (
+        {totalPrice() !== totalDiscountedPrice() && (
           <Text delete style={{ color: "gray" }}>
             {totalPrice().toLocaleString("vi-VN")}đ
           </Text>
@@ -34,7 +34,7 @@ const OrderItem = ({ orderItems, totalDiscount, totalPrice }) => {
 
 OrderItem.propTypes = {
   orderItems: PropTypes.array.isRequired,
-  totalDiscount: PropTypes.number.isRequired,
+  totalDiscountedPrice: PropTypes.number.isRequired,
   totalPrice: PropTypes.number.isRequired,
 };
 

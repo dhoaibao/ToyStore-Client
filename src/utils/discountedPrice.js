@@ -1,6 +1,6 @@
 const discountedPrice = (product) => {
     return (
-        product?.discounts?.reduce((acc, discount) => {
+        product?.promotions?.reduce((acc, discount) => {
           if (discount.discountType === "percentage") {
             return acc - (acc * discount.discountValue) / 100;
           }

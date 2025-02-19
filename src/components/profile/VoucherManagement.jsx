@@ -83,7 +83,7 @@ const VoucherManagement = ({ open, setOpen }) => {
         </div>
       ) : (
         <div className="flex justify-center items-center h-full">
-          <Empty description={"Không có mã giảm giá nào!"} />
+          <Empty description={"Không có mã giảm giá nào khả dụng!"} />
         </div>
       )}
     </Drawer>

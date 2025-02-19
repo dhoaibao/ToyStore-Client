@@ -62,16 +62,19 @@ const VoucherCard = ({ voucher }) => {
           Cho đơn hàng từ {voucher.minOrderPrice.toLocaleString("vi-VN")}đ
         </p>
       </div>
-      <div className="flex justify-end w-full md:w-auto">
+      <div className="flex justify-end w-auto">
         {checkVoucherCollected ? (
-          <Button disabled>Đã nhận</Button>
+          <Button disabled className="min-w-24">
+            Đã nhận
+          </Button>
         ) : (
           <Button
             type="primary"
             onClick={() => handleCollectVoucher(voucher.voucherId)}
             loading={loading}
+            className="min-w-24"
           >
-            Nhận ngay
+            {loading ? "" : "Nhận ngay"}
           </Button>
         )}
       </div>

@@ -24,7 +24,7 @@ const VoucherSection = () => {
         Mã giảm giá
       </h2>
       <span className="mb-2 bg-primary h-2 rounded flex justify-center w-[30vw] mx-auto"></span>
-      <div className="max-h-[200px] overflow-y-auto">
+      <div className="max-h-[200px] min-h-24 overflow-y-auto">
         <div className="grid grid-cols-3 gap-6">
           {vouchers.map((voucher) => (
             <VoucherCard key={voucher.voucherId} voucher={voucher} />

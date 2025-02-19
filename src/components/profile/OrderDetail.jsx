@@ -1,5 +1,12 @@
 import { Drawer, Steps, Button, message, Spin } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
+import {
+  CircleEllipsis,
+  CircleCheckBig,
+  Truck,
+  PackageCheck,
+  CircleX,
+} from "lucide-react";
 import PropTypes from "prop-types";
 import moment from "moment";
 import CartItem from "../cart/CartItem";
@@ -38,10 +45,21 @@ const OrderDetail = ({
       const newItems = orderStatuses
         .slice(1, -1)
         .map((item) => ({ title: item.label, description: "" }));
+      const icons = [
+        <CircleEllipsis key="circle-ellipsis" strokeWidth={1} />,
+        <CircleCheckBig key="circle-check-big" strokeWidth={1} />,
+        <Truck key="truck" strokeWidth={1} />,
+        <PackageCheck key="package-check" strokeWidth={1} />,
+      ];
+      const updatedItems = newItems.map((item, index) => ({
+        ...item,
+        icon: icons[index],
+      }));
       if (selectedOrder.orderStatus.orderStatusId === 5) {
-        newItems[0].title = "Đã hủy";
+        updatedItems[0].title = "Đã hủy";
+        updatedItems[0].icon = <CircleX key="circle-x" strokeWidth={1} />;
       }
-      setItems(newItems);
+      setItems(updatedItems);
     }
   }, [selectedOrder, orderStatuses]);
 

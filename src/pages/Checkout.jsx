@@ -1,7 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
 import { Breadcrumb, Row, Col, message } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
-import { useLocation } from "react-router-dom";
 import { GHNService, orderService, voucherService } from "../services";
 import { useSelector, useDispatch } from "react-redux";
 import { getAddressByUser } from "../redux/thunks/addressThunk";
@@ -15,7 +14,6 @@ import VoucherModal from "../components/checkout/VoucherModal";
 import OrderSuccess from "../components/checkout/OrderSuccess";
 
 const CheckoutPage = () => {
-  const location = useLocation();
   const dispatch = useDispatch();
 
   const [selectedAddress, setSelectedAddress] = useState(null);
@@ -37,7 +35,7 @@ const CheckoutPage = () => {
     []
   );
 
-  const { orderItems } = location.state || [];
+  const orderItems = useMemo(() => JSON.parse(sessionStorage.getItem("orderItems")) || [], []);
 
   useEffect(() => {
     const fetchVouchers = async () => {
@@ -138,6 +136,7 @@ const CheckoutPage = () => {
     try {
       await orderService.createOrder(data);
       dispatch(getCartByUser());
+      sessionStorage.removeItem("orderItems");
       setOrderSuccess(true);
       setLoading(false);
     } catch (error) {

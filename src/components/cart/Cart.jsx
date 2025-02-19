@@ -107,7 +107,8 @@ const Cart = ({ open, setOpen }) => {
     if (orderItems.length === 0) {
       message.error("Vui lòng chọn sản phẩm để thanh toán!");
     } else {
-      navigate("/checkout", { state: { orderItems } });
+      sessionStorage.setItem("orderItems", JSON.stringify(orderItems));
+      navigate("/checkout");
       onClose();
     }
   };

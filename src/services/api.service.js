@@ -66,7 +66,7 @@ const createApiClient = (path) => {
           ) {
             localStorage.removeItem('accessToken');
             localStorage.removeItem('refreshToken');
-            window.location.href = '/login';
+            window.location.reload()
             return Promise.reject(refreshError);
           }
         }

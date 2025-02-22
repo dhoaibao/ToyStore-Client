@@ -98,12 +98,7 @@ const Filter = () => {
     setSelectedBrands([]);
     setSelectedAge(null);
     setSelectedPriceOption(null);
-    const newSearchParams = new URLSearchParams();
-    // searchParams.delete("categoryNames");
-    // searchParams.delete("brandNames");
-    // searchParams.delete("ageOption");
-    // searchParams.delete("priceOption");
-    navigate({ search: newSearchParams.toString() });
+    navigate({ search: "" });
   };
 
   return (

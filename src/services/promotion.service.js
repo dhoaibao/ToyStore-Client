@@ -1,7 +1,7 @@
 import createApiClient from './api.service';
 
 class PromotionService {
-    constructor(path = '/discount') {
+    constructor(path = '/promotion') {
         this.api = createApiClient(path);
     }
 

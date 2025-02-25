@@ -6,7 +6,7 @@ class ProductService {
     }
 
     async getAllProducts(query) {
-        return (await this.api.get(`/?${query}`)).data;
+        return (await this.api.get(`/?${query}&visible=true`)).data;
     }
 
     async getProductBySlug(slug) {

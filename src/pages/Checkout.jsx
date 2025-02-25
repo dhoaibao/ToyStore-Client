@@ -105,7 +105,7 @@ const CheckoutPage = () => {
           return totalPrice() * (selectedVoucher.discountValue / 100);
         }
       } else {
-        return totalPrice() - selectedVoucher.discountValue;
+        return selectedVoucher.discountValue;
       }
     }
     return 0;

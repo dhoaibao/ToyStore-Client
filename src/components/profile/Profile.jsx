@@ -168,7 +168,7 @@ const Profile = ({ open, setOpen }) => {
               name="fullName"
               rules={[{ required: true, message: "Vui lòng nhập họ tên!" }]}
             >
-              <Input disabled={!isEditing} placeholder="Nhập họ tên" />
+              <Input readOnly={!isEditing} placeholder="Nhập họ tên" />
             </Form.Item>
 
             <Form.Item
@@ -176,7 +176,7 @@ const Profile = ({ open, setOpen }) => {
               name="email"
               rules={[{ required: true, message: "Vui lòng nhập email!" }]}
             >
-              <Input disabled={!isEditing} placeholder="Nhập email" />
+              <Input readOnly={!isEditing} placeholder="Nhập email" />
             </Form.Item>
 
             <Form.Item
@@ -186,7 +186,7 @@ const Profile = ({ open, setOpen }) => {
                 { required: true, message: "Vui lòng nhập số điện thoại!" },
               ]}
             >
-              <Input disabled={!isEditing} placeholder="Nhập số điện thoại" />
+              <Input readOnly={!isEditing} placeholder="Nhập số điện thoại" />
             </Form.Item>
 
             <Form.Item

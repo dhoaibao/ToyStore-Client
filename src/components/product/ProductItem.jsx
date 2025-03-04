@@ -1,56 +1,43 @@
 import PropTypes from "prop-types";
 import { Rate } from "antd";
 import { Link } from "react-router-dom";
+import discountedPrice from "../../utils/discountedPrice";
+import getCurrentPrice from "../../utils/getCurrentPrice";
 
 const ProductItem = ({
   productImages,
   brand,
   productName,
   slug,
-  price,
-  promotions,
+  prices,
+  promotion,
   avgRate = 4.5,
   requiredAge,
 }) => {
-  const discountedPrice =
-    promotions?.reduce((acc, promotion) => {
-      if (promotion.discountType === "percentage") {
-        return acc - (acc * promotion.discountValue) / 100;
-      }
-
-      if (promotion.discountType === "fixed_amount") {
-        return acc - promotion.discountValue;
-      }
-    }, price) || price;
-
   return (
     <div className="bg-white rounded-lg shadow-md p-4 relative h-96 w-60">
-      {promotions &&
-        promotions.map((promotion) => (
-          <div
-            key={promotion.id}
-            className="absolute z-10 top-0 left-0 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-tr-lg rounded-br-lg"
-          >
-            {promotion.discountType === "percentage" &&
-              `Giảm ${promotion.discountValue}%`}
+      {promotion && (
+        <div className="absolute z-10 top-0 left-0 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-tr-lg rounded-br-lg">
+          {promotion.discountType === "percentage" &&
+            `Giảm ${promotion.discountValue}%`}
 
-            {promotion.discountType === "fixed_amount" &&
-              `Giảm ${promotion.discountValue.toLocaleString("vi-VN")}đ`}
+          {promotion.discountType === "fixed_amount" &&
+            `Giảm ${promotion.discountValue.toLocaleString("vi-VN")}đ`}
 
-            {promotion.discountType.startsWith("buy_") &&
-              promotion.discountType.includes("_get_") &&
-              (() => {
-                const [x, y] = promotion.discountType.match(/\d+/g);
-                return `Mua ${x} tặng ${y}`;
-              })()}
-          </div>
-        ))}
+          {promotion.discountType.startsWith("buy_") &&
+            promotion.discountType.includes("_get_") &&
+            (() => {
+              const [x, y] = promotion.discountType.match(/\d+/g);
+              return `Mua ${x} tặng ${y}`;
+            })()}
+        </div>
+      )}
 
       <Link to={`/products/${slug}`}>
         {/* Product Image */}
         <div className=" mt-2 flex justify-center transform transition-all duration-500 ease-in-out hover:scale-110">
           <img
-            src={productImages[0].uploadImage.url}
+            src={productImages[0].url}
             alt={productName}
             className="w-full max-h-60 object-contain"
           />
@@ -72,11 +59,12 @@ const ProductItem = ({
         </Link>
         <div className="flex mt-2 items-center">
           <p className="font-extrabold text-hover-primary">
-            {discountedPrice.toLocaleString("vi-VN")}đ
+            {discountedPrice({ promotion, prices }).toLocaleString("vi-VN")}đ
           </p>
-          {discountedPrice !== price && (
+          {discountedPrice({ promotion, prices }) !==
+            getCurrentPrice(prices) && (
             <p className="ml-2 line-through font-semibold text-gray-500">
-              {price.toLocaleString("vi-VN")}đ
+              {getCurrentPrice(prices).toLocaleString("vi-VN")}đ
             </p>
           )}
         </div>
@@ -95,8 +83,8 @@ ProductItem.propTypes = {
   productImages: PropTypes.array.isRequired,
   brand: PropTypes.object.isRequired,
   productName: PropTypes.string.isRequired,
-  price: PropTypes.number.isRequired,
-  promotions: PropTypes.array,
+  prices: PropTypes.number.isRequired,
+  promotion: PropTypes.array,
   avgRate: PropTypes.number,
   slug: PropTypes.string.isRequired,
   requiredAge: PropTypes.number,

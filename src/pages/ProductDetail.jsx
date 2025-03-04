@@ -186,7 +186,7 @@ const ProductDetail = () => {
             <div className="w-full p-4">
               <div className="flex flex-col items-center p-2">
                 <Image
-                  src={currentImage?.uploadImage?.url}
+                  src={currentImage?.url}
                   alt={product?.productName}
                   width={450}
                 />
@@ -194,7 +194,7 @@ const ProductDetail = () => {
                   {images.slice(0, 5).map((image, index) => (
                     <img
                       key={index}
-                      src={image.uploadImage.url}
+                      src={image.url}
                       alt={`Hình ảnh ${index + 1}`}
                       className={`w-20 h-20 cursor-pointer object-contain border rounded-lg
         ${currentImage === image ? "border-cyan-700" : "border-gray-300"}

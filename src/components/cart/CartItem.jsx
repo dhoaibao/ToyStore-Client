@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { updateCartItem, removeFromCart } from "../../redux/thunks/cartThunk";
 import discountedPrice from "../../utils/discountedPrice";
+import getCurrentPrice from "../../utils/getCurrentPrice";
 
 const { Text } = Typography;
 
@@ -80,7 +81,7 @@ const CartItem = ({
             <List.Item.Meta
               avatar={
                 <Avatar
-                  src={item?.product.productImages[0].uploadImage.url}
+                  src={item?.product.productImages[0].url}
                   shape="square"
                   size={64}
                 />
@@ -112,52 +113,16 @@ const CartItem = ({
                       {discountedPrice(item.product).toLocaleString("vi-VN")}đ
                     </Text>
                     <span style={{ margin: "0 4px" }}></span>
-                    {discountedPrice(item.product) !== item.product.price && (
+                    {discountedPrice(item.product) !==
+                      getCurrentPrice(item.product.prices) && (
                       <Text delete style={{ color: "gray" }}>
-                        {item?.product.price.toLocaleString("vi-VN")}đ
+                        {getCurrentPrice(item.product.prices).toLocaleString(
+                          "vi-VN"
+                        )}
+                        đ
                       </Text>
                     )}
                   </Text>
-                  {item?.product?.promotions?.map((promotion) => {
-                    if (
-                      promotion.discountType.startsWith("buy_") &&
-                      promotion.discountType.includes("_get_")
-                    ) {
-                      const [x, y] = promotion.discountType.match(/\d+/g);
-                      return (
-                        <Text key={promotion.promotionId}>
-                          <div className="flex mt-2 items-center">
-                            <img
-                              src={
-                                item.product.productImages[0].uploadImage.url
-                              }
-                              alt={item.product.productName}
-                              className="w-16 h-16 object-cover rounded mr-4"
-                            />
-                            <div>
-                              <Text className="block text-xs font-semibold">
-                                Quà tặng:
-                              </Text>
-                              <Text ellipsis className="block text-xs">
-                                {item.product.productName}
-                              </Text>
-                              <Text className="block text-xs">
-                                Số lượng: {parseInt((item.quantity / x) * y)}
-                              </Text>
-                              <div className="flex items-center">
-                                <Text className="block text-xs">Giá: 0đ</Text>
-                                <span style={{ margin: "0 2px" }}></span>
-                                <Text className="block line-through text-xs">
-                                  {item?.product.price.toLocaleString("vi-VN")}đ
-                                </Text>
-                              </div>
-                            </div>
-                          </div>
-                        </Text>
-                      );
-                    }
-                    return null;
-                  })}
                 </div>
               }
             />

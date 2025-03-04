@@ -12,6 +12,7 @@ import OrderItem from "../components/checkout/OrderItem";
 import PaymentInfo from "../components/checkout/PaymentInfo";
 import VoucherModal from "../components/checkout/VoucherModal";
 import OrderSuccess from "../components/checkout/OrderSuccess";
+import getCurrentPrice from "../utils/getCurrentPrice";
 
 const CheckoutPage = () => {
   const dispatch = useDispatch();
@@ -61,7 +62,7 @@ const CheckoutPage = () => {
       const fee = await GHNService.getShippingFee(address, quantity);
       setShippingFee(fee);
     } catch (error) {
-      console.error("Error calculating shipping fee:", error);
+      console.error("Error calculating shipping fee:", error.response.data);
       message.error("Không thể tính phí vận chuyển.");
     }
   };
@@ -88,7 +89,7 @@ const CheckoutPage = () => {
 
   const totalPrice = () => {
     return orderItems?.reduce(
-      (total, item) => total + item.product.price * item.quantity,
+      (total, item) => total + getCurrentPrice(item.product.prices) * item.quantity,
       0
     );
   };

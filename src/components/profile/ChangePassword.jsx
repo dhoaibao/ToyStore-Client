@@ -27,7 +27,7 @@ const ChangePassword = ({ open, setOpen }) => {
         confirmNewPassword,
       });
       message.success("Thay đổi mật khẩu thành công!");
-      setOpen(false);
+      onClose();
     } catch (error) {
       console.error("Change password error:", error);
       message.error(

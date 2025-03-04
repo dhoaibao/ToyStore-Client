@@ -14,17 +14,17 @@ import {
 const { RangePicker } = DatePicker;
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
-import { orderService, orderStatusService } from "../../services";
+import { orderService } from "../../services";
 import { LoadingOutlined } from "@ant-design/icons";
 import OrderDetail from "./OrderDetail";
 import moment from "moment";
 import { useLocation } from "react-router-dom";
+import { ORDER_STATUS } from "../../constants";
 
 const { Text } = Typography;
 
 const OrderManagement = ({ open, setOpen }) => {
   const [orders, setOrders] = useState([]);
-  const [orderStatuses, setOrderStatuses] = useState([]);
   const [searchText, setSearchText] = useState("");
   const [selectedStatus, setSelectedStatus] = useState(0);
   const [startDate, setStartDate] = useState("");
@@ -40,24 +40,18 @@ const OrderManagement = ({ open, setOpen }) => {
 
   const location = useLocation();
 
+  const orderStatuses = [
+    { label: "Tất cả", value: 0 },
+    { label: "Chờ xác nhận", value: 1 },
+    { label: "Đang xử lý", value: 2 },
+    { label: "Đang giao", value: 3 },
+    { label: "Đã giao", value: 4 },
+    { label: "Đã hủy", value: 5 },
+  ];
+
   useEffect(() => {
     setIsChildDrawerOpen(false);
   }, [location]);
-
-  useEffect(() => {
-    const fetchOrderStatuses = async () => {
-      const orderStatusResponse =
-        await orderStatusService.getAllOrderStatuses();
-
-      let options = [{ key: 0, label: "Tất cả" }];
-      orderStatusResponse.data.map((item) =>
-        options.push({ key: item.orderStatusId, label: item.statusName })
-      );
-      setOrderStatuses(options);
-    };
-
-    fetchOrderStatuses();
-  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,7 +71,15 @@ const OrderManagement = ({ open, setOpen }) => {
 
     if (open || cancelOrder) fetchData();
     setCancelOrder(false);
-  }, [open, cancelOrder, searchText, selectedStatus, currentPage, startDate, endDate]);
+  }, [
+    open,
+    cancelOrder,
+    searchText,
+    selectedStatus,
+    currentPage,
+    startDate,
+    endDate,
+  ]);
 
   const handleOrderSearch = (event) => {
     const id = event.target.value.replace("#", "");
@@ -189,18 +191,27 @@ const OrderManagement = ({ open, setOpen }) => {
                 <Tag
                   className="rounded-lg font-medium"
                   color={
-                    order.orderStatus.statusName === "Chờ xác nhận"
+                    order.orderTrackings[order.orderTrackings.length - 1]
+                      .orderStatus.statusName === "pending"
                       ? "orange"
-                      : order.orderStatus.statusName === "Đang xử lý"
-                      ? "yellow"
-                      : order.orderStatus.statusName === "Đang giao"
+                      : order.orderTrackings[order.orderTrackings.length - 1]
+                          .orderStatus.statusName === "confirmed"
+                      ? "purple"
+                      : order.orderTrackings[order.orderTrackings.length - 1]
+                          .orderStatus.statusName === "shipping"
                       ? "blue"
-                      : order.orderStatus.statusName === "Đã giao"
+                      : order.orderTrackings[order.orderTrackings.length - 1]
+                          .orderStatus.statusName === "delivered"
                       ? "green"
                       : "red" // Đã hủy
                   }
                 >
-                  {order.orderStatus.statusName}
+                  {
+                    ORDER_STATUS[
+                      order.orderTrackings[order.orderTrackings.length - 1]
+                        .orderStatus.statusName
+                    ].label
+                  }
                 </Tag>
               </p>
               <p>

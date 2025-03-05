@@ -1,45 +1,62 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Drawer, Input, Button, List, Typography } from "antd";
 import PropTypes from "prop-types";
+import { useSelector } from "react-redux";
+import io from "socket.io-client";
+import moment from "moment";
 
 const { Text } = Typography;
 
 const ChatDrawer = ({ open, setOpen, sender, receiver }) => {
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      sender: "A",
-      content: "Xin chào! Bạn khỏe không?",
-      time: "10:00 AM",
-    },
-    {
-      id: 2,
-      sender: "B",
-      content: "Mình khỏe. Còn bạn thì sao?",
-      time: "10:02 AM",
-    },
-  ]);
+  const { userId } = useSelector((state) => state.user);
+  const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
+  const [socket, setSocket] = useState(null);
 
-  // Gửi tin nhắn mới
+  useEffect(() => {
+    if (userId) {
+      const newSocket = io("http://localhost:3000", {
+        query: { userId: userId.toString() },
+      });
+
+      setSocket(newSocket);
+
+      newSocket.on("newMessage", (data) => {
+        setMessages((prev) => [
+          ...prev,
+          {
+            ...data,
+            time: moment(data.createdAt).format("HH:mm"),
+          },
+        ]);
+      });
+
+      return () => {
+        newSocket.off("newMessage");
+        newSocket.disconnect();
+      };
+    }
+  }, [userId]);
+
   const sendMessage = () => {
     if (newMessage.trim() === "") return;
 
     const newMsg = {
-      id: Date.now(),
-      sender,
+      senderId: userId,
       content: newMessage,
-      time: new Date().toLocaleTimeString([], {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
+      time: new Date(),
     };
-
-    setMessages([...messages, newMsg]);
-    setNewMessage(""); // Reset input
+    socket.emit("sendMessage", newMsg);
+    setMessages([
+      ...messages,
+      {
+        ...newMsg,
+        time: moment(newMsg.time).format("HH:mm"),
+      },
+    ]);
+    setNewMessage("");
   };
 
-  // Đóng Drawer
   const closeDrawer = () => {
     setOpen(false);
   };
@@ -86,7 +103,7 @@ const ChatDrawer = ({ open, setOpen, sender, receiver }) => {
             <div
               style={{
                 justifyContent:
-                  message.sender === sender ? "flex-end" : "flex-start",
+                  message.senderId === userId ? "flex-end" : "flex-start",
                 display: "flex",
                 marginBottom: "10px", // Tạo khoảng cách giữa các tin nhắn
               }}
@@ -97,12 +114,12 @@ const ChatDrawer = ({ open, setOpen, sender, receiver }) => {
                   padding: "10px",
                   borderRadius: "10px",
                   backgroundColor:
-                    message.sender === sender ? "#e6f7ff" : "#ffffff",
+                    message.senderId === userId ? "#e6f7ff" : "#ffffff",
                   boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1)",
                 }}
               >
                 <Text strong>
-                  {message.sender === sender ? "Bạn" : receiver}
+                  {message.senderId === userId ? "Bạn" : receiver}
                 </Text>
                 <br />
                 <Text>{message.content}</Text>
@@ -120,8 +137,8 @@ const ChatDrawer = ({ open, setOpen, sender, receiver }) => {
 };
 
 ChatDrawer.propTypes = {
-  open: PropTypes.bool.isRequired, // Drawer có mở không
-  setOpen: PropTypes.func.isRequired, // Hàm đóng Drawer
+  open: PropTypes.bool.isRequired, 
+  setOpen: PropTypes.func.isRequired, 
   sender: PropTypes.string.isRequired, // Người gửi
   receiver: PropTypes.string.isRequired, // Người nhận
 };

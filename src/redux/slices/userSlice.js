@@ -4,12 +4,16 @@ const userSlice = createSlice({
   name: "user",
   initialState: {
     user: null,
+    userId: null,
+    roleId: null,
     isLogin: false,
     loading: false,
     error: null,
   },
   reducers: {
     setUser: (state, action) => {
+      state.userId = action.payload.userId;
+      state.roleId = action.payload.roleId;
       state.user = action.payload;
       state.isLogin = !!action.payload;
     },

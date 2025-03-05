@@ -41,12 +41,12 @@ const OrderManagement = ({ open, setOpen }) => {
   const location = useLocation();
 
   const orderStatuses = [
-    { label: "Tất cả", value: 0 },
-    { label: "Chờ xác nhận", value: 1 },
-    { label: "Đang xử lý", value: 2 },
-    { label: "Đang giao", value: 3 },
-    { label: "Đã giao", value: 4 },
-    { label: "Đã hủy", value: 5 },
+    { key: "all", label: "Tất cả", value: 0 },
+    { key: "pending", label: "Chờ xác nhận", value: 1 },
+    { key: "confirmed", label: "Đang xử lý", value: 2 },
+    { key: "shipping", label: "Đang giao", value: 3 },
+    { key: "delivered", label: "Đã giao", value: 4 },
+    { key: "canceled", label: "Đã hủy", value: 5 },
   ];
 
   useEffect(() => {
@@ -57,7 +57,7 @@ const OrderManagement = ({ open, setOpen }) => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const query = `orderId=${searchText}&orderStatusId=${selectedStatus}&page=${currentPage}&limit=${10}&startDate=${startDate}&endDate=${endDate}`;
+        const query = `orderId=${searchText}&orderStatus=${selectedStatus}&page=${currentPage}&limit=${10}&startDate=${startDate}&endDate=${endDate}`;
         const orderResponse = await orderService.getOrderByUser(query);
         console.log("orders: ", orderResponse.data);
         setOrders(orderResponse.data);

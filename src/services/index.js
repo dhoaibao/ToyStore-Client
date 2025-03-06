@@ -11,3 +11,4 @@ export * from "./order.service";
 export * from "./orderStatus.service"
 export * from "./voucher.service";
 export * from "./review.service"
+export * from "./message.service"

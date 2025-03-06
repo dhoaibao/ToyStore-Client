@@ -1,17 +1,50 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Drawer, Input, Button, List, Typography } from "antd";
+import { DownOutlined } from "@ant-design/icons";
 import PropTypes from "prop-types";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
+import { setUnreadCount } from "../../redux/slices/messageSlice";
 import io from "socket.io-client";
 import moment from "moment";
+import { Send } from "lucide-react";
+import { messageService } from "../../services";
 
 const { Text } = Typography;
 
-const ChatDrawer = ({ open, setOpen, sender, receiver }) => {
+const ChatDrawer = ({ open, setOpen }) => {
   const { userId } = useSelector((state) => state.user);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [socket, setSocket] = useState(null);
+  const [showScrollIcon, setShowScrollIcon] = useState(false);
+  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+
+  const unreadCount = useSelector((state) => state.message.unreadCount);
+
+  const dispatch = useDispatch();
+
+  useEffect(() => {
+    if (userId) {
+      const fetchMessages = async () => {
+        try {
+          const result = await messageService.getMessages(userId);
+          setMessages(
+            result.data.map((msg) => ({
+              ...msg,
+              time: moment(msg.time).format("HH:mm"),
+            }))
+          );
+          await messageService.markAsRead(userId);
+          dispatch(setUnreadCount(0));
+        } catch (error) {
+          console.log("Failed to fetch messages: ", error);
+        }
+      };
+
+      if (open) fetchMessages();
+    }
+  }, [open, userId, dispatch]);
 
   useEffect(() => {
     if (userId) {
@@ -26,9 +59,15 @@ const ChatDrawer = ({ open, setOpen, sender, receiver }) => {
           ...prev,
           {
             ...data,
-            time: moment(data.createdAt).format("HH:mm"),
+            time: moment(data.time).format("HH:mm"),
           },
         ]);
+        if (open) {
+          messageService.markAsRead(userId);
+          dispatch(setUnreadCount(0));
+        } else {
+          dispatch(setUnreadCount(unreadCount + 1));
+        }
       });
 
       return () => {
@@ -36,7 +75,30 @@ const ChatDrawer = ({ open, setOpen, sender, receiver }) => {
         newSocket.disconnect();
       };
     }
-  }, [userId]);
+  }, [userId, dispatch, open, unreadCount]);
+
+  useEffect(() => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      setShowScrollIcon(false);
+    }
+  }, [messages]);
+
+  const handleScroll = () => {
+    if (messagesContainerRef.current) {
+      const { scrollTop, scrollHeight, clientHeight } =
+        messagesContainerRef.current;
+      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10;
+      setShowScrollIcon(!isAtBottom);
+    }
+  };
+
+  const scrollToBottom = () => {
+    if (messagesEndRef.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
+      setShowScrollIcon(false);
+    }
+  };
 
   const sendMessage = () => {
     if (newMessage.trim() === "") return;
@@ -64,7 +126,7 @@ const ChatDrawer = ({ open, setOpen, sender, receiver }) => {
   return (
     <Drawer
       closable={false}
-      title={`Chat với ${receiver}`}
+      title="Tin nhắn"
       open={open}
       onClose={closeDrawer}
       width={400}
@@ -84,17 +146,20 @@ const ChatDrawer = ({ open, setOpen, sender, receiver }) => {
             style={{ marginRight: "10px", flex: 1 }}
           />
           <Button type="primary" onClick={sendMessage}>
-            Gửi
+            <Send strokeWidth={1} size={18} />
           </Button>
         </div>
       }
     >
       <div
+        ref={messagesContainerRef}
+        onScroll={handleScroll}
         style={{
           flex: 1,
           overflowY: "auto",
           padding: "10px",
           backgroundColor: "#f5f5f5",
+          position: "relative",
         }}
       >
         <List
@@ -105,7 +170,7 @@ const ChatDrawer = ({ open, setOpen, sender, receiver }) => {
                 justifyContent:
                   message.senderId === userId ? "flex-end" : "flex-start",
                 display: "flex",
-                marginBottom: "10px", // Tạo khoảng cách giữa các tin nhắn
+                marginBottom: "10px",
               }}
             >
               <div
@@ -118,10 +183,6 @@ const ChatDrawer = ({ open, setOpen, sender, receiver }) => {
                   boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1)",
                 }}
               >
-                <Text strong>
-                  {message.senderId === userId ? "Bạn" : receiver}
-                </Text>
-                <br />
                 <Text>{message.content}</Text>
                 <br />
                 <Text type="secondary" style={{ fontSize: "12px" }}>
@@ -131,16 +192,23 @@ const ChatDrawer = ({ open, setOpen, sender, receiver }) => {
             </div>
           )}
         />
+        <div ref={messagesEndRef} />
       </div>
+      {showScrollIcon && (
+        <Button
+          shape="circle"
+          icon={<DownOutlined />}
+          onClick={scrollToBottom}
+          className="fixed bottom-20 right-4 z-10"
+        />
+      )}
     </Drawer>
   );
 };
 
 ChatDrawer.propTypes = {
-  open: PropTypes.bool.isRequired, 
-  setOpen: PropTypes.func.isRequired, 
-  sender: PropTypes.string.isRequired, // Người gửi
-  receiver: PropTypes.string.isRequired, // Người nhận
+  open: PropTypes.bool.isRequired,
+  setOpen: PropTypes.func.isRequired,
 };
 
 export default ChatDrawer;

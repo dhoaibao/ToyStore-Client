@@ -20,7 +20,8 @@ import { getLoggedInUser } from "../../redux/thunks/userThunk";
 import { getCartByUser } from "../../redux/thunks/cartThunk";
 import VoiceSearch from "../search/VoiceSearch";
 import ImageSearch from "../search/ImageSearch";
-import { categoryService } from "../../services";
+import { categoryService, messageService } from "../../services";
+import { setUnreadCount } from "../../redux/slices/messageSlice";
 
 const Header = () => {
   const navigate = useNavigate();
@@ -37,7 +38,9 @@ const Header = () => {
   const dispatch = useDispatch();
 
   const isLogin = useSelector((state) => state.user.isLogin);
+  const userId = useSelector((state) => state.user.userId);
   const totalItems = useSelector((state) => state.cart.totalItems);
+  const unreadCount = useSelector((state) => state.message.unreadCount);
   const totalItemsLocal = JSON.parse(
     localStorage.getItem("cart") || "[]"
   ).length;
@@ -56,6 +59,19 @@ const Header = () => {
 
     fetchCategories();
   }, []);
+
+  useEffect(() => {
+    const fetch = async () => {
+      try {
+        const response = await messageService.getUnreadCount(userId);
+        dispatch(setUnreadCount(response.data));
+      } catch (error) {
+        console.log("Failed to fetch unread count: ", error);
+      }
+    };
+
+    fetch();
+  }, [userId, dispatch]);
 
   useEffect(() => {
     dispatch(getLoggedInUser());
@@ -211,7 +227,7 @@ const Header = () => {
               onClick={() => setIsChatOpen(true)}
               className="flex items-center justify-center"
             >
-              <Badge count={100} overflowCount={99} color="red">
+              <Badge count={unreadCount} overflowCount={99} color="red">
                 <MessageSquare strokeWidth={1} />
               </Badge>
             </button>
@@ -237,12 +253,7 @@ const Header = () => {
         </div>
       </div>
       <Cart open={cartOpen} setOpen={setCartOpen} />
-      <ChatBox
-        open={isChatOpen}
-        setOpen={setIsChatOpen}
-        sender="A" // Người dùng hiện tại
-        receiver="B" // Tên người nhận
-      />
+      <ChatBox open={isChatOpen} setOpen={setIsChatOpen} />
       <Auth open={isAuthOpen} setOpen={setIsAuthOpen} />
       <VoiceSearch
         isOpen={isVoiceSearchOpen}

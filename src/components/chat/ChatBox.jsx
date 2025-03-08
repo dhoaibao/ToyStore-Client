@@ -13,7 +13,7 @@ import { messageService } from "../../services";
 const { Text } = Typography;
 
 const ChatDrawer = ({ open, setOpen }) => {
-  const { userId } = useSelector((state) => state.user);
+  const { userId, user } = useSelector((state) => state.user);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [showScrollIcon, setShowScrollIcon] = useState(false);
@@ -125,6 +125,8 @@ const ChatDrawer = ({ open, setOpen }) => {
       senderId: userId,
       content: newMessage,
       time: new Date(),
+      senderName: user.fullName,
+      avatar: user.avatar,
     };
     socketRef.current.emit("sendMessage", newMsg);
     setMessages([

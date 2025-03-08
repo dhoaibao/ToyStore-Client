@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
-import { Drawer, Input, Button, List, Typography } from "antd";
+import { Drawer, Input, Button, List, Typography, message } from "antd";
+import { Check, CheckCheck } from "lucide-react";
 import { DownOutlined } from "@ant-design/icons";
 import PropTypes from "prop-types";
 import { useSelector, useDispatch } from "react-redux";
@@ -15,17 +16,17 @@ const ChatDrawer = ({ open, setOpen }) => {
   const { userId } = useSelector((state) => state.user);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  const [socket, setSocket] = useState(null);
   const [showScrollIcon, setShowScrollIcon] = useState(false);
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
+  const socketRef = useRef(null);
 
   const unreadCount = useSelector((state) => state.message.unreadCount);
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (userId) {
+    if (userId && open) {
       const fetchMessages = async () => {
         try {
           const result = await messageService.getMessages(userId);
@@ -35,14 +36,14 @@ const ChatDrawer = ({ open, setOpen }) => {
               time: moment(msg.time).format("HH:mm"),
             }))
           );
-          await messageService.markAsRead(userId);
+          // await messageService.markAsRead(userId);
           dispatch(setUnreadCount(0));
         } catch (error) {
-          console.log("Failed to fetch messages: ", error);
+          console.error("Failed to fetch messages:", error);
+          message.error("Không thể tải tin nhắn!");
         }
       };
-
-      if (open) fetchMessages();
+      fetchMessages();
     }
   }, [open, userId, dispatch]);
 
@@ -52,7 +53,17 @@ const ChatDrawer = ({ open, setOpen }) => {
         query: { userId: userId.toString() },
       });
 
-      setSocket(newSocket);
+      socketRef.current = newSocket;
+
+      newSocket.on("updateStatus", (senderId) => {
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.senderId === senderId && !msg.isRead
+              ? { ...msg, isRead: true }
+              : msg
+          )
+        );
+      });
 
       newSocket.on("newMessage", (data) => {
         setMessages((prev) => [
@@ -63,7 +74,10 @@ const ChatDrawer = ({ open, setOpen }) => {
           },
         ]);
         if (open) {
-          messageService.markAsRead(userId);
+          newSocket.emit("markAsRead", {
+            senderId: data.senderId,
+            receiverId: userId,
+          });
           dispatch(setUnreadCount(0));
         } else {
           dispatch(setUnreadCount(unreadCount + 1));
@@ -71,8 +85,12 @@ const ChatDrawer = ({ open, setOpen }) => {
       });
 
       return () => {
-        newSocket.off("newMessage");
-        newSocket.disconnect();
+        if (socketRef.current) {
+          socketRef.current.off("newMessage");
+          socketRef.current.off("updateStatus");
+          socketRef.current.disconnect();
+          socketRef.current = null;
+        }
       };
     }
   }, [userId, dispatch, open, unreadCount]);
@@ -101,14 +119,14 @@ const ChatDrawer = ({ open, setOpen }) => {
   };
 
   const sendMessage = () => {
-    if (newMessage.trim() === "") return;
+    if (!newMessage.trim() || !socketRef.current) return;
 
     const newMsg = {
       senderId: userId,
       content: newMessage,
       time: new Date(),
     };
-    socket.emit("sendMessage", newMsg);
+    socketRef.current.emit("sendMessage", newMsg);
     setMessages([
       ...messages,
       {
@@ -185,8 +203,19 @@ const ChatDrawer = ({ open, setOpen }) => {
               >
                 <Text>{message.content}</Text>
                 <br />
-                <Text type="secondary" style={{ fontSize: "12px" }}>
-                  {message.time}
+                <Text
+                  type="secondary"
+                  className="flex space-x-1 justify-between text-xs"
+                >
+                  <span>{message.time}</span>
+                  <span>
+                    {message.senderId === userId &&
+                      (message.isRead ? (
+                        <CheckCheck strokeWidth={1} size={16} />
+                      ) : (
+                        <Check strokeWidth={1} size={16} />
+                      ))}
+                  </span>
                 </Text>
               </div>
             </div>

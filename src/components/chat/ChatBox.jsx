@@ -34,7 +34,7 @@ const ChatDrawer = ({ open, setOpen }) => {
             result.data.map((msg) => ({
               ...msg,
               time: moment(msg.time).format("HH:mm"),
-            }))
+            })),
           );
           // await messageService.markAsRead(userId);
           dispatch(setUnreadCount(0));
@@ -60,8 +60,8 @@ const ChatDrawer = ({ open, setOpen }) => {
           prev.map((msg) =>
             msg.senderId === senderId && !msg.isRead
               ? { ...msg, isRead: true }
-              : msg
-          )
+              : msg,
+          ),
         );
       });
 
@@ -81,6 +81,23 @@ const ChatDrawer = ({ open, setOpen }) => {
           dispatch(setUnreadCount(0));
         } else {
           dispatch(setUnreadCount(unreadCount + 1));
+        }
+
+        if ("Notification" in window && Notification.permission === "granted") {
+          new Notification("Toy Store", {
+            body: data.content,
+          });
+        } else if (
+          "Notification" in window &&
+          Notification.permission !== "denied"
+        ) {
+          Notification.requestPermission().then((permission) => {
+            if (permission === "granted") {
+              new Notification("Toy Store", {
+                body: data.content,
+              });
+            }
+          });
         }
       });
 

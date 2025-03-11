@@ -101,7 +101,6 @@ const OrderManagement = ({ open, setOpen }) => {
   };
 
   const onClose = () => {
-    setOpen(false);
     setSelectedOrder(null);
     setIsChildDrawerOpen(false);
   };
@@ -143,7 +142,7 @@ const OrderManagement = ({ open, setOpen }) => {
           </div>
         </div>
       }
-      onClose={onClose}
+      onClose={() => setOpen(false)}
       open={open}
       footer={
         <div>

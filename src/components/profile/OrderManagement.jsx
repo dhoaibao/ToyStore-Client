@@ -26,7 +26,7 @@ const { Text } = Typography;
 const OrderManagement = ({ open, setOpen }) => {
   const [orders, setOrders] = useState([]);
   const [searchText, setSearchText] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState(0);
+  const [selectedStatus, setSelectedStatus] = useState('all');
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [loading, setLoading] = useState(false);

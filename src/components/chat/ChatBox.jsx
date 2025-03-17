@@ -1,43 +1,54 @@
 import { useState, useEffect, useRef } from "react";
-import { Drawer, Input, Button, List, Typography, message } from "antd";
-import { Check, CheckCheck } from "lucide-react";
+import { Drawer, Input, Button, List, Typography, message, Spin } from "antd";
+import { Send } from "lucide-react";
 import { DownOutlined } from "@ant-design/icons";
 import PropTypes from "prop-types";
 import { useSelector, useDispatch } from "react-redux";
 import { setUnreadCount } from "../../redux/slices/messageSlice";
-import io from "socket.io-client";
 import moment from "moment";
-import { Send } from "lucide-react";
 import { messageService } from "../../services";
 
 const { Text } = Typography;
 
-const ChatDrawer = ({ open, setOpen }) => {
+const ChatDrawer = ({ open, setOpen, socket }) => {
   const { userId, user } = useSelector((state) => state.user);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [showScrollIcon, setShowScrollIcon] = useState(false);
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
-  const socketRef = useRef(null);
+
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
 
   const unreadCount = useSelector((state) => state.message.unreadCount);
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (userId && open) {
+    if (userId && open && hasMore) {
       const fetchMessages = async () => {
         try {
-          const result = await messageService.getMessages(userId);
-          setMessages(
-            result.data.map((msg) => ({
-              ...msg,
-              time: moment(msg.time).format("HH:mm"),
-            })),
+          setLoading(true);
+          const result = await messageService.getMessages(
+            userId,
+            `page=${page}&limit=20`,
           );
-          // await messageService.markAsRead(userId);
+          if (result && result.pagination) {
+            setPage(result.pagination.page);
+            setHasMore(result.pagination.page < result.pagination.totalPages);
+            setMessages((prev) => [...result.data, ...prev]);
+            result.data.map((msg) => {
+              if (!msg.isRead) {
+                socket.emit("markAsRead", {
+                  senderId: msg.senderId,
+                });
+              }
+            })
+          }
           dispatch(setUnreadCount(0));
+          setLoading(false);
         } catch (error) {
           console.error("Failed to fetch messages:", error);
           message.error("Không thể tải tin nhắn!");
@@ -45,79 +56,71 @@ const ChatDrawer = ({ open, setOpen }) => {
       };
       fetchMessages();
     }
-  }, [open, userId, dispatch]);
+    if (!open) {
+      setMessages([]);
+      setPage(1);
+      setHasMore(true);
+    }
+  }, [open, userId, dispatch, page, hasMore, socket]);
 
-  useEffect(() => {
-    if (userId) {
-      const newSocket = io("http://localhost:3000", {
-        query: { userId: userId.toString() },
+  const handleNotification = (data) => {
+    if ("Notification" in window && Notification.permission === "granted") {
+      new Notification("Toy Store", {
+        body: data.content,
       });
-
-      socketRef.current = newSocket;
-
-      newSocket.on("updateStatus", (senderId) => {
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.senderId === senderId && !msg.isRead
-              ? { ...msg, isRead: true }
-              : msg,
-          ),
-        );
-      });
-
-      newSocket.on("newMessage", (data) => {
-        setMessages((prev) => [
-          ...prev,
-          {
-            ...data,
-            time: moment(data.time).format("HH:mm"),
-          },
-        ]);
-        if (open) {
-          newSocket.emit("markAsRead", {
-            senderId: data.senderId,
-            receiverId: userId,
-          });
-          dispatch(setUnreadCount(0));
-        } else {
-          dispatch(setUnreadCount(unreadCount + 1));
-        }
-
-        if ("Notification" in window && Notification.permission === "granted") {
+    } else if (
+      "Notification" in window &&
+      Notification.permission !== "denied"
+    ) {
+      Notification.requestPermission().then((permission) => {
+        if (permission === "granted") {
           new Notification("Toy Store", {
             body: data.content,
           });
-        } else if (
-          "Notification" in window &&
-          Notification.permission !== "denied"
-        ) {
-          Notification.requestPermission().then((permission) => {
-            if (permission === "granted") {
-              new Notification("Toy Store", {
-                body: data.content,
-              });
-            }
-          });
         }
       });
-
-      return () => {
-        if (socketRef.current) {
-          socketRef.current.off("newMessage");
-          socketRef.current.off("updateStatus");
-          socketRef.current.disconnect();
-          socketRef.current = null;
-        }
-      };
     }
-  }, [userId, dispatch, open, unreadCount]);
+  };
 
   useEffect(() => {
-    if (messagesEndRef.current) {
+    if (!socket) return;
+
+    socket.on("updateStatus", (senderId) => {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.senderId === senderId && !msg.isRead
+            ? { ...msg, isRead: true }
+            : msg,
+        ),
+      );
+    });
+
+    socket.on("newMessage", (data) => {
+      if (open) {
+        setMessages((prev) => [...prev, { ...data }]);
+        socket.emit("markAsRead", {
+          senderId: data.senderId,
+          receiverId: userId,
+        });
+        dispatch(setUnreadCount(0));
+      } else {
+        dispatch(setUnreadCount(unreadCount + 1));
+      }
+      handleNotification(data);
+    });
+
+    return () => {
+      socket.off("updateStatus");
+      socket.off("newMessage");
+    };
+  }, [socket, open, dispatch, userId, unreadCount]);
+
+  useEffect(() => {
+    if (messagesEndRef.current && page === 1) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
       setShowScrollIcon(false);
     }
-  }, [messages]);
+  }, [messages, page]);
 
   const handleScroll = () => {
     if (messagesContainerRef.current) {
@@ -125,6 +128,11 @@ const ChatDrawer = ({ open, setOpen }) => {
         messagesContainerRef.current;
       const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10;
       setShowScrollIcon(!isAtBottom);
+
+      const isAtTop = scrollTop <= 10;
+      if (isAtTop && hasMore && !loading) {
+        setPage((prev) => prev + 1);
+      }
     }
   };
 
@@ -136,7 +144,7 @@ const ChatDrawer = ({ open, setOpen }) => {
   };
 
   const sendMessage = () => {
-    if (!newMessage.trim() || !socketRef.current) return;
+    if (!newMessage.trim() || !socket) return;
 
     const newMsg = {
       senderId: userId,
@@ -145,15 +153,10 @@ const ChatDrawer = ({ open, setOpen }) => {
       senderName: user.fullName,
       avatar: user.avatar,
     };
-    socketRef.current.emit("sendMessage", newMsg);
-    setMessages([
-      ...messages,
-      {
-        ...newMsg,
-        time: moment(newMsg.time).format("HH:mm"),
-      },
-    ]);
+    socket.emit("sendMessage", newMsg);
+    setMessages([...messages, { ...newMsg }]);
     setNewMessage("");
+    scrollToBottom();
   };
 
   const closeDrawer = () => {
@@ -167,20 +170,22 @@ const ChatDrawer = ({ open, setOpen }) => {
       open={open}
       onClose={closeDrawer}
       width={400}
-      bodyStyle={{
-        display: "flex",
-        flexDirection: "column",
-        height: "100%",
-        padding: "0",
+      styles={{
+        body: {
+          display: "flex",
+          flexDirection: "column",
+          height: "100%",
+          padding: "0",
+        },
       }}
       footer={
-        <div style={{ display: "flex", padding: "10px" }}>
+        <div className="flex p-2.5">
           <Input
             placeholder="Nhập tin nhắn..."
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onPressEnter={sendMessage}
-            style={{ marginRight: "10px", flex: 1 }}
+            className="mr-2.5 flex-1"
           />
           <Button type="primary" onClick={sendMessage}>
             <Send strokeWidth={1} size={18} />
@@ -191,54 +196,65 @@ const ChatDrawer = ({ open, setOpen }) => {
       <div
         ref={messagesContainerRef}
         onScroll={handleScroll}
-        style={{
-          flex: 1,
-          overflowY: "auto",
-          padding: "10px",
-          backgroundColor: "#f5f5f5",
-          position: "relative",
-        }}
+        className="flex-1 overflow-y-auto p-2.5 bg-gray-100 relative"
       >
         <List
           dataSource={messages}
-          renderItem={(message) => (
-            <div
-              style={{
-                justifyContent:
-                  message.senderId === userId ? "flex-end" : "flex-start",
-                display: "flex",
-                marginBottom: "10px",
-              }}
-            >
-              <div
-                style={{
-                  maxWidth: "70%",
-                  padding: "10px",
-                  borderRadius: "10px",
-                  backgroundColor:
-                    message.senderId === userId ? "#e6f7ff" : "#ffffff",
-                  boxShadow: "0px 1px 3px rgba(0, 0, 0, 0.1)",
-                }}
-              >
-                <Text>{message.content}</Text>
-                <br />
-                <Text
-                  type="secondary"
-                  className="flex space-x-1 justify-between text-xs"
+          renderItem={(message, index) => {
+            const previousMessage = messages[index - 1];
+            const showDateHeader =
+              !previousMessage ||
+              moment(message.time).format("DD/MM/YYYY") !==
+                moment(previousMessage.time).format("DD/MM/YYYY");
+            return (
+              <>
+                {showDateHeader && (
+                  <div className="text-center sticky top-0 z-50 m-2 text-xs flex justify-center">
+                    {loading ? (
+                      <Spin size="small" />
+                    ) : (
+                      <span className="bg-gray-300 w-32 rounded-lg p-1 ">
+                        {moment(message.time).format("DD/MM/YYYY") ===
+                        moment().format("DD/MM/YYYY")
+                          ? "Hôm nay"
+                          : moment(message.time).format("DD/MM/YYYY")}
+                      </span>
+                    )}
+                  </div>
+                )}
+                <div
+                  className={`flex mb-2 ${
+                    message.senderId === userId
+                      ? "justify-end"
+                      : "justify-start"
+                  }`}
                 >
-                  <span>{message.time}</span>
-                  <span>
-                    {message.senderId === userId &&
-                      (message.isRead ? (
-                        <CheckCheck strokeWidth={1} size={16} />
-                      ) : (
-                        <Check strokeWidth={1} size={16} />
-                      ))}
-                  </span>
-                </Text>
-              </div>
-            </div>
-          )}
+                  <div
+                    className={`max-w-[70%] p-2.5 rounded-lg shadow-md ${
+                      message.senderId === userId ? "bg-[#e6f7ff]" : "bg-white"
+                    }`}
+                  >
+                    <Text>{message.content}</Text>
+                    <br />
+                    <Text
+                      type="secondary"
+                      className="flex space-x-1 justify-between text-xs"
+                    >
+                      <span>{moment(message.time).format("HH:mm")}</span>
+                    </Text>
+                  </div>
+                </div>
+                <span className="flex justify-end">
+                  {index + 1 === messages.length &&
+                    message.senderId === userId && (
+                      <Text className="text-gray-600 text-xs">
+                        {message.isRead ? "Đã xem" : "Đã gửi"}
+                      </Text>
+                    )}
+                </span>
+              </>
+            );
+          }}
         />
         <div ref={messagesEndRef} />
       </div>
@@ -257,6 +273,7 @@ const ChatDrawer = ({ open, setOpen }) => {
 ChatDrawer.propTypes = {
   open: PropTypes.bool.isRequired,
   setOpen: PropTypes.func.isRequired,
+  socket: PropTypes.any.isRequired,
 };
 
 export default ChatDrawer;

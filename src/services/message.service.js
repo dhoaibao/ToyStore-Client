@@ -5,16 +5,12 @@ class MessageService {
         this.api = createApiClient(path);
     }
 
-    async getMessages(id) {
-        return (await this.api.get(`/${id}`)).data;
+    async getMessages(id, query) {
+        return (await this.api.get(`/${id}?${query}`)).data;
     }
 
     async getUnreadCount(id) {
         return (await this.api.get(`/unread/${id}`)).data;
-    }
-
-    async markAsRead(id) {
-        return (await this.api.put(`/${id}`)).data;
     }
 }
 

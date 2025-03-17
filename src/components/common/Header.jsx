@@ -8,7 +8,7 @@ import {
   TableOfContents,
   MoveLeft,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Dropdown, Space, Badge } from "antd";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
@@ -22,6 +22,9 @@ import VoiceSearch from "../search/VoiceSearch";
 import ImageSearch from "../search/ImageSearch";
 import { categoryService, messageService } from "../../services";
 import { setUnreadCount } from "../../redux/slices/messageSlice";
+import io from "socket.io-client";
+
+const socket = io("http://localhost:3000");
 
 const Header = () => {
   const navigate = useNavigate();
@@ -42,10 +45,22 @@ const Header = () => {
   const totalItems = useSelector((state) => state.cart.totalItems);
   const unreadCount = useSelector((state) => state.message.unreadCount);
   const totalItemsLocal = JSON.parse(
-    localStorage.getItem("cart") || "[]"
+    localStorage.getItem("cart") || "[]",
   ).length;
 
+  const socketRef = useRef(socket);
+
   const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    if (userId) {
+      const newSocket = io("http://localhost:3000", {
+        query: { userId: userId.toString() },
+      });
+
+      socketRef.current = newSocket;
+    }
+  }, [userId]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -188,7 +203,7 @@ const Header = () => {
               >
                 {item.label}
               </Link>
-            )
+            ),
           )}
         </div>
 
@@ -253,7 +268,11 @@ const Header = () => {
         </div>
       </div>
       <Cart open={cartOpen} setOpen={setCartOpen} />
-      <ChatBox open={isChatOpen} setOpen={setIsChatOpen} />
+      <ChatBox
+        open={isChatOpen}
+        setOpen={setIsChatOpen}
+        socket={socketRef.current}
+      />
       <Auth open={isAuthOpen} setOpen={setIsAuthOpen} />
       <VoiceSearch
         isOpen={isVoiceSearchOpen}

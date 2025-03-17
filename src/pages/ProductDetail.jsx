@@ -6,6 +6,7 @@ import { useParams } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../redux/thunks/cartThunk";
 import moment from "moment";
+import discountedPrice from "../utils/discountedPrice";
 
 const ProductDetail = () => {
   const { slug } = useParams();
@@ -13,9 +14,9 @@ const ProductDetail = () => {
 
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [reviews, setReviews] = useState([]);
 
   const addToCartLoading = useSelector((state) => state.cart.loading);
-  const errorCart = useSelector((state) => state.cart.error);
   const isLogin = useSelector((state) => state.user.isLogin);
 
   useEffect(() => {
@@ -23,8 +24,10 @@ const ProductDetail = () => {
       if (slug) {
         try {
           const result = await productService.getProductBySlug(slug);
-          console.log("result: ", result);
           setProduct(result.data);
+          if (result.data.reviews) {
+            setReviews(result.data.reviews);
+          }
         } catch (error) {
           console.error("Error fetching product:", error);
         } finally {
@@ -38,7 +41,7 @@ const ProductDetail = () => {
 
   const requiredAge = product?.productInfoValues
     .map((item) =>
-      item.productInfo.productInfoName === "Tuổi" ? item.value : null
+      item.productInfo.productInfoName === "Tuổi" ? item.value : null,
     )
     .filter((item) => item !== null);
 
@@ -48,43 +51,31 @@ const ProductDetail = () => {
     "Hỗ Trợ Kỹ Thuật 24/7",
   ];
 
-  const discountedPrice =
-    product?.promotions?.reduce((acc, promotion) => {
-      if (promotion.discountType === "percentage") {
-        return acc - (acc * promotion.discountValue) / 100;
-      }
-
-      if (promotion.discountType === "fixed_amount") {
-        return acc - promotion.discountValue;
-      }
-    }, product?.price) || product?.price;
-
   const [quantity, setQuantity] = useState(1);
 
   const handleAddToCart = async () => {
-    if (isLogin) {
-      await dispatch(addToCart({ productId: product.productId, quantity }));
-    } else {
-      let cart = JSON.parse(localStorage.getItem("cart")) || [];
-      const existingProduct = cart.find((item) => item.slug === product.slug);
-      if (existingProduct) {
-        cart = cart.map((item) =>
-          item.slug === product.slug
-            ? { ...item, quantity: item.quantity + quantity }
-            : item
-        );
+    try {
+      if (isLogin) {
+        dispatch(addToCart({ productId: product.productId, quantity }));
       } else {
-        cart.push({ slug: product.slug, quantity });
+        let cart = JSON.parse(localStorage.getItem("cart")) || [];
+        const existingProduct = cart.find((item) => item.slug === product.slug);
+        if (existingProduct) {
+          cart = cart.map((item) =>
+            item.slug === product.slug
+              ? { ...item, quantity: item.quantity + quantity }
+              : item,
+          );
+        } else {
+          cart.push({ slug: product.slug, quantity });
+        }
+        localStorage.setItem("cart", JSON.stringify(cart));
+        console.log("Cart", cart);
       }
-      localStorage.setItem("cart", JSON.stringify(cart));
-      console.log("Cart", cart);
-    }
-
-    if (errorCart && isLogin) {
-      console.log("Error when add to cart: ", errorCart);
-      message.error("Đã xảy ra lỗi!");
-    } else {
       message.success("Đã thêm sản phẩm vào giỏ hàng!");
+    } catch (error) {
+      console.log("Error when add to cart: ", error);
+      message.error("Đã xảy ra lỗi!");
     }
   };
 
@@ -94,7 +85,7 @@ const ProductDetail = () => {
 
   const images = useMemo(
     () => product?.productImages || [],
-    [product?.productImages]
+    [product?.productImages],
   );
 
   const [currentImage, setCurrentImage] = useState({});
@@ -121,36 +112,6 @@ const ProductDetail = () => {
 
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
-  };
-  const [reviews, setReviews] = useState([
-    {
-      id: 1,
-      user: "Nguyễn Văn A",
-      rating: 5,
-      comment: "Sản phẩm rất tốt, chất lượng tuyệt vời!",
-    },
-    {
-      id: 2,
-      user: "Trần Thị B",
-      rating: 4,
-      comment: "Hàng đẹp, giao nhanh. Nhưng giá hơi cao.",
-    },
-  ]);
-
-  const [newReview, setNewReview] = useState({
-    user: "",
-    rating: 0,
-    comment: "",
-  });
-
-  // Xử lý thêm đánh giá
-  const handleAddReview = () => {
-    if (newReview.user && newReview.rating > 0 && newReview.comment) {
-      setReviews([...reviews, { ...newReview, id: reviews.length + 1 }]);
-      setNewReview({ user: "", rating: 0, comment: "" });
-    } else {
-      alert("Vui lòng điền đầy đủ thông tin đánh giá.");
-    }
   };
 
   // Tính trung bình sao
@@ -218,19 +179,20 @@ const ProductDetail = () => {
                   | {requiredAge}+
                 </p>
                 <div className="mt-4">
-                  {product?.promotions ? (
+                  {product?.promotionValues.length > 0 ? (
                     <>
                       <p className="text-gray-500 line-through font-semibold">
-                        {discountedPrice !== product?.price &&
+                        {discountedPrice(product) !== product?.price &&
                           `Giá gốc: ${product?.price?.toLocaleString(
-                            "vi-VN"
+                            "vi-VN",
                           )}đ`}
                       </p>
                       <p className="text-lg text-red-600 font-semibold">
-                        Giá hiện tại: {discountedPrice.toLocaleString("vi-VN")}đ
-                        {product?.promotions &&
-                          product.promotions.map((promotion, index) => (
-                            <>
+                        Giá hiện tại:{" "}
+                        {discountedPrice(product).toLocaleString("vi-VN")}đ
+                        {product?.promotionValues.length > 0 &&
+                          product.promotionValues.map((promotion, index) => (
+                            <span key={index}>
                               <span
                                 key={index}
                                 className="ml-4 text-white bg-red-600 p-1 rounded-md text-sm"
@@ -240,7 +202,7 @@ const ProductDetail = () => {
 
                                 {promotion.discountType === "fixed_amount" &&
                                   `-${promotion.discountValue.toLocaleString(
-                                    "vi-VN"
+                                    "vi-VN",
                                   )}đ`}
 
                                 {promotion.discountType.startsWith("buy_") &&
@@ -255,13 +217,13 @@ const ProductDetail = () => {
                               <span className="text-sm font-normal text-gray-800 italic">
                                 (Thời gian khuyến mãi:{" "}
                                 {moment(promotion.startDate).format(
-                                  "DD/MM/YYYY"
+                                  "DD/MM/YYYY",
                                 )}{" "}
                                 -{" "}
                                 {moment(promotion.endDate).format("DD/MM/YYYY")}
                                 )
                               </span>
-                            </>
+                            </span>
                           ))}
                       </p>
                     </>
@@ -368,44 +330,16 @@ const ProductDetail = () => {
                   </p>
                 </div>
               </div>
-              <div className="border border-gray-300 rounded-lg p-4 shadow-sm">
-                <h3 className="text-lg font-bold mb-4">
-                  Thêm đánh giá của bạn
-                </h3>
-                <div className="mb-4">
-                  <Rate
-                    value={newReview.rating}
-                    onChange={(value) =>
-                      setNewReview({ ...newReview, rating: value })
-                    }
-                  />
-                </div>
-                <div className="mb-4">
-                  <label className="block text-gray-700 mb-1">Nhận xét:</label>
-                  <textarea
-                    className="w-full border border-gray-300 rounded-lg px-4 py-2"
-                    rows="4"
-                    value={newReview.comment}
-                    onChange={(e) =>
-                      setNewReview({ ...newReview, comment: e.target.value })
-                    }
-                  ></textarea>
-                </div>
-                <button
-                  onClick={handleAddReview}
-                  className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600"
-                >
-                  Gửi đánh giá
-                </button>
-              </div>
               <div className="space-y-4 mt-6">
                 {reviews.map((review) => (
                   <div
-                    key={review.id}
+                    key={review.reviewId}
                     className="border border-gray-300 rounded-lg p-4 shadow-sm"
                   >
                     <div className="flex items-center justify-between">
-                      <h4 className="font-bold text-gray-800">{review.user}</h4>
+                      <h4 className="font-bold text-gray-800">
+                        {review.user.fullName}
+                      </h4>
                       <Rate disabled value={review.rating} />
                     </div>
                     <p className="mt-2 text-gray-700">{review.comment}</p>

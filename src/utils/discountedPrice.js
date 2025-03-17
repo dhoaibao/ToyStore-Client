@@ -2,14 +2,18 @@ import getCurrentPrice from "./getCurrentPrice";
 
 const discountedPrice = (product) => {
   const price = getCurrentPrice(product?.prices);
-  if (product?.promotion?.discountType === "percentage") {
-    return price - (price * product?.promotion?.discountValue) / 100;
-  }
+  let totalDiscount = 0;
+  product?.promotionValues.map(promotion => {
+    if (promotion?.discountType === "percentage") {
+      totalDiscount += (price * promotion?.discountValue) / 100;
+    }
 
-  if (product?.promotion?.discountType === "fixed_amount") {
-    return price - product?.promotion?.discountValue;
-  }
-  return price;
+    if (promotion?.discountType === "fixed_amount") {
+      totalDiscount += promotion?.discountValue;
+    }
+  })
+
+  return price - totalDiscount;
 }
 
 export default discountedPrice;

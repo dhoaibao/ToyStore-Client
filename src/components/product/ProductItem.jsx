@@ -10,28 +10,32 @@ const ProductItem = ({
   productName,
   slug,
   prices,
-  promotion,
+  promotionValues,
   avgRate = 4.5,
   requiredAge,
 }) => {
   return (
     <div className="bg-white rounded-lg shadow-md p-4 relative h-96 w-60">
-      {promotion && (
-        <div className="absolute z-10 top-0 left-0 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-tr-lg rounded-br-lg">
-          {promotion.discountType === "percentage" &&
-            `Giảm ${promotion.discountValue}%`}
+      {promotionValues.length > 0 &&
+        promotionValues.map((promotion, index) => (
+          <div
+            key={index}
+            className="absolute z-10 top-0 left-0 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-tr-lg rounded-br-lg"
+          >
+            {promotion.discountType === "percentage" &&
+              `Giảm ${promotion.discountValue}%`}
 
-          {promotion.discountType === "fixed_amount" &&
-            `Giảm ${promotion.discountValue.toLocaleString("vi-VN")}đ`}
+            {promotion.discountType === "fixed_amount" &&
+              `Giảm ${promotion.discountValue.toLocaleString("vi-VN")}đ`}
 
-          {promotion.discountType.startsWith("buy_") &&
-            promotion.discountType.includes("_get_") &&
-            (() => {
-              const [x, y] = promotion.discountType.match(/\d+/g);
-              return `Mua ${x} tặng ${y}`;
-            })()}
-        </div>
-      )}
+            {promotion.discountType.startsWith("buy_") &&
+              promotion.discountType.includes("_get_") &&
+              (() => {
+                const [x, y] = promotion.discountType.match(/\d+/g);
+                return `Mua ${x} tặng ${y}`;
+              })()}
+          </div>
+        ))}
 
       <Link to={`/products/${slug}`}>
         {/* Product Image */}
@@ -59,9 +63,12 @@ const ProductItem = ({
         </Link>
         <div className="flex mt-2 items-center">
           <p className="font-extrabold text-hover-primary">
-            {discountedPrice({ promotion, prices }).toLocaleString("vi-VN")}đ
+            {discountedPrice({ promotionValues, prices }).toLocaleString(
+              "vi-VN",
+            )}
+            đ
           </p>
-          {discountedPrice({ promotion, prices }) !==
+          {discountedPrice({ promotionValues, prices }) !==
             getCurrentPrice(prices) && (
             <p className="ml-2 line-through font-semibold text-gray-500">
               {getCurrentPrice(prices).toLocaleString("vi-VN")}đ
@@ -84,7 +91,7 @@ ProductItem.propTypes = {
   brand: PropTypes.object.isRequired,
   productName: PropTypes.string.isRequired,
   prices: PropTypes.number.isRequired,
-  promotion: PropTypes.array,
+  promotionValues: PropTypes.array,
   avgRate: PropTypes.number,
   slug: PropTypes.string.isRequired,
   requiredAge: PropTypes.number,

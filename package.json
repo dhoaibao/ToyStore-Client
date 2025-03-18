@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@reduxjs/toolkit": "^2.6.1",
-    "antd": "^5.24.3",
+    "antd": "^5.24.4",
     "axios": "^1.8.3",
     "crypto-js": "^4.2.0",
     "ct553-client": "file:",

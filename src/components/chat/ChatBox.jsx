@@ -1,6 +1,16 @@
 import { useState, useEffect, useRef } from "react";
-import { Drawer, Input, Button, List, Typography, message, Spin } from "antd";
-import { Send } from "lucide-react";
+import {
+  Drawer,
+  Input,
+  Button,
+  List,
+  Typography,
+  message,
+  Spin,
+  Upload,
+  Image,
+} from "antd";
+import { Send, ImageUp } from "lucide-react";
 import { DownOutlined } from "@ant-design/icons";
 import PropTypes from "prop-types";
 import { useSelector, useDispatch } from "react-redux";
@@ -17,6 +27,7 @@ const ChatDrawer = ({ open, setOpen, socket }) => {
   const [showScrollIcon, setShowScrollIcon] = useState(false);
   const messagesEndRef = useRef(null);
   const messagesContainerRef = useRef(null);
+  const [fileList, setFileList] = useState([]);
 
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
@@ -45,7 +56,7 @@ const ChatDrawer = ({ open, setOpen, socket }) => {
                   senderId: msg.senderId,
                 });
               }
-            })
+            });
           }
           dispatch(setUnreadCount(0));
           setLoading(false);
@@ -144,23 +155,49 @@ const ChatDrawer = ({ open, setOpen, socket }) => {
   };
 
   const sendMessage = () => {
-    if (!newMessage.trim() || !socket) return;
-
+    if ((!newMessage.trim() && fileList.length === 0) || !socket) return;
+    console.log(fileList);
     const newMsg = {
       senderId: userId,
       content: newMessage,
       time: new Date(),
       senderName: user.fullName,
       avatar: user.avatar,
+      files: fileList.map((file) => ({
+        originName: file.originFileObj.name,
+        mimetype: file.originFileObj.type,
+        buffer: file.originFileObj,
+      })),
     };
     socket.emit("sendMessage", newMsg);
-    setMessages([...messages, { ...newMsg }]);
+    setMessages([
+      ...messages,
+      {
+        ...newMsg,
+        uploadImages: fileList.map((file) => ({
+          url: URL.createObjectURL(file.originFileObj),
+        })),
+      },
+    ]);
     setNewMessage("");
+    setFileList([]);
     scrollToBottom();
   };
 
+  console.log(messages);
+
   const closeDrawer = () => {
     setOpen(false);
+  };
+
+  const handleUploadChange = ({ fileList }) => {
+    setFileList(fileList);
+  };
+
+  const handleRemove = (file) => {
+    setFileList((prevFileList) =>
+      prevFileList.filter((item) => item.uid !== file.uid),
+    );
   };
 
   return (
@@ -179,17 +216,48 @@ const ChatDrawer = ({ open, setOpen, socket }) => {
         },
       }}
       footer={
-        <div className="flex p-2.5">
-          <Input
-            placeholder="Nhập tin nhắn..."
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            onPressEnter={sendMessage}
-            className="mr-2.5 flex-1"
-          />
-          <Button type="primary" onClick={sendMessage}>
-            <Send strokeWidth={1} size={18} />
-          </Button>
+        <div>
+          {fileList.length > 0 && (
+            <Upload
+              fileList={fileList}
+              listType="picture-card"
+              onRemove={handleRemove}
+            />
+          )}
+          <div className="flex items-center justify-center space-x-2 p-2">
+            <Upload
+              beforeUpload={(file) => {
+                // Check if file with same name already exists in fileList
+                const isDuplicate = fileList.some(
+                  (item) => item.originFileObj.name === file.name,
+                );
+                if (isDuplicate) {
+                  message.warning("Hình ảnh này đã được chọn");
+                  return Upload.LIST_IGNORE;
+                }
+                return false;
+              }}
+              showUploadList={false}
+              multiple
+              fileList={fileList}
+              accept="image/*"
+              maxCount={5}
+              onChange={handleUploadChange}
+            >
+              <Button type="text" className="p-0">
+                <ImageUp strokeWidth={1} size={26} />
+              </Button>
+            </Upload>
+            <Input
+              placeholder="Nhập tin nhắn..."
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onPressEnter={sendMessage}
+            />
+            <Button type="primary" onClick={sendMessage} className="px-3">
+              <Send strokeWidth={1} size={18} />
+            </Button>
+          </div>
         </div>
       }
     >
@@ -229,20 +297,59 @@ const ChatDrawer = ({ open, setOpen, socket }) => {
                       : "justify-start"
                   }`}
                 >
-                  <div
-                    className={`max-w-[70%] p-2.5 rounded-lg shadow-md ${
-                      message.senderId === userId ? "bg-[#e6f7ff]" : "bg-white"
-                    }`}
-                  >
-                    <Text>{message.content}</Text>
-                    <br />
-                    <Text
-                      type="secondary"
-                      className="flex space-x-1 justify-between text-xs"
+                  {message.uploadImages && message.uploadImages.length > 0 && (
+                    <div
+                      className={`max-w-[70%] ${message.senderId === userId ? "ml-auto" : "mr-auto"}`}
                     >
-                      <span>{moment(message.time).format("HH:mm")}</span>
-                    </Text>
-                  </div>
+                      <div className="flex flex-col">
+                        <div className={`flex flex-wrap gap-1 ${message.senderId === userId ? "justify-end" : "justify-start"}`}>
+                          {message.uploadImages.map((image, idx) => (
+                            <Image
+                              key={idx}
+                              src={image.url}
+                              className="rounded-lg"
+                              width={100}
+                              height={100}
+                              style={{ objectFit: 'cover' }}
+                              preview={true}
+                            />
+                          ))}
+                        </div>
+                        <Text
+                          type="secondary"
+                          className="text-xs mt-1 text-right"
+                        >
+                          <span>{moment(message.time).format("HH:mm")}</span>
+                        </Text>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div
+                  className={`flex mb-2 ${
+                    message.senderId === userId
+                      ? "justify-end"
+                      : "justify-start"
+                  }`}
+                >
+                  {message.content && (
+                    <div
+                      className={`max-w-[70%] p-2.5 rounded-lg shadow-md ${
+                        message.senderId === userId
+                          ? "bg-[#e6f7ff]"
+                          : "bg-white"
+                      }`}
+                    >
+                      <Text>{message.content}</Text>
+                      <br />
+                      <Text
+                        type="secondary"
+                        className="flex space-x-1 justify-between text-xs"
+                      >
+                        <span>{moment(message.time).format("HH:mm")}</span>
+                      </Text>
+                    </div>
+                  )}
                 </div>
                 <span className="flex justify-end">
                   {index + 1 === messages.length &&

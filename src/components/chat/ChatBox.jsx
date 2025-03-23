@@ -22,21 +22,22 @@ const { Text } = Typography;
 
 const ChatDrawer = ({ open, setOpen, socket }) => {
   const { userId, user } = useSelector((state) => state.user);
+  const unreadCount = useSelector((state) => state.message.unreadCount);
+  
+  const messagesEndRef = useRef(null);
+  const messagesContainerRef = useRef(null);
+  
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [showScrollIcon, setShowScrollIcon] = useState(false);
-  const messagesEndRef = useRef(null);
-  const messagesContainerRef = useRef(null);
   const [fileList, setFileList] = useState([]);
-
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
 
-  const unreadCount = useSelector((state) => state.message.unreadCount);
-
   const dispatch = useDispatch();
 
+  // Fetches messages when the chat drawer is opened or when scrolling to load more messages
   useEffect(() => {
     if (userId && open && hasMore) {
       const fetchMessages = async () => {
@@ -50,7 +51,8 @@ const ChatDrawer = ({ open, setOpen, socket }) => {
             setPage(result.pagination.page);
             setHasMore(result.pagination.page < result.pagination.totalPages);
             setMessages((prev) => [...result.data, ...prev]);
-            result.data.map((msg) => {
+            // Mark messages as read when received
+            result.data.forEach((msg) => {
               if (!msg.isRead) {
                 socket.emit("markAsRead", {
                   senderId: msg.senderId,
@@ -67,6 +69,7 @@ const ChatDrawer = ({ open, setOpen, socket }) => {
       };
       fetchMessages();
     }
+    // Reset state when drawer is closed
     if (!open) {
       setMessages([]);
       setPage(1);
@@ -74,6 +77,7 @@ const ChatDrawer = ({ open, setOpen, socket }) => {
     }
   }, [open, userId, dispatch, page, hasMore, socket]);
 
+  // Handle browser notifications for new messages
   const handleNotification = (data) => {
     if ("Notification" in window && Notification.permission === "granted") {
       new Notification("Toy Store", {
@@ -93,9 +97,11 @@ const ChatDrawer = ({ open, setOpen, socket }) => {
     }
   };
 
+  // Socket event listeners for real-time messaging
   useEffect(() => {
     if (!socket) return;
 
+    // Update message read status
     socket.on("updateStatus", (senderId) => {
       setMessages((prev) =>
         prev.map((msg) =>
@@ -106,8 +112,10 @@ const ChatDrawer = ({ open, setOpen, socket }) => {
       );
     });
 
+    // Handle new incoming messages
     socket.on("newMessage", (data) => {
       if (open) {
+        // If drawer is open, add message and mark as read
         setMessages((prev) => [...prev, { ...data }]);
         socket.emit("markAsRead", {
           senderId: data.senderId,
@@ -115,17 +123,20 @@ const ChatDrawer = ({ open, setOpen, socket }) => {
         });
         dispatch(setUnreadCount(0));
       } else {
+        // If drawer is closed, increment unread count
         dispatch(setUnreadCount(unreadCount + 1));
       }
       handleNotification(data);
     });
 
+    // Cleanup listeners when component unmounts
     return () => {
       socket.off("updateStatus");
       socket.off("newMessage");
     };
   }, [socket, open, dispatch, userId, unreadCount]);
 
+  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (messagesEndRef.current && page === 1) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -133,13 +144,17 @@ const ChatDrawer = ({ open, setOpen, socket }) => {
     }
   }, [messages, page]);
 
+  // Handle scroll events to show/hide scroll button and load more messages
   const handleScroll = () => {
     if (messagesContainerRef.current) {
       const { scrollTop, scrollHeight, clientHeight } =
         messagesContainerRef.current;
+
+      // Show/hide scroll to bottom button based on scroll position
       const isAtBottom = scrollTop + clientHeight >= scrollHeight - 10;
       setShowScrollIcon(!isAtBottom);
 
+      // Load more messages when scrolled to top
       const isAtTop = scrollTop <= 10;
       if (isAtTop && hasMore && !loading) {
         setPage((prev) => prev + 1);
@@ -147,6 +162,7 @@ const ChatDrawer = ({ open, setOpen, socket }) => {
     }
   };
 
+  // Function to scroll to the bottom of the chat
   const scrollToBottom = () => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
@@ -154,9 +170,12 @@ const ChatDrawer = ({ open, setOpen, socket }) => {
     }
   };
 
+  // Send a new message
   const sendMessage = () => {
+    // Don't send if message is empty and no files or socket not available
     if ((!newMessage.trim() && fileList.length === 0) || !socket) return;
-    console.log(fileList);
+
+    // Create new message object
     const newMsg = {
       senderId: userId,
       content: newMessage,
@@ -169,7 +188,11 @@ const ChatDrawer = ({ open, setOpen, socket }) => {
         buffer: file.originFileObj,
       })),
     };
+
+    // Send message via socket
     socket.emit("sendMessage", newMsg);
+
+    // Update local state immediately for better UX
     setMessages([
       ...messages,
       {
@@ -179,21 +202,23 @@ const ChatDrawer = ({ open, setOpen, socket }) => {
         })),
       },
     ]);
+
+    // Reset input fields
     setNewMessage("");
     setFileList([]);
     scrollToBottom();
   };
 
-  console.log(messages);
-
   const closeDrawer = () => {
     setOpen(false);
   };
 
+  // Handle file upload changes
   const handleUploadChange = ({ fileList }) => {
     setFileList(fileList);
   };
 
+  // Handle removing files from the upload list
   const handleRemove = (file) => {
     setFileList((prevFileList) =>
       prevFileList.filter((item) => item.uid !== file.uid),
@@ -290,6 +315,7 @@ const ChatDrawer = ({ open, setOpen, socket }) => {
                     )}
                   </div>
                 )}
+                {/* show images */}
                 <div
                   className={`flex mb-2 ${
                     message.senderId === userId
@@ -325,6 +351,7 @@ const ChatDrawer = ({ open, setOpen, socket }) => {
                     </div>
                   )}
                 </div>
+                {/* show content messages */}
                 <div
                   className={`flex mb-2 ${
                     message.senderId === userId
@@ -351,6 +378,7 @@ const ChatDrawer = ({ open, setOpen, socket }) => {
                     </div>
                   )}
                 </div>
+                {/* status */}
                 <span className="flex justify-end">
                   {index + 1 === messages.length &&
                     message.senderId === userId && (

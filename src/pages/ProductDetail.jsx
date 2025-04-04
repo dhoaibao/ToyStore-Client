@@ -179,7 +179,7 @@ const ProductDetail = () => {
                   | {requiredAge}+
                 </p>
                 <div className="mt-4">
-                  {product?.promotionValues.length > 0 ? (
+                  {product?.promotionPeriods.length > 0 ? (
                     <>
                       <p className="text-gray-500 line-through font-semibold">
                         {discountedPrice(product) !== product?.price &&
@@ -190,8 +190,8 @@ const ProductDetail = () => {
                       <p className="text-lg text-red-600 font-semibold">
                         Giá hiện tại:{" "}
                         {discountedPrice(product).toLocaleString("vi-VN")}đ
-                        {product?.promotionValues.length > 0 &&
-                          product.promotionValues.map((promotion, index) => (
+                        {product?.promotionPeriods.length > 0 &&
+                          product.promotionPeriods.map((promotion, index) => (
                             <span key={index}>
                               <span
                                 key={index}

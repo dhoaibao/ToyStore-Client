@@ -10,14 +10,14 @@ const ProductItem = ({
   productName,
   slug,
   prices,
-  promotionValues,
+  promotionPeriods,
   avgRate = 4.5,
   requiredAge,
 }) => {
   return (
     <div className="bg-white rounded-lg shadow-md p-4 relative h-96 w-60">
-      {promotionValues.length > 0 &&
-        promotionValues.map((promotion, index) => (
+      {promotionPeriods.length > 0 &&
+        promotionPeriods.map((promotion, index) => (
           <div
             key={index}
             className="absolute z-10 top-0 left-0 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-tr-lg rounded-br-lg"
@@ -63,12 +63,12 @@ const ProductItem = ({
         </Link>
         <div className="flex mt-2 items-center">
           <p className="font-extrabold text-hover-primary">
-            {discountedPrice({ promotionValues, prices }).toLocaleString(
+            {discountedPrice({ promotionPeriods, prices }).toLocaleString(
               "vi-VN",
             )}
             đ
           </p>
-          {discountedPrice({ promotionValues, prices }) !==
+          {discountedPrice({ promotionPeriods, prices }) !==
             getCurrentPrice(prices) && (
             <p className="ml-2 line-through font-semibold text-gray-500">
               {getCurrentPrice(prices).toLocaleString("vi-VN")}đ
@@ -91,7 +91,7 @@ ProductItem.propTypes = {
   brand: PropTypes.object.isRequired,
   productName: PropTypes.string.isRequired,
   prices: PropTypes.number.isRequired,
-  promotionValues: PropTypes.array,
+  promotionPeriods: PropTypes.array,
   avgRate: PropTypes.number,
   slug: PropTypes.string.isRequired,
   requiredAge: PropTypes.number,

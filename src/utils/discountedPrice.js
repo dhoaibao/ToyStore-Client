@@ -3,7 +3,7 @@ import getCurrentPrice from "./getCurrentPrice";
 const discountedPrice = (product) => {
   const price = getCurrentPrice(product?.prices);
   let totalDiscount = 0;
-  product?.promotionValues.map(promotion => {
+  product?.promotionPeriods.map(promotion => {
     if (promotion?.discountType === "percentage") {
       totalDiscount += (price * promotion?.discountValue) / 100;
     }

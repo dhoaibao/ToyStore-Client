@@ -181,6 +181,7 @@ const ChatDrawer = ({ open, setOpen, socket }) => {
       content: newMessage,
       time: new Date(),
       senderName: user.fullName,
+      email: user.email,
       avatar: user.avatar,
       files: fileList.map((file) => ({
         originName: file.originFileObj.name,
@@ -190,7 +191,7 @@ const ChatDrawer = ({ open, setOpen, socket }) => {
     };
 
     // Send message via socket
-    socket.emit("sendMessage", newMsg);
+    socket.emit("sendMessageByClient", newMsg);
 
     // Update local state immediately for better UX
     setMessages([

@@ -86,13 +86,15 @@ const Header = () => {
       }
     };
 
-    fetch();
-  }, [userId, dispatch]);
+    if (isLogin) fetch();
+  }, [userId, dispatch, isLogin]);
 
   useEffect(() => {
-    dispatch(getLoggedInUser());
-    dispatch(getCartByUser());
-  }, [dispatch]);
+    if (isLogin) {
+      dispatch(getLoggedInUser());
+      dispatch(getCartByUser());
+    }
+  }, [dispatch, isLogin]);
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -161,11 +163,7 @@ const Header = () => {
         {/* Logo */}
         <Link to="/">
           <div className="text-2xl font-bold">
-            <img
-              src="/logo(150x50).png"
-              alt="Logo"
-              className="h-12"
-            />
+            <img src="/logo(150x50).png" alt="Logo" className="h-12" />
           </div>
         </Link>
 

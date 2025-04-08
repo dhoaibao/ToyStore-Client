@@ -37,7 +37,7 @@ function Home() {
   const carousel = ["/banner1.png", "/banner2.png", "/banner3.png"];
 
   return (
-    <div className="container mx-auto">
+    <div className="container mx-auto bg-gray-50">
       <div className="w-full h-96 overflow-hidden">
         <Carousel autoplay arrows infinite={false}>
           {carousel.map((item, index) => (

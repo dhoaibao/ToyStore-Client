@@ -11,8 +11,6 @@ const VoucherCard = ({ voucher }) => {
   const user = useSelector((state) => state.user.user);
   const isLogin = useSelector((state) => state.user.isLogin);
 
-  console.log(user);
-
   const handleCollectVoucher = async (voucherId) => {
     if (!isLogin) {
       message.error("Vui lòng đăng nhập để nhận mã giảm giá!");

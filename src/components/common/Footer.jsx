@@ -49,8 +49,8 @@ const Footer = () => {
               bạn trải nghiệm mua sắm hoàn hảo cùng dịch vụ tận tâm nhất.
             </p>
             <p className="mt-4 leading-relaxed">
-              <strong>Địa chỉ</strong>: 123 Đường ABC, Phường XYZ, Quận 1, TP.
-              Hồ Chí Minh
+              <strong>Địa chỉ</strong>: 123 Đường 3/2, Phường Xuân Khánh, Quận Ninh Kiều, TP.
+              Cần Thơ
             </p>
             <div className="flex space-x-4 mt-4">
               {socialIcons.map(({ Icon, label, color }, index) => (
@@ -109,7 +109,7 @@ const Footer = () => {
 
         {/* Bottom Footer */}
         <div className="border-t mt-8 pt-6 text-sm text-center">
-          <span>© 2024 ToyStore. All rights reserved.</span>
+          <span>© 2025 ToyStore. All rights reserved.</span>
         </div>
       </div>
     </footer>

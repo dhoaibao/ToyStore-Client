@@ -138,7 +138,7 @@ const Header = () => {
 
   const items = categories.map((category) => ({
     label: (
-      <Link to={`/products?category=${category?.categoryName}`}>
+      <Link to={`/products?categoryNames=${category?.categoryName}`}>
         <div className="border border-gray-200 rounded-lg p-4 text-center shadow hover:shadow-lg transition-shadow duration-300">
           <img
             src={category?.categoryThumbnail.url}

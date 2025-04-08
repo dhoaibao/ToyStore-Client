@@ -15,7 +15,7 @@ const ProductItem = ({
   requiredAge,
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 relative h-96 w-60">
+    <div className="bg-white rounded-lg shadow-md p-4 relative h-96 w-60 border-t-4 border-primary">
       {promotionPeriods.length > 0 &&
         promotionPeriods.map((promotion, index) => (
           <div

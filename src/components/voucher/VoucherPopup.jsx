@@ -54,23 +54,23 @@ const VoucherPopup = ({ open, setOpen }) => {
       }}
     >
       <div className="flex-grow">
-        {vouchers?.length > 0 ? (
-          <section className="container mx-auto p-4">
-            <h2 className="text-2xl text-center text-primary font-bold mb-2">
-              Mã giảm giá
-            </h2>
-            <span className="mb-2 bg-primary h-2 rounded flex justify-center w-[30vw] mx-auto"></span>
+        <section className="container mx-auto p-4">
+          <h2 className="text-2xl text-center text-primary font-bold mb-2">
+            Mã giảm giá
+          </h2>
+          <span className="mb-2 bg-primary h-2 rounded flex justify-center w-[30vw] mx-auto"></span>
+          {vouchers?.length > 0 ? (
             <div className="grid grid-cols-2 gap-6">
               {vouchers.map((voucher) => (
                 <VoucherCard key={voucher.voucherId} voucher={voucher} />
               ))}
             </div>
-          </section>
-        ) : (
-          <div className="flex items-center justify-center h-full">
-            <Empty description={"Không có mã giảm giá!"} />
-          </div>
-        )}
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <Empty description={"Không có mã giảm giá!"} />
+            </div>
+          )}
+        </section>
       </div>
       <div className="mt-auto pt-4">
         {vouchers?.length > 0 && (

@@ -32,18 +32,24 @@ const SortBar = () => {
     },
   ];
 
-  const updateQuery = (key, value) => {
-    searchParams.set(key, value);
+  const onChange = (value) => {
+    searchParams.set("sort", "price");
+    searchParams.set("order", value);
     navigate({ search: searchParams.toString() });
   };
 
-  const onChange = (value) => {
-    updateQuery("sort", "price");
-    updateQuery("order", value);
+  const onClick = (option) => {
+    searchParams.set("sort", option.value);
+    if (option.value === "bestseller") {
+      searchParams.delete("order");
+    } else {
+      searchParams.set("order", "desc");
+    }
+    navigate({ search: searchParams.toString() });
   };
 
   const options = [
-    { label: "Mới Nhất", value: "newest" },
+    { label: "Mới Nhất", value: "createdAt" },
     { label: "Bán Chạy", value: "bestseller" },
   ];
 
@@ -52,7 +58,7 @@ const SortBar = () => {
       {options.map((option) => (
         <button
           key={option.value}
-          onClick={() => updateQuery("sort", option.value)}
+          onClick={() => onClick(option)}
           className={`px-4 py-2 rounded-md text-sm ${
             active === option.value
               ? "bg-primary text-white"

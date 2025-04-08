@@ -40,6 +40,7 @@ const Header = () => {
   const [isImageSearchOpen, setIsImageSearchOpen] = useState(false);
 
   const dispatch = useDispatch();
+  const accessToken = localStorage.getItem("accessToken");
 
   const isLogin = useSelector((state) => state.user.isLogin);
   const userId = useSelector((state) => state.user.userId);
@@ -90,11 +91,11 @@ const Header = () => {
   }, [userId, dispatch, isLogin]);
 
   useEffect(() => {
-    if (isLogin) {
+    if (accessToken) {
       dispatch(getLoggedInUser());
       dispatch(getCartByUser());
     }
-  }, [dispatch, isLogin]);
+  }, [dispatch, accessToken]);
 
   useEffect(() => {
     let lastScrollY = window.scrollY;

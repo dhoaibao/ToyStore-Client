@@ -55,7 +55,7 @@ const Header = () => {
 
   useEffect(() => {
     if (userId) {
-      const newSocket = io("http://localhost:3000", {
+      const newSocket = io(SOCKET_URL, {
         query: { userId: userId.toString() },
       });
 

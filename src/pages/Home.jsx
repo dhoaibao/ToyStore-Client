@@ -3,10 +3,13 @@ import ProductItem from "../components/product/ProductItem";
 import VoucherSection from "../components/voucher/VoucherSection";
 import { productService, categoryService } from "../services";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function Home() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
+  
+  const navagate = useNavigate();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -84,7 +87,7 @@ function Home() {
                 className="w-full h-32 object-cover mb-2 rounded-xl"
               />
               <h3 className="font-semibold text-xl">{category?.categoryName}</h3>
-              <Button type="primary" className="mt-4 px-6 py-2 font-medium rounded-lg">
+              <Button onClick={() => navagate(`/products?categoryNames=${category?.categoryName}`)} type="primary" className="mt-4 px-6 py-2 font-medium rounded-lg">
                 Xem Thêm
               </Button>
             </div>

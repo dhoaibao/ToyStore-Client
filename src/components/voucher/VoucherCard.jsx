@@ -11,8 +11,6 @@ const VoucherCard = ({ voucher }) => {
   const user = useSelector((state) => state.user.user);
   const isLogin = useSelector((state) => state.user.isLogin);
 
-  console.log(user);
-
   const handleCollectVoucher = async (voucherId) => {
     if (!isLogin) {
       message.error("Vui lòng đăng nhập để nhận mã giảm giá!");
@@ -49,13 +47,13 @@ const VoucherCard = ({ voucher }) => {
     </div>
   );
   return (
-    <div className="flex flex-row items-center bg-white shadow-md rounded-lg p-3">
+    <div className="flex flex-row items-center bg-white shadow-md rounded-lg p-4">
       <div className="flex justify-center items-center md:mr-2 text-primary text-3xl">
-        <Ticket strokeWidth={1} size={70} />
+        <Ticket strokeWidth={1} size={60} />
       </div>
       <div className="flex-1 text-left">
         <Popover content={content} trigger="hover">
-          <h3 className="text-xl font-bold text-primary">
+          <h3 className="text-lg font-bold text-primary">
             {voucher.discountType === "percentage" &&
               `Giảm ${voucher.discountValue}%`}
 

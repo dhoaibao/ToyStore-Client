@@ -15,12 +15,12 @@ const ProductItem = ({
   requiredAge,
 }) => {
   return (
-    <div className="bg-white rounded-lg shadow-md p-4 relative h-96 w-60">
+    <div className="bg-white rounded-lg shadow-md hover:shadow-2xl transition duration-300 transform hover:-translate-y-1 p-4 relative h-96 w-60 border-t-4 border-primary">
       {promotionPeriods.length > 0 &&
         promotionPeriods.map((promotion, index) => (
           <div
             key={index}
-            className="absolute z-10 top-0 left-0 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-tr-lg rounded-br-lg"
+            className="absolute shadow-md z-10 top-0 left-0 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-tl-md rounded-tr-md rounded-br-md"
           >
             {promotion.discountType === "percentage" &&
               `Giảm ${promotion.discountValue}%`}
@@ -39,7 +39,7 @@ const ProductItem = ({
 
       <Link to={`/products/${slug}`}>
         {/* Product Image */}
-        <div className=" mt-2 flex justify-center transform transition-all duration-500 ease-in-out hover:scale-110">
+        <div className=" mt-2 flex justify-center">
           <img
             src={productImages[0].url}
             alt={productName}

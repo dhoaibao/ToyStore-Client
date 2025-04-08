@@ -40,6 +40,7 @@ const Header = () => {
   const [isImageSearchOpen, setIsImageSearchOpen] = useState(false);
 
   const dispatch = useDispatch();
+  const accessToken = localStorage.getItem("accessToken");
 
   const isLogin = useSelector((state) => state.user.isLogin);
   const userId = useSelector((state) => state.user.userId);
@@ -86,13 +87,15 @@ const Header = () => {
       }
     };
 
-    fetch();
-  }, [userId, dispatch]);
+    if (isLogin) fetch();
+  }, [userId, dispatch, isLogin]);
 
   useEffect(() => {
-    dispatch(getLoggedInUser());
-    dispatch(getCartByUser());
-  }, [dispatch]);
+    if (accessToken) {
+      dispatch(getLoggedInUser());
+      dispatch(getCartByUser());
+    }
+  }, [dispatch, accessToken]);
 
   useEffect(() => {
     let lastScrollY = window.scrollY;
@@ -135,7 +138,7 @@ const Header = () => {
 
   const items = categories.map((category) => ({
     label: (
-      <Link to={`/products?category=${category?.categoryName}`}>
+      <Link to={`/products?categoryNames=${category?.categoryName}`}>
         <div className="border border-gray-200 rounded-lg p-4 text-center shadow hover:shadow-lg transition-shadow duration-300">
           <img
             src={category?.categoryThumbnail.url}
@@ -161,11 +164,7 @@ const Header = () => {
         {/* Logo */}
         <Link to="/">
           <div className="text-2xl font-bold">
-            <img
-              src="/logo(150x50).png"
-              alt="Logo"
-              className="h-12"
-            />
+            <img src="/logo(150x50).png" alt="Logo" className="h-12" />
           </div>
         </Link>
 

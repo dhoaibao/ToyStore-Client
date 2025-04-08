@@ -1,4 +1,4 @@
-import { Carousel } from "antd";
+import { Carousel, Button } from "antd";
 import ProductItem from "../components/product/ProductItem";
 import VoucherSection from "../components/voucher/VoucherSection";
 import { productService, categoryService } from "../services";
@@ -76,7 +76,7 @@ function Home() {
           {categories.map((category) => (
             <div
               key={category?.categoryId}
-              className="border rounded-lg p-4 text-center shadow hover:shadow-md"
+              className="rounded-lg p-4 text-center shadow-md hover:shadow-2xl transition duration-300 transform hover:-translate-y-1 border-t-4 border-primary"
             >
               <img
                 src={category?.categoryThumbnail.url}
@@ -84,9 +84,9 @@ function Home() {
                 className="w-full h-32 object-cover mb-2 rounded-xl"
               />
               <h3 className="font-semibold text-xl">{category?.categoryName}</h3>
-              <button className="mt-4 px-6 py-2 border-2 border-primary text-primary font-medium rounded-xl hover:bg-red-500 hover:text-white transition-all">
+              <Button type="primary" className="mt-4 px-6 py-2 font-medium rounded-lg">
                 Xem Thêm
-              </button>
+              </Button>
             </div>
           ))}
         </div>

@@ -38,7 +38,7 @@ const Footer = () => {
           <div>
             <div className="text-2xl font-bold">
               <img
-                src="/src/assets/Logo(150x50).png"
+                src="/logo(150x50).png"
                 alt="Logo"
                 className="h-12"
               />

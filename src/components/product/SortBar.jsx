@@ -7,7 +7,7 @@ const SortBar = () => {
   const location = useLocation();
   const searchParams = useMemo(
     () => new URLSearchParams(location.search),
-    [location.search]
+    [location.search],
   );
 
   const [active, setActive] = useState("newest");
@@ -38,7 +38,8 @@ const SortBar = () => {
   };
 
   const onChange = (value) => {
-    updateQuery("sortPrice", value);
+    updateQuery("sort", "price");
+    updateQuery("order", value);
   };
 
   const options = [

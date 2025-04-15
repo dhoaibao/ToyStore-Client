@@ -322,27 +322,45 @@ const ProductDetail = () => {
             <hr className="my-4 border-gray-300" />
             <div className="container mx-auto p-4">
               <div className="mb-6">
-                <h2 className="text-xl font-bold mb-2">Đánh giá sản phẩm</h2>
-                <div className="flex items-center">
-                  <Rate disabled defaultValue={Math.round(averageRating)} />
-                  <p className="ml-2 text-gray-600">
+                <h2 className="text-xl font-bold mb-2">
+                  Đánh giá sản phẩm
+                </h2>
+                <div className="flex items-center space-x-2">
+                  <Rate disabled allowHalf defaultValue={averageRating} />
+                  <span className="text-gray-600 text-base">
                     {averageRating.toFixed(1)} / 5 ({reviews.length} đánh giá)
-                  </p>
+                  </span>
                 </div>
               </div>
-              <div className="space-y-4 mt-6">
+
+              <div className="space-y-6 mt-6">
                 {reviews.map((review) => (
                   <div
                     key={review.reviewId}
-                    className="border border-gray-300 rounded-lg p-4 shadow-sm"
+                    className="flex items-start space-x-4 border border-gray-200 rounded-xl p-4 shadow-sm bg-white"
                   >
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-bold text-gray-800">
-                        {review.user.fullName}
-                      </h4>
-                      <Rate disabled value={review.rating} />
+                    {/* Avatar hoặc chữ đại diện */}
+                    <div className="flex-shrink-0 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-semibold text-lg uppercase">
+                      {review.user.fullName.charAt(0)}
                     </div>
-                    <p className="mt-2 text-gray-700">{review.comment}</p>
+
+                    {/* Nội dung đánh giá */}
+                    <div className="flex-1">
+                      <div className="flex justify-between items-center mb-1">
+                        <h4 className="text-base font-bold text-gray-800">
+                          {review.user.fullName}
+                        </h4>
+                        <Rate
+                          disabled
+                          allowHalf
+                          value={review.rating}
+                          className="text-lg"
+                        />
+                      </div>
+                      <p className="text-gray-700 leading-relaxed">
+                        {review.comment}
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>

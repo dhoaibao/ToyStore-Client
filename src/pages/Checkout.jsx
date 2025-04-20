@@ -135,7 +135,8 @@ const CheckoutPage = () => {
       contactPhone: address.contactPhone,
     };
     try {
-      await orderService.createOrder(data);
+      const respone = await orderService.createOrder(data);
+      window.location.href = respone.redirectUrl;
       dispatch(getCartByUser());
       sessionStorage.removeItem("orderItems");
       setOrderSuccess(true);

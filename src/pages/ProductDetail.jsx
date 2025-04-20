@@ -326,10 +326,18 @@ const ProductDetail = () => {
                   Đánh giá sản phẩm
                 </h2>
                 <div className="flex items-center space-x-2">
-                  <Rate disabled allowHalf defaultValue={averageRating} />
-                  <span className="text-gray-600 text-base">
-                    {averageRating.toFixed(1)} / 5 ({reviews.length} đánh giá)
-                  </span>
+                  {reviews.length > 0 ? (
+                    <>
+                      <Rate disabled allowHalf defaultValue={averageRating} />
+                      <span className="text-gray-600 text-base">
+                        {averageRating.toFixed(1)} / 5 ({reviews.length} đánh giá)
+                      </span>
+                    </>
+                  ) : (
+                    <span className="text-gray-600 text-base">
+                      Chưa có đánh giá nào cho sản phẩm này
+                    </span>
+                  )}
                 </div>
               </div>
 

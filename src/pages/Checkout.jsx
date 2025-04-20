@@ -3,6 +3,7 @@ import { Breadcrumb, Row, Col, message } from "antd";
 import { HomeOutlined } from "@ant-design/icons";
 import { GHNService, orderService, voucherService } from "../services";
 import { useSelector, useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
 import { getAddressByUser } from "../redux/thunks/addressThunk";
 import { getCartByUser } from "../redux/thunks/cartThunk";
 import discountedPrice from "../utils/discountedPrice";
@@ -11,11 +12,11 @@ import AddressModal from "../components/checkout/AddressModal";
 import OrderItem from "../components/checkout/OrderItem";
 import PaymentInfo from "../components/checkout/PaymentInfo";
 import VoucherModal from "../components/checkout/VoucherModal";
-import OrderSuccess from "../components/checkout/OrderSuccess";
 import getCurrentPrice from "../utils/getCurrentPrice";
 
 const CheckoutPage = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [selectedAddress, setSelectedAddress] = useState(null);
   const [selectedVoucher, setSelectedVoucher] = useState("");
@@ -23,7 +24,6 @@ const CheckoutPage = () => {
   const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
   const [shippingFee, setShippingFee] = useState(0);
   const [paymentMethod, setPaymentMethod] = useState(null);
-  const [orderSuccess, setOrderSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
   const [vouchers, setVouchers] = useState([]);
 
@@ -33,10 +33,13 @@ const CheckoutPage = () => {
   const addressString = useMemo(
     () => (address) =>
       `${address.detail}, ${address.wardName}, ${address.districtName}, ${address.provinceName}`,
-    []
+    [],
   );
 
-  const orderItems = useMemo(() => JSON.parse(sessionStorage.getItem("orderItems")) || [], []);
+  const orderItems = useMemo(
+    () => JSON.parse(sessionStorage.getItem("orderItems")) || [],
+    [],
+  );
 
   useEffect(() => {
     const fetchVouchers = async () => {
@@ -70,11 +73,11 @@ const CheckoutPage = () => {
   useEffect(() => {
     if (selectedAddress && orderItems.length > 0) {
       const address = addresses.find(
-        (item) => item.addressId === selectedAddress
+        (item) => item.addressId === selectedAddress,
       );
       const quantity = orderItems.reduce(
         (total, item) => total + item.quantity,
-        0
+        0,
       );
       calculateShippingFee(address, quantity);
     }
@@ -83,14 +86,15 @@ const CheckoutPage = () => {
   const totalDiscountedPrice = () => {
     return orderItems?.reduce(
       (total, item) => total + discountedPrice(item.product) * item.quantity,
-      0
+      0,
     );
   };
 
   const totalPrice = () => {
     return orderItems?.reduce(
-      (total, item) => total + getCurrentPrice(item.product.prices) * item.quantity,
-      0
+      (total, item) =>
+        total + getCurrentPrice(item.product.prices) * item.quantity,
+      0,
     );
   };
 
@@ -119,7 +123,7 @@ const CheckoutPage = () => {
   const handleSubmit = async () => {
     setLoading(true);
     const address = addresses.find(
-      (item) => item.addressId === selectedAddress
+      (item) => item.addressId === selectedAddress,
     );
     const data = {
       voucherId: selectedVoucher ? selectedVoucher.voucherId : null,
@@ -136,11 +140,14 @@ const CheckoutPage = () => {
     };
     try {
       const respone = await orderService.createOrder(data);
-      window.location.href = respone.redirectUrl;
-      dispatch(getCartByUser());
-      sessionStorage.removeItem("orderItems");
-      setOrderSuccess(true);
-      setLoading(false);
+      if (respone.redirectUrl) {
+        window.location.href = respone.redirectUrl;
+      } else {
+        dispatch(getCartByUser());
+        sessionStorage.removeItem("orderItems");
+        setLoading(false);
+        navigate("/order-success");
+      }
     } catch (error) {
       console.log("Error when order: ", error.message);
       setLoading(false);
@@ -163,49 +170,45 @@ const CheckoutPage = () => {
           ]}
         />
       </div>
-      {!orderSuccess ? (
-        <div className="p-4 bg-gray-100 min-h-screen">
-          <div>
-            <Row gutter={12}>
-              {/* Summary Order Section */}
-              <Col className="w-3/5">
-                <Col className="w-full mb-4">
-                  <ShippingAddress
-                    addresses={addresses}
-                    selectedAddress={selectedAddress}
-                    setIsAddressModalOpen={setIsAddressModalOpen}
-                  ></ShippingAddress>
-                </Col>
-                <Col className="w-full">
-                  <OrderItem
-                    orderItems={orderItems}
-                    totalDiscountedPrice={totalDiscountedPrice}
-                    totalPrice={totalPrice}
-                  ></OrderItem>
-                </Col>
+      <div className="p-4 bg-gray-100 min-h-screen">
+        <div>
+          <Row gutter={12}>
+            {/* Summary Order Section */}
+            <Col className="w-3/5">
+              <Col className="w-full mb-4">
+                <ShippingAddress
+                  addresses={addresses}
+                  selectedAddress={selectedAddress}
+                  setIsAddressModalOpen={setIsAddressModalOpen}
+                ></ShippingAddress>
               </Col>
-
-              {/* Payment Details Section */}
-              <Col className="w-2/5">
-                <PaymentInfo
-                  selectedVoucher={selectedVoucher}
-                  setIsVoucherModalOpen={setIsVoucherModalOpen}
-                  totalPrice={totalPrice}
-                  shippingFee={shippingFee}
-                  voucherDiscount={voucherDiscount}
-                  finalPrice={finalPrice}
+              <Col className="w-full">
+                <OrderItem
+                  orderItems={orderItems}
                   totalDiscountedPrice={totalDiscountedPrice}
-                  setPaymentMethod={setPaymentMethod}
-                  onSubmit={handleSubmit}
-                  loading={loading}
-                />
+                  totalPrice={totalPrice}
+                ></OrderItem>
               </Col>
-            </Row>
-          </div>
+            </Col>
+
+            {/* Payment Details Section */}
+            <Col className="w-2/5">
+              <PaymentInfo
+                selectedVoucher={selectedVoucher}
+                setIsVoucherModalOpen={setIsVoucherModalOpen}
+                totalPrice={totalPrice}
+                shippingFee={shippingFee}
+                voucherDiscount={voucherDiscount}
+                finalPrice={finalPrice}
+                totalDiscountedPrice={totalDiscountedPrice}
+                setPaymentMethod={setPaymentMethod}
+                onSubmit={handleSubmit}
+                loading={loading}
+              />
+            </Col>
+          </Row>
         </div>
-      ) : (
-        <OrderSuccess></OrderSuccess>
-      )}
+      </div>
 
       <AddressModal
         open={isAddressModalOpen}

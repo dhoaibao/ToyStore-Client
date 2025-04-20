@@ -171,27 +171,28 @@ const Header = () => {
         {/* Phần menu điều hướng */}
         <div className="flex justify-center space-x-4 p-2">
           {navItems.map((item, index) =>
-            item.value === "products" ? (
-              <Dropdown
-                key={index}
-                menu={{
-                  items,
-                }}
-              >
-                <Link to="/products?sort=newest">
-                  <Space
-                    className={`${
-                      location.pathname === `/${item.value}`
-                        ? "text-hover-primary"
-                        : "hover:text-hover-primary"
-                    } p-2 rounded-xl font-bold cursor-pointer`}
-                  >
-                    <TableOfContents strokeWidth={1} />
-                    {item.label}
-                  </Space>
-                </Link>
-              </Dropdown>
-            ) : (
+            // item.value === "products" ? (
+            //   <Dropdown
+            //     key={index}
+            //     menu={{
+            //       items,
+            //     }}
+            //   >
+            //     <Link to="/products?sort=newest">
+            //       <Space
+            //         className={`${
+            //           location.pathname === `/${item.value}`
+            //             ? "text-hover-primary"
+            //             : "hover:text-hover-primary"
+            //         } p-2 rounded-xl font-bold cursor-pointer`}
+            //       >
+            //         <TableOfContents strokeWidth={1} />
+            //         {item.label}
+            //       </Space>
+            //     </Link>
+            //   </Dropdown>
+            // ) : 
+            (
               <Link
                 key={index}
                 to={`/${item.value}`}

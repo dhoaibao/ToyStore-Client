@@ -121,10 +121,10 @@ const Promotion = () => {
                         >
                           {promotion.description}
                         </Paragraph>
-                        <Text className="text-sm text-gray-700">
+                        {/* <Text className="text-sm text-gray-700">
                           Khuyến mãi đến ngày:{" "}
                           {new Date(promotion?.endDate).toLocaleDateString()}
-                        </Text>
+                        </Text> */}
                       </>
                     }
                   />

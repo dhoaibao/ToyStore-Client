@@ -12,3 +12,4 @@ export * from "./orderStatus.service"
 export * from "./voucher.service";
 export * from "./review.service"
 export * from "./message.service"
+export * from "./news.service"

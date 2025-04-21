@@ -85,7 +85,7 @@ const Search = () => {
                   <Spin indicator={<LoadingOutlined spin />} size="large" />
                 </div>
               ) : products?.length > 0 ? (
-                <div className="mt-4 grid grid-cols-4 gap-3">
+                <div className="mt-4 grid grid-cols-5 gap-3">
                   {products.map((product) => {
                     const requiredAge = product?.productInfoValues
                       .map((item) =>

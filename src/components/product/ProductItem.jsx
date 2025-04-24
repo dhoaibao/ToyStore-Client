@@ -11,9 +11,11 @@ const ProductItem = ({
   slug,
   prices,
   promotionPeriods,
-  avgRate = 4.5,
+  reviews,
   requiredAge,
 }) => {
+  const averageRating =
+    reviews.reduce((sum, review) => sum + review.rating, 0) / reviews.length;
   return (
     <div className="bg-white rounded-lg shadow-md hover:shadow-2xl transition duration-300 transform hover:-translate-y-1 p-4 relative h-96 w-60 border-t-4 border-primary">
       {promotionPeriods.length > 0 &&
@@ -64,7 +66,7 @@ const ProductItem = ({
         <div className="flex mt-2 items-center">
           <p className="font-extrabold text-hover-primary">
             {discountedPrice({ promotionPeriods, prices }).toLocaleString(
-              "vi-VN",
+              "vi-VN"
             )}
             đ
           </p>
@@ -79,8 +81,16 @@ const ProductItem = ({
 
       {/* Rating */}
       <div className="flex items-center mt-2">
-        <Rate disabled allowHalf defaultValue={avgRate} />
-        <p className="ml-2 text-sm">{avgRate}</p>
+        {reviews.length > 0 ? (
+          <>
+            <Rate disabled allowHalf defaultValue={averageRating} />
+            <p className="ml-2 text-sm">{averageRating.toFixed(1)}</p>
+          </>
+        ) : (
+          <span className="text-gray-600 text-sm">
+            Chưa có đánh giá
+          </span>
+        )}
       </div>
     </div>
   );
@@ -92,7 +102,7 @@ ProductItem.propTypes = {
   productName: PropTypes.string.isRequired,
   prices: PropTypes.number.isRequired,
   promotionPeriods: PropTypes.array,
-  avgRate: PropTypes.number,
+  reviews: PropTypes.array,
   slug: PropTypes.string.isRequired,
   requiredAge: PropTypes.number,
 };

@@ -44,10 +44,8 @@ const ImageSearchPopup = ({ isOpen, onClose }) => {
 
   const handleSearch = () => {
     if (imageFile) {
-      const formData = new FormData();
-      formData.append("file", imageFile);
       navigate("/search?image", {
-        state: { imageSearchData: formData },
+        state: { imageSearchData: { file: imageFile } },
       });
     } else if (imageUrl) {
       navigate("/search?image", {

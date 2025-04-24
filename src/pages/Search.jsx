@@ -22,6 +22,7 @@ const Search = () => {
   const [totalPage, setTotalPage] = useState(50);
 
   const { imageSearchData } = location.state || {};
+  console.log(imageSearchData);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -29,7 +30,13 @@ const Search = () => {
       try {
         let result;
         if (searchParams.has("image") && imageSearchData) {
-          result = await productService.imageSearch(imageSearchData);
+          let data = imageSearchData;
+          if (!imageSearchData.url) {
+            const formData = new FormData();
+            formData.append("file", imageSearchData.file);
+            data = formData;
+          }
+          result = await productService.imageSearch(data);
         } else {
           result = await productService.getAllProducts(searchParams.toString());
         }

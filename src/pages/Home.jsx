@@ -1,21 +1,28 @@
 import { Carousel, Button } from "antd";
 import ProductItem from "../components/product/ProductItem";
 import VoucherSection from "../components/voucher/VoucherSection";
-import { productService, categoryService } from "../services";
+import { recommendationService, categoryService } from "../services";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 function Home() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
-  
+
+  const accessToken = localStorage.getItem("accessToken");
+
   const navagate = useNavigate();
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const result = await productService.getAllProducts("");
-        setProducts(result.data);
+        if (accessToken) {
+          const result = await recommendationService.getRecommendations();
+          setProducts(result.data);
+        } else {
+          const result = await recommendationService.getTrendingProducts();
+          setProducts(result.data);
+        }
       } catch (error) {
         console.log("Failed to fetch products: ", error);
       }
@@ -86,8 +93,16 @@ function Home() {
                 alt={category?.categoryName}
                 className="w-full h-32 object-cover mb-2 rounded-xl"
               />
-              <h3 className="font-semibold text-xl">{category?.categoryName}</h3>
-              <Button onClick={() => navagate(`/products?categoryNames=${category?.categoryName}`)} type="primary" className="mt-4 px-6 py-2 font-medium rounded-lg">
+              <h3 className="font-semibold text-xl">
+                {category?.categoryName}
+              </h3>
+              <Button
+                onClick={() =>
+                  navagate(`/products?categoryNames=${category?.categoryName}`)
+                }
+                type="primary"
+                className="mt-4 px-6 py-2 font-medium rounded-lg"
+              >
                 Xem Thêm
               </Button>
             </div>

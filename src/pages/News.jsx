@@ -140,11 +140,8 @@ const NewsPage = () => {
         title={<Title level={4}>{selectedNews?.title}</Title>}
         open={isModalVisible}
         onCancel={closeModal}
-        footer={[
-          <Button key="close" onClick={closeModal}>
-            Đóng
-          </Button>,
-        ]}
+        width={700}
+        footer={null}
       >
         {selectedNews && (
           <Space direction="vertical" size="middle" style={{ width: "100%" }}>
@@ -160,9 +157,9 @@ const NewsPage = () => {
             /> */}
             <div
               dangerouslySetInnerHTML={{ __html: selectedNews.content }}
-              style={{ fontSize: "14px", color: "#555" }}
+              className="text-base"
             />
-            <Text style={{ color: "#888", fontSize: "12px" }}>
+            <Text className="text-gray-500">
               Ngày đăng: {moment(selectedNews.createdAt).format("DD/MM/YYYY")}
             </Text>
           </Space>

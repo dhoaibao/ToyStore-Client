@@ -62,20 +62,22 @@ function Home() {
         </Carousel>
       </div>
       <VoucherSection />
-      {/* Featured Products */}
-      <section className="mb-4 px-4">
-        <hr className="my-4 border-gray-300" />
-        <h2 className="text-3xl text-center font-bold text-primary mb-2">
-          Sản phẩm dành cho bạn
-        </h2>
-        <span className="mb-6 bg-primary h-2 rounded flex justify-center w-[50vw] md:w-[30vw] mx-auto"></span>
-        <div className="grid grid-cols-5 gap-4">
-          {products.map((product) => (
-            <ProductItem key={product.id} {...product} />
-          ))}
-        </div>
-      </section>
-      {/* Categories */}
+     
+        <section className="mb-4 px-4">
+          <hr className="my-4 border-gray-300" />
+          <h2 className="text-3xl text-center font-bold text-primary mb-2">
+            Sản phẩm dành cho bạn
+          </h2>
+          <span className="mb-6 bg-primary h-2 rounded flex justify-center w-[50vw] md:w-[30vw] mx-auto"></span>
+          <div className="flex overflow-x-auto space-x-4 scrollbar-hide">
+            {products.map((product) => (
+          <div key={product.id} className="flex-shrink-0 w-60">
+            <ProductItem {...product} />
+          </div>
+            ))}
+          </div>
+        </section>
+        {/* Categories */}
       <section className="my-4 p-4">
         <hr className="my-4 border-gray-300" />
         <h2 className="text-3xl text-center text-primary font-bold mb-2">

@@ -345,30 +345,71 @@ const ProductDetail = () => {
                 {reviews.map((review) => (
                   <div
                     key={review.reviewId}
-                    className="flex items-start space-x-4 border border-gray-200 rounded-xl p-4 shadow-sm bg-white"
+                    className="flex flex-col space-y-4 border border-gray-200 rounded-xl p-4 shadow-sm bg-white"
                   >
                     {/* Avatar hoặc chữ đại diện */}
-                    <div className="flex-shrink-0 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-semibold text-lg uppercase">
-                      {review.user.fullName.charAt(0)}
+                    <div className="flex items-start space-x-4">
+                      <div className="flex-shrink-0 w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center font-semibold text-lg uppercase">
+                        {review.user.fullName.charAt(0)}
+                      </div>
+
+                      {/* Nội dung đánh giá */}
+                      <div className="flex-1">
+                        <div className="flex justify-between items-center mb-1">
+                          <h4 className="text-base font-bold text-gray-800">
+                            {review.user.fullName}
+                          </h4>
+                          <Rate
+                            disabled
+                            allowHalf
+                            value={review.rating}
+                            className="text-lg"
+                          />
+                        </div>
+                        <p className="text-gray-700 leading-relaxed">
+                          {review.comment}
+                        </p>
+                      </div>
                     </div>
 
-                    {/* Nội dung đánh giá */}
-                    <div className="flex-1">
-                      <div className="flex justify-between items-center mb-1">
-                        <h4 className="text-base font-bold text-gray-800">
-                          {review.user.fullName}
-                        </h4>
-                        <Rate
-                          disabled
-                          allowHalf
-                          value={review.rating}
-                          className="text-lg"
-                        />
+                    {/* Hình ảnh đánh giá */}
+                    {review.uploadImages?.length > 0 && (
+                      <div className="flex space-x-4 mt-2">
+                        {review.uploadImages.map((image, index) => (
+                          <Image
+                            key={index}
+                            src={image.url}
+                            alt={`Review Image ${index + 1}`}
+                            width={100}
+                            className="rounded-lg"
+                          />
+                        ))}
                       </div>
-                      <p className="text-gray-700 leading-relaxed">
-                        {review.comment}
-                      </p>
-                    </div>
+                    )}
+
+                    {/* Trả lời đánh giá */}
+                    {review.childrenReviews?.length > 0 && (
+                      <div className="mt-4 space-y-2">
+                        {review.childrenReviews.map((childReview) => (
+                          <div
+                            key={childReview.reviewId}
+                            className="flex items-start space-x-4 border border-gray-200 rounded-lg p-3 bg-gray-50"
+                          >
+                            <div className="flex-shrink-0 w-8 h-8 bg-gray-400 text-white rounded-full flex items-center justify-center font-semibold text-sm uppercase">
+                              {childReview.user.fullName.charAt(0)}
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="text-sm font-bold text-gray-800">
+                                {childReview.user.fullName}
+                              </h4>
+                              <p className="text-gray-700 text-sm">
+                                {childReview.comment}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>

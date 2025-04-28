@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Checkbox, Radio } from "antd";
 import { useNavigate, useLocation } from "react-router-dom";
-import { brandService, categoryService } from "../../services";
+import { brandService, categoryService, productInfoService } from "../../services";
 
 const Filter = () => {
   const navigate = useNavigate();
@@ -12,8 +12,10 @@ const Filter = () => {
   const [selectedPriceOption, setSelectedPriceOption] = useState(null);
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedBrands, setSelectedBrands] = useState([]);
+  const [selectedMaterials, setSelectedMaterials] = useState([]);
   const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [materials, setMaterials] = useState([]);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -23,7 +25,6 @@ const Filter = () => {
           (category) => category.categoryName
         );
         setCategories(categoryNames);
-        console.log("Categories: ", categoryNames);
       } catch (error) {
         console.log("Failed to fetch categories: ", error);
       }
@@ -39,6 +40,18 @@ const Filter = () => {
       }
     };
 
+    const fetchProductsInfo = async () => {
+      try {
+        const result = await productInfoService.getAllProductInfo();
+        const array = result.data[0].productInfoDetails.map((item) => item.value);
+        const uniqueMaterials = [...new Set(array)];
+        setMaterials(uniqueMaterials);
+      } catch (error) {
+        console.log("Failed to fetch products info: ", error);
+      }
+    };
+
+    fetchProductsInfo();
     fetchCategories();
     fetchBrands();
   }, []);
@@ -81,6 +94,18 @@ const Filter = () => {
     navigate({ search: searchParams.toString() });
   };
 
+  const handleMaterialdChange = (checkedValues) => {
+    setSelectedMaterials(checkedValues);
+
+    if (checkedValues.length === 0) {
+      searchParams.delete("materials");
+    } else {
+      searchParams.set("materials", checkedValues.join(","));
+    }
+
+    navigate({ search: searchParams.toString() });
+  };
+
   const handleAgeChange = (e) => {
     setSelectedAge(e.target.value);
     searchParams.set("ageOption", e.target.value);
@@ -96,6 +121,7 @@ const Filter = () => {
   const handleClearFilters = () => {
     setSelectedCategories([]);
     setSelectedBrands([]);
+    setSelectedMaterials([]);
     setSelectedAge(null);
     setSelectedPriceOption(null);
     navigate({ search: "" });
@@ -134,6 +160,15 @@ const Filter = () => {
           className="flex flex-col space-y-2"
           value={selectedBrands}
           onChange={handleBrandChange}
+        />
+      </div>
+      <div className="mb-6">
+        <h3 className="text-lg font-semibold mb-2">Chất liệu</h3>
+        <Checkbox.Group
+          options={materials}
+          className="flex flex-col space-y-2"
+          value={selectedMaterials}
+          onChange={handleMaterialdChange}
         />
       </div>
       <div className="mb-6">

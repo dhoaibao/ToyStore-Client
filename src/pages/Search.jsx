@@ -22,6 +22,7 @@ const Search = () => {
   const [totalPage, setTotalPage] = useState(50);
 
   const { imageSearchData } = location.state || {};
+  console.log(imageSearchData);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -29,7 +30,13 @@ const Search = () => {
       try {
         let result;
         if (searchParams.has("image") && imageSearchData) {
-          result = await productService.imageSearch(imageSearchData);
+          let data = imageSearchData;
+          if (!imageSearchData.url) {
+            const formData = new FormData();
+            formData.append("file", imageSearchData.file);
+            data = formData;
+          }
+          result = await productService.imageSearch(data);
         } else {
           result = await productService.getAllProducts(searchParams.toString());
         }
@@ -85,7 +92,7 @@ const Search = () => {
                   <Spin indicator={<LoadingOutlined spin />} size="large" />
                 </div>
               ) : products?.length > 0 ? (
-                <div className="mt-4 grid grid-cols-4 gap-3">
+                <div className="mt-4 grid grid-cols-5 gap-3">
                   {products.map((product) => {
                     const requiredAge = product?.productInfoValues
                       .map((item) =>

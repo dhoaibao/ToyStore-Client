@@ -41,7 +41,7 @@ const ProductDetail = () => {
 
   const requiredAge = product?.productInfoValues
     .map((item) =>
-      item.productInfo.productInfoName === "Tuổi" ? item.value : null,
+      item.productInfo.productInfoName === "Tuổi" ? item.value : null
     )
     .filter((item) => item !== null);
 
@@ -57,22 +57,23 @@ const ProductDetail = () => {
     try {
       if (isLogin) {
         dispatch(addToCart({ productId: product.productId, quantity }));
+        message.success("Đã thêm sản phẩm vào giỏ hàng!");
       } else {
-        let cart = JSON.parse(localStorage.getItem("cart")) || [];
-        const existingProduct = cart.find((item) => item.slug === product.slug);
-        if (existingProduct) {
-          cart = cart.map((item) =>
-            item.slug === product.slug
-              ? { ...item, quantity: item.quantity + quantity }
-              : item,
-          );
-        } else {
-          cart.push({ slug: product.slug, quantity });
-        }
-        localStorage.setItem("cart", JSON.stringify(cart));
-        console.log("Cart", cart);
+        // let cart = JSON.parse(localStorage.getItem("cart")) || [];
+        // const existingProduct = cart.find((item) => item.slug === product.slug);
+        // if (existingProduct) {
+        //   cart = cart.map((item) =>
+        //     item.slug === product.slug
+        //       ? { ...item, quantity: item.quantity + quantity }
+        //       : item,
+        //   );
+        // } else {
+        //   cart.push({ slug: product.slug, quantity });
+        // }
+        // localStorage.setItem("cart", JSON.stringify(cart));
+        // console.log("Cart", cart);
+        message.error("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng!");
       }
-      message.success("Đã thêm sản phẩm vào giỏ hàng!");
     } catch (error) {
       console.log("Error when add to cart: ", error);
       message.error("Đã xảy ra lỗi!");
@@ -85,7 +86,7 @@ const ProductDetail = () => {
 
   const images = useMemo(
     () => product?.productImages || [],
-    [product?.productImages],
+    [product?.productImages]
   );
 
   const [currentImage, setCurrentImage] = useState({});
@@ -113,6 +114,8 @@ const ProductDetail = () => {
   const toggleExpand = () => {
     setIsExpanded(!isExpanded);
   };
+
+  console.log(reviews)
 
   // Tính trung bình sao
   const averageRating =
@@ -184,7 +187,7 @@ const ProductDetail = () => {
                       <p className="text-gray-500 line-through font-semibold">
                         {discountedPrice(product) !== product?.price &&
                           `Giá gốc: ${product?.price?.toLocaleString(
-                            "vi-VN",
+                            "vi-VN"
                           )}đ`}
                       </p>
                       <p className="text-lg text-red-600 font-semibold">
@@ -202,7 +205,7 @@ const ProductDetail = () => {
 
                                 {promotion.discountType === "fixed_amount" &&
                                   `-${promotion.discountValue.toLocaleString(
-                                    "vi-VN",
+                                    "vi-VN"
                                   )}đ`}
 
                                 {promotion.discountType.startsWith("buy_") &&
@@ -217,7 +220,7 @@ const ProductDetail = () => {
                               <span className="text-sm font-normal text-gray-800 italic">
                                 (Thời gian khuyến mãi:{" "}
                                 {moment(promotion.startDate).format(
-                                  "DD/MM/YYYY",
+                                  "DD/MM/YYYY"
                                 )}{" "}
                                 -{" "}
                                 {moment(promotion.endDate).format("DD/MM/YYYY")}
@@ -302,7 +305,9 @@ const ProductDetail = () => {
                     </table>
                     <button
                       onClick={toggleExpand}
-                      className="text-red-600 text-center font-medium mt-2 hover:underline"
+                      className={`${
+                        !isExpanded ? "hidden" : ""
+                      } text-red-600 text-center font-medium mt-2 hover:underline`}
                     >
                       {isExpanded ? "Thu gọn" : "Xem thêm"}
                     </button>
@@ -322,15 +327,14 @@ const ProductDetail = () => {
             <hr className="my-4 border-gray-300" />
             <div className="container mx-auto p-4">
               <div className="mb-6">
-                <h2 className="text-xl font-bold mb-2">
-                  Đánh giá sản phẩm
-                </h2>
+                <h2 className="text-xl font-bold mb-2">Đánh giá sản phẩm</h2>
                 <div className="flex items-center space-x-2">
                   {reviews.length > 0 ? (
                     <>
                       <Rate disabled allowHalf defaultValue={averageRating} />
                       <span className="text-gray-600 text-base">
-                        {averageRating.toFixed(1)} / 5 ({reviews.length} đánh giá)
+                        {averageRating.toFixed(1)} / 5 ({reviews.length} đánh
+                        giá)
                       </span>
                     </>
                   ) : (
@@ -396,16 +400,29 @@ const ProductDetail = () => {
                             className="flex items-start space-x-4 border border-gray-200 rounded-lg p-3 bg-gray-50"
                           >
                             <div className="flex-shrink-0 w-8 h-8 bg-gray-400 text-white rounded-full flex items-center justify-center font-semibold text-sm uppercase">
-                              {childReview.user.fullName.charAt(0)}
+                              T
                             </div>
                             <div className="flex-1">
                               <h4 className="text-sm font-bold text-gray-800">
-                                {childReview.user.fullName}
+                                ToyStore
                               </h4>
                               <p className="text-gray-700 text-sm">
                                 {childReview.comment}
                               </p>
                             </div>
+                            {childReview.uploadImages.length > 0 && (
+                              <div className="flex space-x-4 mt-2">
+                                {childReview.uploadImages.map((image, index) => (
+                                  <Image
+                                    key={index}
+                                    src={image.url}
+                                    alt={`Review Image ${index + 1}`}
+                                    width={100}
+                                    className="rounded-lg"
+                                  />
+                                ))}
+                              </div>
+                            )}
                           </div>
                         ))}
                       </div>

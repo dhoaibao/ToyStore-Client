@@ -9,7 +9,7 @@ import {
   MoveLeft,
 } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
-import { Dropdown, Space, Badge } from "antd";
+import { Dropdown, Space, Badge, message } from "antd";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useSelector, useDispatch } from "react-redux";
 import ProfileDropdown from "../profile/ProfileDropdown";
@@ -47,7 +47,7 @@ const Header = () => {
   const totalItems = useSelector((state) => state.cart.totalItems);
   const unreadCount = useSelector((state) => state.message.unreadCount);
   const totalItemsLocal = JSON.parse(
-    localStorage.getItem("cart") || "[]",
+    localStorage.getItem("cart") || "[]"
   ).length;
 
   const socketRef = useRef(socket);
@@ -170,7 +170,7 @@ const Header = () => {
 
         {/* Phần menu điều hướng */}
         <div className="flex justify-center space-x-4 p-2">
-          {navItems.map((item, index) =>
+          {navItems.map((item, index) => (
             // item.value === "products" ? (
             //   <Dropdown
             //     key={index}
@@ -191,21 +191,19 @@ const Header = () => {
             //       </Space>
             //     </Link>
             //   </Dropdown>
-            // ) : 
-            (
-              <Link
-                key={index}
-                to={`/${item.value}`}
-                className={`${
-                  location.pathname === `/${item.value}`
-                    ? "text-hover-primary"
-                    : "hover:text-hover-primary"
-                } p-2 rounded-xl font-bold cursor-pointer`}
-              >
-                {item.label}
-              </Link>
-            ),
-          )}
+            // ) :
+            <Link
+              key={index}
+              to={`/${item.value}`}
+              className={`${
+                location.pathname === `/${item.value}`
+                  ? "text-hover-primary"
+                  : "hover:text-hover-primary"
+              } p-2 rounded-xl font-bold cursor-pointer`}
+            >
+              {item.label}
+            </Link>
+          ))}
         </div>
 
         {/* Thanh tìm kiếm */}
@@ -240,7 +238,13 @@ const Header = () => {
           </Link>
           <div className="flex items-center space-x-6">
             <button
-              onClick={() => setIsChatOpen(true)}
+              onClick={() => {
+                if (isLogin) {
+                  setIsChatOpen(true);
+                } else {
+                  message.error("Vui lòng đăng nhập để sử dụng tính năng này!");
+                }
+              }}
               className="flex items-center justify-center"
             >
               <Badge count={unreadCount} overflowCount={99} color="red">
@@ -248,7 +252,13 @@ const Header = () => {
               </Badge>
             </button>
             <button
-              onClick={() => setCartOpen(true)}
+              onClick={() => {
+                if (isLogin) {
+                  setCartOpen(true);
+                } else {
+                  message.error("Vui lòng đăng nhập để sử dụng tính năng này!");
+                }
+              }}
               className="flex items-center justify-center"
             >
               <Badge

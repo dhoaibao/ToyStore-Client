@@ -25,9 +25,9 @@ const OrderSuccess = () => {
           </p>
         }
         extra={[
-          <Button key="orders" onClick={handleGoToOrders}>
-            Xem đơn hàng
-          </Button>,
+          // <Button key="orders" onClick={handleGoToOrders}>
+          //   Xem đơn hàng
+          // </Button>,
           <Button
             type="primary"
             key="continue"

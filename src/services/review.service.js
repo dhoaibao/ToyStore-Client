@@ -11,13 +11,12 @@ class ReviewService {
     }
 
     async createReview(data) {
-        const response = await this.api.post('/', data);
-        return response.data;
-    }
-
-    async deleteReview(id) {
-        const response = await this.api.delete(`/${id}`);
-        return response.data;
+        return (await this.api.post('/', data,
+            {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            })).data;
     }
 }
 
